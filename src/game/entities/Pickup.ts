@@ -1,0 +1,35 @@
+import Phaser from 'phaser';
+import { TEX } from '@data/textureKeys';
+import { registry } from '@data/registry';
+import { theme } from '../ui/theme';
+
+export type PickupPayload = { kind: 'won'; amount: number } | { kind: 'item'; itemId: string; qty: number };
+
+const LIFETIME_MS = 60_000;
+
+/** Ground drop: walk over it to collect (handled by CombatBridge). */
+export class Pickup extends Phaser.Physics.Arcade.Sprite {
+  readonly payload: PickupPayload;
+  private label: Phaser.GameObjects.Text;
+
+  constructor(scene: Phaser.Scene, x: number, y: number, payload: PickupPayload) {
+    super(scene, x, y, payload.kind === 'won' ? TEX.pickup_won : TEX.pickup_item, 0);
+    this.payload = payload;
+    scene.add.existing(this);
+    scene.physics.add.existing(this);
+    this.setCircle(8);
+    this.setDepth(5);
+    const text = payload.kind === 'won' ? `₩${payload.amount}` : `${registry.item(payload.itemId).name}${payload.qty > 1 ? ` ×${payload.qty}` : ''}`;
+    this.label = scene.add.text(x, y - 14, text, theme.textStyle(10, payload.kind === 'won' ? theme.colors.brass : '#cfe3ff', { stroke: '#000', strokeThickness: 3 })).setOrigin(0.5).setDepth(6);
+    scene.tweens.add({ targets: this, y: y - 3, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    scene.time.delayedCall(LIFETIME_MS, () => {
+      if (!this.active) return;
+      scene.tweens.add({ targets: [this, this.label], alpha: 0, duration: 800, onComplete: () => this.destroy() });
+    });
+  }
+
+  destroy(fromScene?: boolean): void {
+    this.label.destroy();
+    super.destroy(fromScene);
+  }
+}

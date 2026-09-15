@@ -6,3 +6,4 @@ dist-ssr
 test-results
 playwright-report
 .DS_Store
+e2e/out

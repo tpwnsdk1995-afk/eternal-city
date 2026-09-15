@@ -6,8 +6,11 @@ import { buildMap, pointInRect, tileCenter, type BuiltMap } from '@core/map/mapB
 import { dist } from '@core/math/vec';
 import { buildTilemap, type BuiltTilemap } from '../systems/TilemapBuilder';
 import { InputMapper, type InputIntent } from '../systems/input/InputMapper';
+import { balance } from '@data/balance';
 import { Player } from '../entities/Player';
 import { Npc, NPC_INTERACT_RADIUS } from '../entities/Npc';
+import { Enemy } from '../entities/Enemy';
+import type { CombatBridge } from '../systems/CombatBridge';
 import { gameState } from '../state/GameState';
 import { theme } from '../ui/theme';
 
@@ -39,6 +42,9 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   protected mapper!: InputMapper;
   protected npcs: Npc[] = [];
   protected lastIntent!: InputIntent;
+  enemies!: Phaser.Physics.Arcade.Group;
+  pickups!: Phaser.Physics.Arcade.Group;
+  protected combat: CombatBridge | null = null;
   private portalArmed = false;
   private transitioning = false;
 
@@ -74,6 +80,12 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     const spawn = tileCenter(this.def, sp.x, sp.y);
     this.player = new Player(this, spawn.x, spawn.y);
     this.physics.add.collider(this.player, this.tilemap.layer);
+
+    this.enemies = this.physics.add.group();
+    this.pickups = this.physics.add.group();
+    this.physics.add.collider(this.enemies, this.tilemap.layer);
+    this.physics.add.collider(this.enemies, this.enemies);
+    this.physics.add.collider(this.player, this.enemies);
 
     this.cameras.main.setBounds(0, 0, w, h);
     this.cameras.main.setZoom(WORLD_ZOOM);
@@ -136,6 +148,38 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   /** Player world position (debug/e2e). */
   playerPos(): { x: number; y: number } {
     return { x: this.player.x, y: this.player.y };
+  }
+
+  /** World → screen (debug/e2e), accounting for camera scroll and zoom. */
+  toScreen(x: number, y: number): { x: number; y: number } {
+    const cam = this.cameras.main;
+    return { x: (x - cam.worldView.x) * cam.zoom, y: (y - cam.worldView.y) * cam.zoom };
+  }
+
+  /** Scripted/debug spawn. Returns null on maps without combat. */
+  spawnEnemyAt(monsterId: string, x: number, y: number): Enemy | null {
+    if (!this.combat) return null;
+    const e = new Enemy(this, x, y, registry.monster(monsterId), this.time.now);
+    this.enemies.add(e);
+    return e;
+  }
+
+  enemiesSnapshot(): { uid: string; id: string; hp: number; x: number; y: number; mode: string }[] {
+    return (this.enemies.getChildren() as Enemy[]).filter((e) => e.alive).map((e) => ({ uid: e.uid, id: e.def.id, hp: e.hp, x: e.x, y: e.y, mode: e.brain.mode }));
+  }
+
+  /** Death → fade → respawn in the safe zone at half HP. */
+  playerDied(): void {
+    if (this.transitioning) return;
+    this.transitioning = true;
+    this.time.delayedCall(1200, () => {
+      const d = gameState.derived();
+      gameState.setVitals({ hp: Math.max(1, Math.round(d.maxHp * balance.death.respawnHpPct)), stamina: d.maxStamina, ap: d.maxAp });
+      this.cameras.main.fadeOut(400, 0, 0, 0);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.scene.start('SafeZone', { mapId: balance.death.respawnMap, spawn: balance.death.respawnPoint } satisfies WorldSceneData);
+      });
+    });
   }
 
   goToMap(mapId: string, spawn: string): void {

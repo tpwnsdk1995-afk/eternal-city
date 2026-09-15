@@ -33,6 +33,12 @@ export interface EcDebug {
   player(): { x: number; y: number } | null;
   /** Jump to another map/spawn (same transition the portals use). */
   warp(mapId: string, spawn?: string): void;
+  /** World → screen pixels for the active world camera. */
+  toScreen(x: number, y: number): { x: number; y: number } | null;
+  /** Spawn a monster offset from the player (combat maps only). Returns its uid. */
+  spawn(monsterId: string, dx?: number, dy?: number): string | null;
+  enemies(): { uid: string; id: string; hp: number; x: number; y: number; mode: string }[];
+  god(on: boolean): void;
   state: typeof gameState;
 }
 
@@ -51,6 +57,17 @@ export function exposeDebug(game: Phaser.Game): void {
     },
     player: () => worldScene()?.playerPos() ?? null,
     warp: (mapId, spawn = 'default') => worldScene()?.goToMap(mapId, spawn),
+    toScreen: (x, y) => worldScene()?.toScreen(x, y) ?? null,
+    spawn: (monsterId, dx = 120, dy = 0) => {
+      const s = worldScene();
+      if (!s) return null;
+      const p = s.playerPos();
+      return s.spawnEnemyAt(monsterId, p.x + dx, p.y + dy)?.uid ?? null;
+    },
+    enemies: () => worldScene()?.enemiesSnapshot() ?? [],
+    god: (on) => {
+      gameState.flags.god = on;
+    },
     fps: () => game.loop.actualFps,
     hud: () => {
       const d = gameState.derived();
