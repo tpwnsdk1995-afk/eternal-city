@@ -65,7 +65,7 @@ export const questService = {
       rolled.push({ itemId: it.itemId, qty: it.qty });
     }
     gameState.setInventory(inv);
-    const xr = applyXp({ ...gameState.character, won: gameState.character.won + def.rewards.won }, def.rewards.xp);
+    const xr = applyXp({ ...gameState.character, won: gameState.character.won + def.rewards.won }, Math.round(def.rewards.xp * gameState.xpMult()));
     gameState.setCharacter(xr.character);
     if (xr.levelUps.length) {
       const d = gameState.derived();

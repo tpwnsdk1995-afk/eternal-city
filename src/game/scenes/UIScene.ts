@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { weaponLabel } from '@core/tuning/tuning';
+import { activeBuffs, formatRemaining } from '@core/combat/buffs';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 import { TEX } from '@data/textureKeys';
 import { registry } from '@data/registry';
@@ -53,6 +54,7 @@ export class UIScene extends Phaser.Scene {
   private minimapAt = 0;
   private questTracker!: Phaser.GameObjects.Text;
   private permitText!: Phaser.GameObjects.Text;
+  private buffText!: Phaser.GameObjects.Text;
 
   constructor() {
     super('UI');
@@ -112,6 +114,10 @@ export class UIScene extends Phaser.Scene {
     // quest tracker under the minimap
     this.questTracker = this.add.text(GAME_WIDTH - 16, 12 + MINIMAP_MAX_H + 40, '', theme.textStyle(12, '#ffd166', { stroke: '#000', strokeThickness: 3, align: 'right' })).setOrigin(1, 0).setDepth(40);
     this.permitText = this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - HUD_H + 84, '', theme.textStyle(10, '#6b7280')).setOrigin(1, 0);
+    // active 사이버샵 buffs, bottom-right above the HUD, refreshed every second
+    this.buffText = this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - HUD_H - 12, '', theme.textStyle(11, theme.colors.good, { stroke: '#000', strokeThickness: 3, align: 'right' })).setOrigin(1, 1).setDepth(40);
+    this.time.addEvent({ delay: 1000, loop: true, callback: () => this.tickBuffs() });
+    this.refreshBuffs();
 
     // --- assault banner (top centre) ---------------------------------------------------------
     this.banner = this.add.container(GAME_WIDTH / 2, 8).setDepth(50).setVisible(false);
@@ -159,6 +165,11 @@ export class UIScene extends Phaser.Scene {
     });
     on('stats', refreshWindows);
     on('achievements', refreshWindows);
+    on('buffs', () => {
+      this.refreshBuffs();
+      this.refreshVitals();
+      refreshWindows();
+    });
     on('assault', (hud) => this.setBanner(hud));
     on('assaultResult', (r) => this.windows.showResult(r));
     on('message', (m) => this.pushLog(m.text, m.tone));
@@ -240,6 +251,20 @@ export class UIScene extends Phaser.Scene {
   }
 
   // --- HUD refreshers -----------------------------------------------------------------------
+
+  private tickBuffs(): void {
+    for (const name of gameState.pruneBuffs()) gameState.message(`${name} 효과가 끝났습니다.`, 'system');
+    this.refreshBuffs();
+  }
+
+  private refreshBuffs(): void {
+    const now = Date.now();
+    const lines = activeBuffs(gameState.buffs, now).map((b) => {
+      const def = registry.buff(b.id);
+      return `${def.name} ${formatRemaining(b.until - now)}`;
+    });
+    this.buffText.setText(lines.join('\n'));
+  }
 
   private refreshVitals(): void {
     const d = gameState.derived();

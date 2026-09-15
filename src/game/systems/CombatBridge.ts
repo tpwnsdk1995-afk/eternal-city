@@ -384,7 +384,7 @@ export class CombatBridge {
   killEnemy(e: Enemy, now: number): void {
     e.kill();
     this.fx.blood({ x: e.x, y: e.y + 8 }, 1.6 * (e.def.scale ?? 1));
-    const xp = xpForKill(e.def, gameState.character.level);
+    const xp = Math.round(xpForKill(e.def, gameState.character.level) * gameState.xpMult());
     const r = applyXp(gameState.character, xp);
     gameState.setCharacter(r.character);
     gameState.message(`${e.def.name} 처치  +${xp} XP`, 'info');
@@ -418,9 +418,10 @@ export class CombatBridge {
     if (!p.active) return;
     const pay = p.payload;
     if (pay.kind === 'won') {
-      gameState.setCharacter({ ...gameState.character, won: gameState.character.won + pay.amount });
-      progressService.recordWon(pay.amount);
-      this.floating.spawn(this.host.player.x, this.host.player.y - 16, `+₩${pay.amount}`, '#c9a227', 12);
+      const amount = Math.round(pay.amount * gameState.wonMult());
+      gameState.setCharacter({ ...gameState.character, won: gameState.character.won + amount });
+      progressService.recordWon(amount);
+      this.floating.spawn(this.host.player.x, this.host.player.y - 16, `+₩${amount}`, '#c9a227', 12);
     } else {
       const def = registry.item(pay.itemId);
       const next = addItem(gameState.inventory, def, pay.qty, { prefix: pay.prefix });

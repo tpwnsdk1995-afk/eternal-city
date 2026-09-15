@@ -17,6 +17,7 @@ import { gameState } from './GameState';
 import { questService } from './questService';
 import { progressService } from './progressService';
 import { canTravel, yearDef } from '@core/world/parallel';
+import { applyBuff, formatRemaining } from '@core/combat/buffs';
 
 export interface ActionResult {
   ok: boolean;
@@ -71,8 +72,22 @@ export const actions = {
     if (!stack) return fail('아이템을 찾을 수 없습니다.');
     const def = registry.item(stack.itemId);
     if (def.kind !== 'consumable') return fail('사용할 수 없는 아이템입니다.');
+    const E = def.effect;
+    if (E.enhanceBonusPct) {
+      if (gameState.flags.enhanceBonus) return fail('이미 특수 강화권이 적용되어 있습니다. 강화를 먼저 진행하세요.');
+      gameState.setFlag('enhanceBonus', E.enhanceBonusPct);
+      gameState.setInventory(removeQty(gameState.inventory, uid, 1));
+      return done(`${def.name} 사용 — 다음 강화 성공률 +${E.enhanceBonusPct}%`, 'good');
+    }
     const v = gameState.vitals;
-    gameState.setVitals({ hp: v.hp + (def.effect.hp ?? 0), stamina: v.stamina + (def.effect.stamina ?? 0), ap: v.ap + (def.effect.ap ?? 0) });
+    gameState.setVitals({ hp: v.hp + (E.hp ?? 0), stamina: v.stamina + (E.stamina ?? 0), ap: v.ap + (E.ap ?? 0) });
+    if (E.buff) {
+      const b = registry.buff(E.buff);
+      gameState.setBuffs(applyBuff(gameState.buffs, b, Date.now()));
+      gameState.setVitals({});
+      gameState.setInventory(removeQty(gameState.inventory, uid, 1));
+      return done(`${b.name} 적용 — ${b.desc} (${formatRemaining(b.durationMs)})`, 'good');
+    }
     gameState.setInventory(removeQty(gameState.inventory, uid, 1));
     return done(`${def.name} 사용`, 'good');
   },
@@ -182,9 +197,11 @@ export const actions = {
     if (!stack) return fail('아이템을 찾을 수 없습니다.');
     const def = registry.item(stack.itemId);
     if (def.kind !== 'weapon') return fail('무기만 강화할 수 있습니다.');
-    const r = tryEnhance(def, stack, rng);
+    const bonus = Number(gameState.flags.enhanceBonus ?? 0);
+    const r = tryEnhance(def, stack, rng, bonus);
     if (!r.ok) return fail(TUNE_FAIL[r.reason]);
     if (gameState.character.won < r.cost) return fail(`강화 비용 ₩${r.cost.toLocaleString('ko-KR')}이 부족합니다.`);
+    if (bonus) gameState.setFlag('enhanceBonus', 0); // the ticket is spent on this attempt
     gameState.setCharacter({ ...gameState.character, won: gameState.character.won - r.cost });
     gameState.setInventory(replaceStack(gameState.inventory, r.stack));
     gameState.setEquipment({ ...gameState.equipment }); // HUD/label refresh

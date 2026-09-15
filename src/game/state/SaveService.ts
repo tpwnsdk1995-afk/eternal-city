@@ -34,6 +34,7 @@ export function takeSnapshot(): SaveGame {
     quests: gameState.quests,
     stats: gameState.stats,
     achievements: gameState.achievements,
+    buffs: gameState.buffs,
     location: saveLocation(gameState.currentMapId),
     flags: { ...gameState.flags, god: false },
     settings: { ...gameState.settings },
@@ -51,6 +52,8 @@ export function applySnapshot(save: SaveGame): void {
   gameState.quests = save.quests;
   gameState.stats = save.stats;
   gameState.achievements = save.achievements;
+  gameState.buffs = save.buffs;
+  gameState.pruneBuffs();
   gameState.status = emptyStatus();
   gameState.consciousness = { lastTriggeredAt: -Infinity };
   gameState.flags = { ...save.flags };

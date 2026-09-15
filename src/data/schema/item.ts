@@ -57,7 +57,7 @@ export interface ConsumableDef {
   kind: 'consumable';
   id: string;
   name: string;
-  effect: { hp?: number; stamina?: number; ap?: number };
+  effect: { hp?: number; stamina?: number; ap?: number; buff?: string; enhanceBonusPct?: number };
   weightKg: number;
   price: number;
   iconTex: TexKey;

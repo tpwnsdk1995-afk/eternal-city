@@ -120,6 +120,13 @@ export const TEX = {
   icon_skill_passive: 'icon_skill_passive',
   icon_skill_mastery: 'icon_skill_mastery',
   icon_consumable: 'icon_consumable',
+  icon_hp_pack: 'icon_hp_pack',
+  icon_syringe: 'icon_syringe',
+  icon_lens: 'icon_lens',
+  icon_ampoule: 'icon_ampoule',
+  icon_ticket: 'icon_ticket',
+  icon_coupon: 'icon_coupon',
+  npc_cyber: 'npc_cyber',
 } as const;
 
 export type TexKey = (typeof TEX)[keyof typeof TEX];

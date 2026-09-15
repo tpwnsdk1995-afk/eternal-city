@@ -52,6 +52,7 @@ export const jongnoShelter: MapDef = {
     { id: 'npc_elia', at: { x: 28, y: 12 } },
     { id: 'npc_assault', at: { x: 34, y: 12 } },
     { id: 'npc_taxi', at: { x: 24, y: 21 } },
+    { id: 'npc_cybershop', at: { x: 38, y: 12 } },
   ],
   safeZone: true,
 };

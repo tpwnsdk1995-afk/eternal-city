@@ -5,6 +5,7 @@ import { WEAPONS } from '@data/weapons';
 import type { NpcDef } from '@data/schema/npc';
 import { buyPrice, buyQty, sellPrice } from '@core/economy/shop';
 import { gradeMult } from '@core/weapons/weaponMath';
+import { formatRemaining } from '@core/combat/buffs';
 import { gameState } from '../state/GameState';
 import { actions } from '../state/actions';
 import { Window } from './Window';
@@ -86,7 +87,7 @@ export class ShopWindow extends Window {
           : def.kind === 'armor'
             ? `${def.slot} · 방어 ${def.defense} · Lv.${def.reqLevel}`
             : def.kind === 'consumable'
-              ? `소모품 · ${[def.effect.hp ? `생명 +${def.effect.hp}` : '', def.effect.stamina ? `지구력 +${def.effect.stamina}` : ''].filter(Boolean).join(' ')}`
+              ? `소모품 · ${[def.effect.hp ? `생명 +${def.effect.hp}` : '', def.effect.stamina ? `지구력 +${def.effect.stamina}` : '', def.effect.ap ? `행동력 +${def.effect.ap}` : '', def.effect.buff ? `${registry.buff(def.effect.buff).desc} (${formatRemaining(registry.buff(def.effect.buff).durationMs)})` : '', def.effect.enhanceBonusPct ? `다음 강화 성공률 +${def.effect.enhanceBonusPct}%` : ''].filter(Boolean).join(' · ')}`
               : def.desc;
       buyRows.push({
         id,

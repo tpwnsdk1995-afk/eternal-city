@@ -36,6 +36,8 @@ import { assaultC } from './assaults/assault-c';
 import { advancedOf } from '@core/assault/advanced';
 import { CAMPAIGNS } from './campaigns';
 import { ACHIEVEMENTS } from './achievements';
+import { BUFFS } from './buffs';
+import type { BuffDef } from '@core/combat/buffs';
 import type { AchievementDef, CampaignDef } from './schema/progress';
 
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
@@ -54,7 +56,8 @@ const maps = byId(MAPS);
 const assaults = byId(ASSAULTS);
 const campaigns = byId(CAMPAIGNS);
 const achievements = byId(ACHIEVEMENTS);
-export { CAMPAIGNS, ACHIEVEMENTS };
+const buffs = byId(BUFFS);
+export { CAMPAIGNS, ACHIEVEMENTS, BUFFS };
 const quests = byId(QUESTS);
 
 function must<T>(map: Map<string, T>, id: string, what: string): T {
@@ -93,6 +96,7 @@ export const registry = {
   quest: (id: string): QuestDef => must(quests, id, 'quest'),
   campaign: (id: string): CampaignDef => must(campaigns, id, 'campaign'),
   achievement: (id: string): AchievementDef => must(achievements, id, 'achievement'),
+  buff: (id: string): BuffDef => must(buffs, id, 'buff'),
   hasItem: (id: string): boolean => items.has(id),
   hasMap: (id: string): boolean => maps.has(id),
 };
@@ -109,6 +113,8 @@ export function validateAll(): void {
     if (seen.has(it.id)) errors.push(`duplicate item id ${it.id}`);
     seen.add(it.id);
   }
+
+  for (const it of ITEMS) if (it.kind === 'consumable' && it.effect.buff && !buffs.has(it.effect.buff)) errors.push(`consumable ${it.id} applies unknown buff ${it.effect.buff}`);
 
   for (const m of MONSTERS) {
     for (const d of m.drops) if (!items.has(d.itemId)) errors.push(`monster ${m.id} drops unknown item ${d.itemId}`);

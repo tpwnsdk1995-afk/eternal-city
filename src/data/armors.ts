@@ -37,4 +37,12 @@ export const CONSUMABLES: ConsumableDef[] = [
   { kind: 'consumable', id: 'bandage', name: '붕대', effect: { hp: 40 }, weightKg: 0.1, price: 800, iconTex: TEX.icon_bandage },
   { kind: 'consumable', id: 'energy_drink', name: '에너지 드링크', effect: { stamina: 60 }, weightKg: 0.2, price: 600, iconTex: TEX.icon_energy_drink },
   { kind: 'consumable', id: 'painkiller', name: '진통제', effect: { hp: 15, ap: 10 }, weightKg: 0.05, price: 500, iconTex: TEX.icon_painkiller },
+  // ---------------------------------------------------------------- 사이버샵 (원작 캐시 아이템 → ₩)
+  { kind: 'consumable', id: 'hp_pack', name: '피뻥 (대회복 팩)', effect: { hp: 250 }, weightKg: 0.2, price: 3_000, iconTex: TEX.icon_hp_pack },
+  { kind: 'consumable', id: 'stamina_pack', name: '지감 (지구력 회복제)', effect: { stamina: 100, ap: 40 }, weightKg: 0.2, price: 2_000, iconTex: TEX.icon_energy_drink },
+  { kind: 'consumable', id: 'steroid_shot', name: '스테로이드', effect: { buff: 'buff_steroid' }, weightKg: 0.1, price: 15_000, iconTex: TEX.icon_syringe },
+  { kind: 'consumable', id: 'focus_lens', name: '집중 렌즈', effect: { buff: 'buff_focus' }, weightKg: 0.05, price: 12_000, iconTex: TEX.icon_lens },
+  { kind: 'consumable', id: 'ampoule', name: '경험 앰플', effect: { buff: 'buff_ampoule' }, weightKg: 0.1, price: 25_000, iconTex: TEX.icon_ampoule },
+  { kind: 'consumable', id: 'enhance_ticket', name: '특수 강화권', effect: { enhanceBonusPct: 20 }, weightKg: 0.01, price: 40_000, iconTex: TEX.icon_ticket },
+  { kind: 'consumable', id: 'premium_coupon', name: '프리미엄 쿠폰 (30일)', effect: { buff: 'buff_premium' }, weightKg: 0.01, price: 300_000, iconTex: TEX.icon_coupon },
 ];

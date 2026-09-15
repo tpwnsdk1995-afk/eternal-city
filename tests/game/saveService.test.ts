@@ -51,11 +51,14 @@ describe('save/load', () => {
     const v1 = { ...rest, version: 1 } as unknown;
     const migrated = migrateSave(v1);
     expect(migrated).not.toBeNull();
-    expect(migrated!.version).toBe(4);
+    expect(migrated!.version).toBe(5);
+    expect(migrated!.buffs).toEqual({ active: [] });
     expect(migrated!.stats.kills).toBe(0);
     expect(migrated!.achievements).toEqual({ unlocked: [], title: null });
     const { stats: _s, achievements: _a, ...v3 } = { ...v2, version: 3 as number };
-    expect(migrateSave(v3)!.version).toBe(4);
+    expect(migrateSave(v3)!.version).toBe(5);
+    const { buffs: _b, ...v4 } = { ...v2, version: 4 as number };
+    expect(migrateSave(v4)!.version).toBe(5);
     expect(migrated!.quests).toEqual({ active: [], completed: [] });
     expect(migrated!.character.name).toBe('세이브테스트');
     expect(migrated!.inventory.items.length).toBe(v2.inventory.items.length);

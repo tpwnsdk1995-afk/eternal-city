@@ -88,8 +88,9 @@ export class TuningWindow extends Window {
     let y = 110;
     this.label(X, y, '강화', theme.colors.brass, 14, { fontStyle: 'bold' });
     const lv = enhanceLevel(s);
-    const chance = enhanceChancePct(s);
-    this.label(X + 60, y + 1, chance === null ? `+${lv} (최대)` : `+${lv} → +${lv + 1}  ·  성공 ${chance}%`, theme.colors.text, 13);
+    const bonus = Number(gameState.flags.enhanceBonus ?? 0);
+    const chance = enhanceChancePct(s, bonus);
+    this.label(X + 60, y + 1, chance === null ? `+${lv} (최대)` : `+${lv} → +${lv + 1}  ·  성공 ${chance}%${bonus ? ` (특수 강화권 +${bonus}%)` : ''}`, bonus ? theme.colors.good : theme.colors.text, 13);
     this.label(X, y + 22, `실패 시 −1 (파손 없음) · 공격력 +${T.enhanceDmgPerLevel * 100}%/강 · 비용은 무기 가격과 강화 단계에 비례`, '#6b7280', 11);
     if (chance !== null) this.button(this.w - 16 - 150, y - 2, `강화 ${won(enhanceCost(def, s))}`, () => actions.enhance(s.uid), '#9be7ff').setX(this.w - 16 - this.lastW());
     else this.label(this.w - 16, y, '최대 강화', theme.colors.good, 12).setOrigin(1, 0);

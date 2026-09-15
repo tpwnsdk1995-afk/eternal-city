@@ -105,6 +105,14 @@ export const NPCS: NpcDef[] = [
     lines: ['패러렐 시스템은 허가증을 가진 헌터만 통과시킵니다. 어느 해로 가시겠습니까?', '시간대를 건너면 그 해의 안전지역에 도착합니다. 돌아올 때도 저를 찾으세요.'],
   },
   {
+    id: 'npc_cybershop',
+    name: '사이버샵 단말기',
+    role: 'shop',
+    tex: TEX.npc_cyber,
+    lines: ['사이버샵에 접속했습니다. 회복 팩, 강화 약물, 프리미엄 쿠폰을 ₩로 구매할 수 있습니다.', '프리미엄 쿠폰은 30일 동안 경험치와 ₩ 획득, 무게 한도를 늘려 줍니다.'],
+    stock: ['hp_pack', 'stamina_pack', 'steroid_shot', 'focus_lens', 'ampoule', 'enhance_ticket', 'premium_coupon'],
+  },
+  {
     id: 'npc_kimhun',
     name: '김훈 소대장',
     role: 'quest',

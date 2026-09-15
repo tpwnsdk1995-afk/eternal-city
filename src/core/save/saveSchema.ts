@@ -6,9 +6,10 @@ import type { FireState } from '../weapons/fireController';
 import type { QuestState } from '../quest/questState';
 import type { PlayerStats } from '../world/stats';
 import type { AchievementState } from '../progress/achievements';
+import type { BuffState } from '../combat/buffs';
 import type { ControlScheme } from '@data/schema/enums';
 
-export const CURRENT_SAVE_VERSION = 4 as const;
+export const CURRENT_SAVE_VERSION = 5 as const;
 
 export interface SaveSettings {
   controlScheme: ControlScheme;
@@ -55,7 +56,16 @@ export interface SaveGameV4 extends SaveCommon {
   achievements: AchievementState;
 }
 
-export type SaveGame = SaveGameV4;
+/** M5: timed 사이버샵 buffs (wall-clock expiry). */
+export interface SaveGameV5 extends SaveCommon {
+  version: 5;
+  quests: QuestState;
+  stats: PlayerStats;
+  achievements: AchievementState;
+  buffs: BuffState;
+}
+
+export type SaveGame = SaveGameV5;
 
 const EMPTY_STATS: PlayerStats = { kills: 0, bossKills: 0, killsByMonster: {}, killsByFaction: {}, assaultClears: {}, assaultFails: 0, questsCompleted: 0, deaths: 0, wonEarned: 0, maxEnhance: 0 };
 
@@ -65,6 +75,7 @@ const MIGRATIONS: Record<number, (d: Record<string, unknown>) => Record<string, 
   1: (d) => ({ ...d, version: 2, quests: { active: [], completed: [] }, flags: isObj(d.flags) ? d.flags : {} }),
   2: (d) => ({ ...d, version: 3 }),
   3: (d) => ({ ...d, version: 4, stats: { ...EMPTY_STATS }, achievements: { unlocked: [], title: null } }),
+  4: (d) => ({ ...d, version: 5, buffs: { active: [] } }),
 };
 
 /**
@@ -80,7 +91,7 @@ export function migrateSave(raw: unknown): SaveGame | null {
     data = step(data);
   }
   if (data.version !== CURRENT_SAVE_VERSION) return null;
-  const required = ['character', 'vitals', 'inventory', 'equipment', 'skills', 'fire', 'location', 'settings', 'quests', 'stats', 'achievements'];
+  const required = ['character', 'vitals', 'inventory', 'equipment', 'skills', 'fire', 'location', 'settings', 'quests', 'stats', 'achievements', 'buffs'];
   for (const k of required) if (!isObj(data[k])) return null;
   const c = data.character as Record<string, unknown>;
   if (typeof c.name !== 'string' || typeof c.level !== 'number' || !isObj(c.base)) return null;

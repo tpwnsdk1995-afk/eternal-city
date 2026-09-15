@@ -10,6 +10,8 @@ import { emptyQuestState, type QuestState } from '@core/quest/questState';
 import { emptyStatus, type StatusState } from '@core/combat/statusEffects';
 import { emptyStats, type PlayerStats } from '@core/world/stats';
 import { emptyAchievements, type AchievementState } from '@core/progress/achievements';
+import { aggregateBuffMods, emptyBuffs, extraWeightKg, pruneExpired, xpMultiplier, wonMultiplier, type BuffState } from '@core/combat/buffs';
+import { addMods } from '@data/schema/mods';
 import type { ConsciousnessState } from '@core/combat/consciousness';
 import { balance } from '@data/balance';
 import { registry } from '@data/registry';
@@ -53,6 +55,7 @@ export interface GameEvents extends Record<string, unknown> {
   quests: QuestState;
   stats: PlayerStats;
   achievements: AchievementState;
+  buffs: BuffState;
   flags: Record<string, boolean | number>;
   message: { text: string; tone?: 'info' | 'good' | 'bad' | 'system' };
   mapChanged: { mapId: string; name: string; minimap: MinimapInfo | null };
@@ -84,6 +87,7 @@ class GameState {
   quests: QuestState = emptyQuestState();
   stats: PlayerStats = emptyStats();
   achievements: AchievementState = emptyAchievements();
+  buffs: BuffState = emptyBuffs();
   status: StatusState = emptyStatus();
   consciousness: ConsciousnessState = { lastTriggeredAt: -Infinity };
   currentMapId: string = balance.death.respawnMap;
@@ -112,6 +116,7 @@ class GameState {
     this.quests = emptyQuestState();
     this.stats = emptyStats();
     this.achievements = emptyAchievements();
+    this.buffs = emptyBuffs();
     this.status = emptyStatus();
     this.consciousness = { lastTriggeredAt: -Infinity };
     this.currentMapId = balance.death.respawnMap;
@@ -121,14 +126,42 @@ class GameState {
     this.emitAll();
   }
 
-  /** Active modifiers, with weapon mastery gated on the equipped class. */
+  /** Active modifiers: skills (weapon mastery gated on the equipped class) + 사이버샵 buffs. */
   mods(): StatMods {
     const weapon = equippedWeapon(this.equipment, this.inventory, registry.item);
-    return aggregateMods(this.skills, registry.skill, weapon?.def.class ?? null);
+    const skill = aggregateMods(this.skills, registry.skill, weapon?.def.class ?? null);
+    return addMods(skill, aggregateBuffMods(this.buffs, registry.buff, Date.now()));
   }
 
   derived(): DerivedStats {
-    return derivedStats(this.character.base, this.character.level, this.mods());
+    const d = derivedStats(this.character.base, this.character.level, this.mods());
+    const extra = extraWeightKg(this.buffs, registry.buff, Date.now());
+    return extra ? { ...d, maxWeightKg: d.maxWeightKg + extra } : d;
+  }
+
+  /** experience multiplier from buffs (앰플·프리미엄) */
+  xpMult(): number {
+    return xpMultiplier(this.buffs, registry.buff, Date.now());
+  }
+
+  wonMult(): number {
+    return wonMultiplier(this.buffs, registry.buff, Date.now());
+  }
+
+  setBuffs(b: BuffState): void {
+    this.buffs = b;
+    this.events.emit('buffs', b);
+  }
+
+  /** Drops expired buffs; returns the names that just ran out. */
+  pruneBuffs(): string[] {
+    const now = Date.now();
+    const before = this.buffs.active;
+    const next = pruneExpired(this.buffs, now);
+    if (next === this.buffs) return [];
+    const gone = before.filter((b) => b.until <= now).map((b) => registry.buff(b.id).name);
+    this.setBuffs(next);
+    return gone;
   }
 
   defense(): number {
@@ -219,6 +252,7 @@ class GameState {
     this.events.emit('quests', this.quests);
     this.events.emit('stats', this.stats);
     this.events.emit('achievements', this.achievements);
+    this.events.emit('buffs', this.buffs);
     this.events.emit('flags', this.flags);
     this.events.emit('settings', this.settings);
   }

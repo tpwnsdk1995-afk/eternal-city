@@ -513,3 +513,90 @@ export function drawIconSkillActive(ctx: Ctx, _f: number, w: number, h: number):
   poly(ctx, [[18, 3], [8, 18], [15, 18], [13, 29], [24, 13], [17, 13]], '#3b7bc2'); // lightning bolt (행동력)
   poly(ctx, [[18, 3], [8, 18], [15, 18], [15, 15], [12, 15]], 'rgba(255,255,255,0.25)');
 }
+
+// ---------------------------------------------------------------- 사이버샵
+
+export function drawIconHpPack(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  fill(ctx, 7, 6, 18, 22, '#c9c9cf'); // IV bag
+  fill(ctx, 9, 8, 14, 14, '#c23b3b');
+  fill(ctx, 9, 8, 14, 5, 'rgba(255,255,255,0.25)');
+  fill(ctx, 14, 3, 4, 3, '#8a8a90');
+  fill(ctx, 15, 22, 2, 8, '#d9d9df'); // tube
+  fill(ctx, 12, 12, 8, 2, '#ffffff'); // cross
+  fill(ctx, 15, 9, 2, 8, '#ffffff');
+}
+
+export function drawIconSyringe(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.save();
+  ctx.translate(16, 16);
+  ctx.rotate(-Math.PI / 4);
+  fill(ctx, -10, -3, 16, 6, '#dfe6ee'); // barrel
+  fill(ctx, -9, -2, 9, 4, '#7bd88f'); // fluid
+  fill(ctx, 6, -1, 8, 2, '#9aa0a6'); // needle
+  fill(ctx, -14, -5, 4, 10, '#6b7280'); // plunger cap
+  fill(ctx, -12, -1, 3, 2, '#9aa0a6');
+  ctx.restore();
+}
+
+export function drawIconLens(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.strokeStyle = '#c9a227';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(16, 16, 10, 0, Math.PI * 2);
+  ctx.stroke();
+  const g = ctx.createRadialGradient(13, 13, 1, 16, 16, 9);
+  g.addColorStop(0, 'rgba(180,230,255,0.9)');
+  g.addColorStop(1, 'rgba(40,90,160,0.8)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(16, 16, 8, 0, Math.PI * 2);
+  ctx.fill();
+  fill(ctx, 15, 6, 2, 20, 'rgba(255,255,255,0.35)');
+  fill(ctx, 6, 15, 20, 2, 'rgba(255,255,255,0.35)');
+}
+
+export function drawIconAmpoule(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  poly(ctx, [[13, 4], [19, 4], [18, 9], [22, 13], [22, 27], [10, 27], [10, 13], [14, 9]], '#e8eef5'); // glass
+  fill(ctx, 11, 16, 10, 10, '#3b7bc2'); // fluid
+  fill(ctx, 11, 16, 10, 3, 'rgba(255,255,255,0.3)');
+  fill(ctx, 14, 4, 4, 2, '#9aa0a6'); // neck
+  fill(ctx, 12, 12, 2, 10, 'rgba(255,255,255,0.45)'); // shine
+}
+
+export function drawIconTicket(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.save();
+  ctx.translate(16, 16);
+  ctx.rotate(-0.3);
+  fill(ctx, -13, -7, 26, 14, '#c9a227');
+  fill(ctx, -12, -6, 24, 12, '#e8c85a');
+  for (let i = -10; i <= 10; i += 4) fill(ctx, i, -8, 2, 2, '#1d2126');
+  for (let i = -10; i <= 10; i += 4) fill(ctx, i, 6, 2, 2, '#1d2126');
+  fill(ctx, -9, -2, 18, 1, '#7a5a10');
+  fill(ctx, -9, 1, 12, 1, '#7a5a10');
+  fill(ctx, 3, 0, 5, 3, '#c23b3b'); // stamp
+  ctx.restore();
+}
+
+export function drawIconCoupon(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  fill(ctx, 4, 8, 24, 16, '#2b2f3a');
+  fill(ctx, 5, 9, 22, 14, '#3b4a7a');
+  fill(ctx, 5, 9, 22, 4, '#c9a227'); // band
+  fill(ctx, 8, 15, 10, 2, '#ffffff');
+  fill(ctx, 8, 19, 14, 1, '#9aa0a6');
+  // star
+  ctx.fillStyle = '#ffd166';
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * Math.PI * 2 - Math.PI / 2;
+    const r = i % 2 ? 1.5 : 3.5;
+    ctx.lineTo(23 + Math.cos(a) * r, 17 + Math.sin(a) * r);
+  }
+  ctx.closePath();
+  ctx.fill();
+}

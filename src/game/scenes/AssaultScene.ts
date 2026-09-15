@@ -247,7 +247,7 @@ export class AssaultScene extends BaseWorldScene {
         result.items.push({ name: def.name, qty: it.qty });
       }
       gameState.setInventory(inv);
-      const xr = applyXp({ ...gameState.character, won: gameState.character.won + R.won }, R.xp);
+      const xr = applyXp({ ...gameState.character, won: gameState.character.won + R.won }, Math.round(R.xp * gameState.xpMult()));
       gameState.setCharacter(xr.character);
       if (xr.levelUps.length) {
         const d = gameState.derived();

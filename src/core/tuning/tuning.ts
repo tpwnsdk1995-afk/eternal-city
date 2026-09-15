@@ -14,11 +14,11 @@ export type TuneResult<Extra = object> = ({ ok: true; stack: ItemStack; success:
 
 export const enhanceLevel = (s: ItemStack): number => s.enhance ?? 0;
 
-/** % chance the next 강화 attempt succeeds (null when maxed). */
-export function enhanceChancePct(s: ItemStack): number | null {
+/** % chance the next 강화 attempt succeeds (null when maxed). `bonusPct` = 특수 강화권. */
+export function enhanceChancePct(s: ItemStack, bonusPct = 0): number | null {
   const lv = enhanceLevel(s);
   if (lv >= T.maxEnhance) return null;
-  return T.enhanceSuccessPct[Math.min(lv, T.enhanceSuccessPct.length - 1)];
+  return Math.min(100, T.enhanceSuccessPct[Math.min(lv, T.enhanceSuccessPct.length - 1)] + bonusPct);
 }
 
 export function enhanceCost(def: WeaponDef, s: ItemStack): number {
@@ -29,8 +29,8 @@ export function enhanceCost(def: WeaponDef, s: ItemStack): number {
  * One 강화 attempt. Success: +1. Failure: −1 (weapons never break). The caller pays `cost` first.
  * Pure; the RNG decides the roll so tests can seed it.
  */
-export function tryEnhance(def: WeaponDef, s: ItemStack, rng: Rng): TuneResult {
-  const chance = enhanceChancePct(s);
+export function tryEnhance(def: WeaponDef, s: ItemStack, rng: Rng, bonusPct = 0): TuneResult {
+  const chance = enhanceChancePct(s, bonusPct);
   if (chance === null) return { ok: false, reason: 'maxed' };
   const cost = enhanceCost(def, s);
   const lv = enhanceLevel(s);
