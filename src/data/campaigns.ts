@@ -88,6 +88,7 @@ export const CAMPAIGNS: CampaignDef[] = [
       { id: 'ch1', title: '1장 · 출근길', desc: '테헤란 사무직 좀비 30명을 처치한다.', requires: { kills: [{ monsterId: 'zombie_office', count: 30 }] }, rewards: { won: 60_000, xp: 8_000, items: [{ itemId: 'ammo_762_ap', qty: 60 }] } },
       { id: 'ch2', title: '2장 · 중화기 진지', desc: '위토 중화기병 15명과 GUEST 사냥꾼 15명을 처치한다.', requires: { kills: [{ monsterId: 'wito_heavy_gunner', count: 15 }, { monsterId: 'guest_hunter', count: 15 }] }, rewards: { won: 90_000, xp: 12_000, items: [{ itemId: 'hp_pack', qty: 3 }] } },
       { id: 'ch3', title: '3장 · 회장실', desc: '네임드 회장 좀비를 처치한다.', requires: { kills: [{ monsterId: 'zombie_ceo', count: 1 }], level: 60 }, rewards: { won: 200_000, xp: 25_000, items: [{ itemId: 'armor_top_tactical_cl', qty: 1 }] } },
+      { id: 'ch4', title: '4장 · 환기구 폐쇄', desc: '코엑스 지하 어설트를 성공해 포자 확산을 끊는다.', requires: { assaultClears: [{ assaultId: 'assault-e', count: 1 }] }, rewards: { won: 300_000, xp: 40_000, items: [{ itemId: 'premium_coupon', qty: 1 }] } },
     ],
   },
   {
@@ -111,7 +112,8 @@ export const CAMPAIGNS: CampaignDef[] = [
     chapters: [
       { id: 'ch1', title: '1장 · 광화문', desc: 'GUEST 정예 25명과 고대 좀비 25명을 처치한다.', requires: { kills: [{ monsterId: 'guest_elite', count: 25 }, { monsterId: 'zombie_ancient', count: 25 }] }, rewards: { won: 250_000, xp: 40_000, items: [{ itemId: 'ammo_50_ap', qty: 100 }] } },
       { id: 'ch2', title: '2장 · 남산 등반', desc: '패러사이트 호러 10마리를 처치한다.', requires: { kills: [{ monsterId: 'parasite_horror', count: 10 }] }, rewards: { won: 350_000, xp: 60_000, items: [{ itemId: 'premium_coupon', qty: 1 }] } },
-      { id: 'ch3', title: '3장 · the Wise One', desc: '남산 정상의 the Wise One을 처치한다.', requires: { kills: [{ monsterId: 'the_wise_one', count: 1 }], level: 90 }, rewards: { won: 2_000_000, xp: 300_000, items: [{ itemId: 'armor_top_tactical_cl', qty: 1 }, { itemId: 'armor_coat_kevlar_cl', qty: 1 }, { itemId: 'premium_coupon', qty: 3 }] } },
+      { id: 'ch3', title: '3장 · 광화문 사수', desc: '광화문 부스 방어 어설트를 성공한다.', requires: { assaultClears: [{ assaultId: 'assault-f', count: 1 }] }, rewards: { won: 800_000, xp: 120_000, items: [{ itemId: 'premium_coupon', qty: 1 }] } },
+      { id: 'ch4', title: '4장 · the Wise One', desc: '남산 정상의 the Wise One을 처치한다.', requires: { kills: [{ monsterId: 'the_wise_one', count: 1 }], level: 90 }, rewards: { won: 2_000_000, xp: 300_000, items: [{ itemId: 'armor_top_tactical_cl', qty: 1 }, { itemId: 'armor_coat_kevlar_cl', qty: 1 }, { itemId: 'premium_coupon', qty: 3 }] } },
     ],
   },
 ];

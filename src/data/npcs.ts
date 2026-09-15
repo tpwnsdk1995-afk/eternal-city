@@ -145,6 +145,6 @@ export const NPCS: NpcDef[] = [
     role: 'assault',
     tex: TEX.npc_assault,
     lines: ['어설트 작전 접수처입니다. 레벨에 맞는 임무를 고르세요 — 기물 파괴 전진, 거점 방어, 보스 사냥이 있습니다.'],
-    assaults: ['assault-a', 'assault-b', 'assault-c', 'assault-d', 'assault-a-adv', 'assault-b-adv', 'assault-c-adv', 'assault-d-adv'],
+    assaults: ['assault-a', 'assault-b', 'assault-c', 'assault-d', 'assault-e', 'assault-f', 'assault-a-adv', 'assault-b-adv', 'assault-c-adv', 'assault-d-adv', 'assault-e-adv', 'assault-f-adv'],
   },
 ];

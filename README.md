@@ -122,6 +122,10 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 - 레벨 곡선 대비 처치 수 점검: 2003~2008 일반 몬스터 경험치 +30~55%(레벨당 약 60~110마리 → 메인스트림·캠페인 보상과 합쳐 레벨당 30~60마리 체감), the Wise One HP 40만→30만(Lv.100 풀강 기준 약 4~5분 솔로 킬)
 - 검사 결과: Lv.100 원거리 배율 2.0·치명 18%, 11등급 무기 DPS 1,000~1,860 → 방어 115~160 몬스터에 실효 1,100~1,400 DPS. 2017 일반 몬스터 4~7초, 위토 사령관 약 1분
 
+## M9 — 후속 콘텐츠 (진행 중)
+
+- **어설트 E "코엑스 지하 — 환기구 폐쇄"**(2006, Lv.60+, 기물 파괴 전진형): GUEST 사냥꾼 소탕 → 환기구 3개 파괴 → 격벽 개방 → 위토 중화기 진지 → 회장 좀비. **어설트 F "광화문 부스 방어"**(2017, Lv.85+, 거점 방어형): GUEST 정예 격퇴 → 부스 이동 → 3파 방어(패러사이트·드론·호러) → 위토 사령관 강하. 둘 다 고급 변형 포함, 캠페인 2006 4장·2017 3장과 업적 2종 연결
+
 ## 다음 단계
 
 원작 로드맵의 큰 줄기(2002~2005, 어설트·캠페인·튠·패러렐·환생)는 모두 들어갔습니다. 이후는 콘텐츠 확장(2006~2008·2017, 길드, 방어구 조합, 사운드, 실제 아트 교체)과 밸런스 튜닝입니다.
@@ -132,7 +136,7 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 src/core/   순수 TS 게임 규칙 (Phaser 금지, 전부 유닛 테스트)  stats · combat · weapons · tuning · inventory · skills · ai · assault · progress · map · quest · economy · save
 src/data/   콘텐츠 데이터 + 스키마 + balance.ts (부팅 시 validateAll로 참조 검증)
 src/game/   Phaser 어댑터: scenes · entities · systems(InputMapper, CombatBridge, SpawnSystem) · ui(창들) · textures(코드 드로잉) · state
-e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch · save-transfer · cloud-save · audio · guild · late-years)
+e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch · save-transfer · cloud-save · audio · guild · late-years · assault-ef)
 ```
 
 `window.__ec` 디버그 훅으로 상태 조회/스폰/텔레포트/어설트 진행을 제어할 수 있습니다(e2e에서 사용).

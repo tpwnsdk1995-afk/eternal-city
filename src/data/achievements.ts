@@ -16,6 +16,8 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'ach_assault_first', name: '첫 작전', desc: '어설트를 처음 성공한다.', cond: { kind: 'assaultClears', count: 1 }, reward: { won: 2_000, xp: 200 } },
   { id: 'ach_assault_10', name: '베테랑', desc: '어설트를 10회 성공한다.', cond: { kind: 'assaultClears', count: 10 }, reward: { won: 25_000, xp: 2_000, title: '베테랑' } },
   { id: 'ach_assault_c', name: '심층 돌파', desc: '하수도 심층 어설트를 성공한다.', cond: { kind: 'assaultClears', count: 1, assaultId: 'assault-c' }, reward: { won: 15_000, xp: 1_500 } },
+  { id: 'ach_assault_e', name: '포자 차단', desc: '코엑스 지하 환기구 폐쇄 어설트를 성공한다.', cond: { kind: 'assaultClears', count: 1, assaultId: 'assault-e' }, reward: { won: 100_000, xp: 10_000 } },
+  { id: 'ach_assault_f', name: '광화문의 방패', desc: '광화문 부스 방어 어설트를 성공한다.', cond: { kind: 'assaultClears', count: 1, assaultId: 'assault-f' }, reward: { won: 300_000, xp: 40_000, title: '광화문의 방패' } },
   { id: 'ach_level_10', name: '신참 헌터', desc: '레벨 10에 도달한다.', cond: { kind: 'level', level: 10 }, reward: { won: 2_000, xp: 0 } },
   { id: 'ach_level_20', name: '중견 헌터', desc: '레벨 20에 도달한다.', cond: { kind: 'level', level: 20 }, reward: { won: 8_000, xp: 0, title: '중견 헌터' } },
   { id: 'ach_level_30', name: '고참 헌터', desc: '레벨 30에 도달한다.', cond: { kind: 'level', level: 30 }, reward: { won: 20_000, xp: 0, title: '고참 헌터' } },
