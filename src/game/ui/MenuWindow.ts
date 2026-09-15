@@ -1,14 +1,15 @@
 import type Phaser from 'phaser';
 import { gameState } from '../state/GameState';
 import { saveService } from '../state/SaveService';
-import { schemeHints } from '../systems/input/InputMapper';
+import { schemeHints, touchHints } from '../systems/input/InputMapper';
+import { isTouchDevice, touchControlsEnabled } from '../systems/input/touchState';
 import { Window } from './Window';
 import { theme } from './theme';
 
 /** Esc menu: control scheme, FPS overlay, manual save, back to title. */
 export class MenuWindow extends Window {
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, 'menu', x, y, 440, 400, '메뉴 (Esc)');
+    super(scene, 'menu', x, y, 440, 520, '메뉴 (Esc)');
   }
 
   refresh(): void {
@@ -25,6 +26,18 @@ export class MenuWindow extends Window {
       y += 18;
     }
     y += 10;
+    const touchOn = touchControlsEnabled(s.touchControls);
+    const touchLabel = { auto: `자동 (${isTouchDevice() ? '터치 기기 감지됨 → 켬' : '터치 기기 아님 → 끔'})`, on: '항상 켬', off: '항상 끔' }[s.touchControls];
+    const nextTouch = { auto: 'on', on: 'off', off: 'auto' } as const;
+    this.button(20, y, `터치 조작: ${touchLabel}`, () => gameState.setSettings({ touchControls: nextTouch[s.touchControls] }), touchOn ? theme.colors.good : theme.colors.brass, 13);
+    y += 30;
+    if (touchOn) {
+      for (const h of touchHints()) {
+        this.label(28, y, `· ${h}`, theme.colors.text, 12);
+        y += 18;
+      }
+      y += 6;
+    }
     this.button(20, y, `FPS 표시: ${s.showFps ? '켬' : '끔'}`, () => gameState.setSettings({ showFps: !s.showFps }), theme.colors.brass, 13);
     y += 40;
     this.button(20, y, '지금 저장', () => void saveService.save().then(() => gameState.message('저장했습니다.', 'good')), theme.colors.good, 13);

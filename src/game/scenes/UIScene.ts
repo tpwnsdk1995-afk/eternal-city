@@ -11,6 +11,8 @@ import { gameState, type AssaultHud, type GameEvents } from '../state/GameState'
 import { Gauge } from '../ui/Gauge';
 import { theme } from '../ui/theme';
 import { WindowManager } from '../ui/WindowManager';
+import { TouchControls } from '../ui/TouchControls';
+import { touchControlsEnabled } from '../systems/input/touchState';
 import { MINIMAP_MAX_H, MINIMAP_MAX_W, type MinimapInfo } from '../systems/Minimap';
 
 export const HUD_H = 108;
@@ -41,6 +43,7 @@ export class UIScene extends Phaser.Scene {
   private logLines: Phaser.GameObjects.Text[] = [];
   private unsubs: (() => void)[] = [];
   windows!: WindowManager;
+  touch!: TouchControls;
   private banner!: Phaser.GameObjects.Container;
   private bannerName!: Phaser.GameObjects.Text;
   private bannerPhase!: Phaser.GameObjects.Text;
@@ -91,6 +94,9 @@ export class UIScene extends Phaser.Scene {
       const count = this.add.text(x + SLOT - 3, qy + 30, '', theme.textStyle(10, theme.colors.text, { stroke: '#000', strokeThickness: 2 })).setOrigin(1, 1);
       this.quickIcons.push(icon);
       this.quickCounts.push(count);
+      // tap/click a quickslot = its number key
+      const slot = i + 1;
+      this.add.zone(x, qy, SLOT, 32).setOrigin(0, 0).setInteractive({ useHandCursor: true }).on('pointerdown', () => gameState.events.emit('hotkey', `quick${slot}`));
     }
 
     // --- right: money / map / xp -------------------------------------------------------------
@@ -132,8 +138,13 @@ export class UIScene extends Phaser.Scene {
     this.banner.add([bannerBg, this.bannerName, this.bannerPhase, this.bannerProgress, this.bannerTime, this.bossBar]);
 
     this.windows = new WindowManager(this);
+    // on-screen touch controls (phones/tablets, or forced from the Esc menu / ?touch=1)
+    this.touch = new TouchControls(this);
+    this.touch.setEnabled(touchControlsEnabled(gameState.settings.touchControls));
+    const windowHit = gameState.uiHit;
+    gameState.uiHit = (sx, sy) => !!windowHit?.(sx, sy) || this.touch.hits(sx, sy);
 
-    const on = <K extends keyof GameEvents>(k: K, fn: (p: GameEvents[K]) => void) => this.unsubs.push(gameState.events.on(k, fn));
+    const on =<K extends keyof GameEvents>(k: K, fn: (p: GameEvents[K]) => void) => this.unsubs.push(gameState.events.on(k, fn));
     const refreshWindows = () => this.windows.refreshOpen();
     on('vitals', () => this.refreshVitals());
     on('character', () => {
@@ -177,6 +188,7 @@ export class UIScene extends Phaser.Scene {
     on('settings', (s) => {
       this.fpsText.setVisible(s.showFps);
       this.minimapPanel.setVisible(s.showMinimap);
+      this.touch.setEnabled(touchControlsEnabled(s.touchControls));
       this.windows.refreshOpen();
     });
     on('quests', () => this.refreshQuests());
@@ -185,6 +197,7 @@ export class UIScene extends Phaser.Scene {
     on('npcInteract', ({ npcId }) => this.windows.talkTo(npcId));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.unsubs.forEach((u) => u());
+      this.touch.destroy();
       this.windows.destroy();
     });
 

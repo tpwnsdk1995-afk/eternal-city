@@ -26,5 +26,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
   physics: { default: 'arcade', arcade: { gravity: { x: 0, y: 0 }, debug: params.has('debug') } },
   fps: { target: 60 },
   dom: { createContainer: true },
+  // stick + fire + one action button at once on phones
+  input: { activePointers: 3 },
   scene: [BootScene, TextureGenScene, TitleScene, CharacterCreateScene, SafeZoneScene, FieldScene, AssaultScene, UIScene],
 };

@@ -30,6 +30,8 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 | Ctrl 서브연사 토글 | Ctrl 서브연사 토글 |
 | I 인벤토리 · C 상태 · K 스킬 | I 인벤토리 · V 상태 · K 스킬 |
 
+**모바일/태블릿**: 터치 기기가 감지되면 화면 위 조작이 자동으로 켜집니다(Esc 메뉴 → 터치 조작: 자동/켬/끔, 데스크톱 테스트는 `?touch=1`). 왼쪽 스틱 이동(끝까지 밀면 달리기), 오른쪽 **공격** 버튼(누르면 가까운 적 자동 조준, 끌면 그 방향 조준), 점프·웅크림·대화·서브연사 버튼, 위쪽 탭(인벤·상태·스킬·퀘스트·지도·메뉴·전체화면), HUD 퀵슬롯 직접 탭. 가로 화면 권장.
+
 ## 지금 들어 있는 것 (M1 — 첫 플레이어블)
 
 - **2002년 중곡동**: 광진구청 지하주차장(안전지역·부활·NPC) ⇄ 중곡동 거리(사냥터, 스폰존 3)
@@ -92,6 +94,13 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 - 캠페인 2004 "강변의 겨울"(4챕터) · 2005 "침묵의 폐허"(3챕터), 메인스트림 2005 일반/CL, 업적 3종 추가
 - 저장 스키마 v6(종족), v1~v5 자동 마이그레이션
 
+## M7 — 모바일 터치 조작
+
+- 가상 스틱(원작식/현대식 어느 쪽이든 이동, 85% 이상 밀면 달리기) · 공격 버튼(홀드 사격, 드래그 트윈스틱 조준, 드래그 없으면 520px 내 최근접 적 자동 조준) · 점프/웅크림/대화/서브연사 버튼 · 창 탭 · 전체화면 · 세로 화면 안내
+- 멀티터치 3포인터(스틱+공격+버튼 동시), 터치 영역은 월드 입력에서 제외, HUD 퀵슬롯 탭 = 숫자 키
+- 설정 `터치 조작: 자동/켬/끔`(저장·복원), `viewport-fit=cover` · 확대 방지 · 스크롤 바운스 차단
+- e2e `touch.spec.ts`(`?touch=1`로 강제, 스틱 이동/달리기·자동 조준 사격·조준 드래그·점프·탭·퀵슬롯·설정 토글) + 데스크톱에서 숨김 확인
+
 ## 다음 단계
 
 원작 로드맵의 큰 줄기(2002~2005, 어설트·캠페인·튠·패러렐·환생)는 모두 들어갔습니다. 이후는 콘텐츠 확장(2006~2008·2017, 길드, 방어구 조합, 사운드, 실제 아트 교체)과 밸런스 튜닝입니다.
@@ -102,7 +111,7 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 src/core/   순수 TS 게임 규칙 (Phaser 금지, 전부 유닛 테스트)  stats · combat · weapons · tuning · inventory · skills · ai · assault · progress · map · quest · economy · save
 src/data/   콘텐츠 데이터 + 스키마 + balance.ts (부팅 시 validateAll로 참조 검증)
 src/game/   Phaser 어댑터: scenes · entities · systems(InputMapper, CombatBridge, SpawnSystem) · ui(창들) · textures(코드 드로잉) · state
-e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005)
+e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch)
 ```
 
 `window.__ec` 디버그 훅으로 상태 조회/스폰/텔레포트/어설트 진행을 제어할 수 있습니다(e2e에서 사용).

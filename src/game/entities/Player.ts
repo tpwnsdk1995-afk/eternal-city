@@ -90,7 +90,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const wantsRun = (intent.runHeld || intent.runToggled || this.runLatched) && !this.crouching && vit.stamina > 0;
 
     let dir: Vec2 = { x: 0, y: 0 };
-    if (scheme === 'classic') {
+    if (intent.moveDir) {
+      // direct vector (WASD or the virtual stick) always wins over a pending click-move
+      dir = intent.moveDir;
+      this.moveTarget = null;
+    } else if (scheme === 'classic') {
       if (intent.clickedWorld) {
         this.moveTarget = intent.clickedWorld;
         this.runLatched = intent.clickedWithShift;
@@ -105,8 +109,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
           if (this.stuck.stuckMs > balance.ai.stuckMs) this.stopMoving();
         }
       }
-    } else if (intent.moveDir) {
-      dir = intent.moveDir;
     }
 
     this.moving = dir.x !== 0 || dir.y !== 0;

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { Vec2 } from '@core/math/vec';
 import type { ControlScheme } from '@data/schema/enums';
 import { gameState } from '../../state/GameState';
+import { takePending, touchState } from './touchState';
 
 export type Hotkey = 'inventory' | 'status' | 'skills' | 'quest' | 'minimap' | 'menu' | `quick${number}`;
 
@@ -89,18 +90,20 @@ export class InputMapper {
     const k = this.keys;
     const jd = Phaser.Input.Keyboard.JustDown;
     const pointer = this.scene.input.activePointer;
-    const aimWorld = { x: pointer.worldX, y: pointer.worldY };
+    let aimWorld: Vec2 = { x: pointer.worldX, y: pointer.worldY };
+    const touch = touchState.enabled ? touchState : null;
+    const tp = touch ? takePending() : null;
 
     const click = this.pendingClick;
     this.pendingClick = null;
 
     const space = this.pendingSpace;
     this.pendingSpace = false;
-    const interactPressed = this.pendingInteract;
+    const interactPressed = this.pendingInteract || !!tp?.interact;
     this.pendingInteract = false;
 
-    let crouchPressed = false;
-    let jumpPressed = false;
+    let crouchPressed = !!tp?.crouch;
+    let jumpPressed = !!tp?.jump;
     if (this.scheme === 'classic') {
       if (space) {
         if (this.crouched) jumpPressed = true;
@@ -120,28 +123,45 @@ export class InputMapper {
         moveDir = { x: x / l, y: y / l };
       }
     }
+    // virtual stick drives movement under either scheme
+    if (touch?.moveDir) moveDir = touch.moveDir;
 
     const overUi = gameState.uiHit?.(pointer.x, pointer.y) ?? false;
-    const fireHeld = !overUi && (this.scheme === 'classic' ? pointer.rightButtonDown() : pointer.leftButtonDown());
+    let fireHeld = !overUi && (this.scheme === 'classic' ? pointer.rightButtonDown() : pointer.leftButtonDown());
 
-    const hotkey = this.pendingHotkey;
+    if (touch) {
+      // Touch aiming: fire-stick drag → that direction; plain press → nearest enemy; otherwise
+      // face the way we walk (aimWorld on the body makes Player fall back to movement facing).
+      const me = gameState.worldProvider?.().player;
+      if (me) {
+        if (touch.fireHeld && touch.aimDir) aimWorld = { x: me.x + touch.aimDir.x * 240, y: me.y + touch.aimDir.y * 240 };
+        else if (touch.fireHeld) aimWorld = nearestEnemy(me) ?? (moveDir ? { x: me.x + moveDir.x * 240, y: me.y + moveDir.y * 240 } : { x: me.x + Math.cos(this.lastAim) * 240, y: me.y + Math.sin(this.lastAim) * 240 });
+        else if (!fireHeld) aimWorld = { x: me.x, y: me.y };
+        if (aimWorld.x !== me.x || aimWorld.y !== me.y) this.lastAim = Math.atan2(aimWorld.y - me.y, aimWorld.x - me.x);
+      }
+      if (touch.fireHeld) fireHeld = true;
+    }
+
+    const hotkey = this.pendingHotkey ?? tp?.hotkey ?? null;
     this.pendingHotkey = null;
 
     return {
       clickedWorld: this.scheme === 'classic' && click ? { x: click.x, y: click.y } : null,
       clickedWithShift: !!click?.shift,
       moveDir,
-      runHeld: k.SHIFT.isDown,
+      runHeld: k.SHIFT.isDown || !!touch?.runHeld,
       runToggled: this.scheme === 'classic' && this.capsLatch,
       crouchPressed,
       jumpPressed,
       aimWorld,
       fireHeld,
-      subFirePressed: jd(k.CTRL),
+      subFirePressed: jd(k.CTRL) || !!tp?.subFire,
       interactPressed,
       hotkey,
     };
   }
+
+  private lastAim = 0;
 
   private hotkeyFor(code: string): Hotkey | null {
     switch (code) {
@@ -167,6 +187,26 @@ export class InputMapper {
   hints(): string[] {
     return schemeHints(this.scheme);
   }
+}
+
+/** Closest living enemy within auto-aim range (touch fire without a drag), or null. */
+function nearestEnemy(me: Vec2): Vec2 | null {
+  const snap = gameState.worldProvider?.();
+  if (!snap) return null;
+  let best: Vec2 | null = null;
+  let bestD = 520;
+  for (const e of snap.enemies) {
+    const d = Math.hypot(e.x - me.x, e.y - me.y);
+    if (d < bestD) {
+      bestD = d;
+      best = { x: e.x, y: e.y };
+    }
+  }
+  return best;
+}
+
+export function touchHints(): string[] {
+  return ['왼쪽 스틱 이동 · 끝까지 밀면 달리기', '공격 버튼: 누르면 가까운 적 자동 조준 · 끌면 그 방향 조준', '점프 · 웅크림 · 대화 · 서브연사 버튼', '위쪽 탭: 인벤 · 상태 · 스킬 · 퀘스트 · 지도 · 메뉴 · 전체화면', '퀵슬롯은 HUD를 직접 탭'];
 }
 
 export function schemeHints(scheme: ControlScheme): string[] {

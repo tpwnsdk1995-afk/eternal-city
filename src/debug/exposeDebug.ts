@@ -68,6 +68,8 @@ export interface EcDebug {
   /** Open the shop window with a specific merchant's stock. */
   openShop(npcId: string): void;
   closeWindows(): void;
+  /** On-screen touch control layout (screen px), or null when the UI scene is not running. */
+  touch(): ReturnType<UIScene['touch']['snapshot']> | null;
   /** Same validated player actions the windows use (equip/use/allocate/buy/sell/skills). */
   actions: Actions;
   state: typeof gameState;
@@ -126,6 +128,7 @@ export function exposeDebug(game: Phaser.Game): void {
     questTab: (tab) => uiScene()?.windows.questTab(tab),
     openShop: (npcId) => uiScene()?.windows.openShopFor(npcId),
     closeWindows: () => uiScene()?.windows.closeAll(),
+    touch: () => uiScene()?.touch.snapshot() ?? null,
     actions,
     fps: () => game.loop.actualFps,
     hud: () => {

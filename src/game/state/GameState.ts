@@ -25,6 +25,8 @@ export interface Settings {
   controlScheme: ControlScheme;
   showFps: boolean;
   showMinimap: boolean;
+  /** on-screen touch controls: auto = when a touch device is detected */
+  touchControls: 'auto' | 'on' | 'off';
 }
 
 export interface AssaultHud {
@@ -92,7 +94,7 @@ class GameState {
   status: StatusState = emptyStatus();
   consciousness: ConsciousnessState = { lastTriggeredAt: -Infinity };
   currentMapId: string = balance.death.respawnMap;
-  settings: Settings = { controlScheme: 'classic', showFps: false, showMinimap: true };
+  settings: Settings = { controlScheme: 'classic', showFps: false, showMinimap: true, touchControls: 'auto' };
   /** Set by the active world scene so the HUD can draw live minimap markers. */
   worldProvider: (() => WorldSnapshot) | null = null;
   /** Latest minimap texture info (the UI scene may start a frame after `mapChanged`). */

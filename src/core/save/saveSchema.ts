@@ -15,6 +15,7 @@ export interface SaveSettings {
   controlScheme: ControlScheme;
   showFps: boolean;
   showMinimap?: boolean;
+  touchControls?: 'auto' | 'on' | 'off';
 }
 
 interface SaveCommon {
