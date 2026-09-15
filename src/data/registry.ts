@@ -23,14 +23,19 @@ import { sewer } from './maps/sewer';
 import { hangangPark } from './maps/hangang-park';
 import { pyeongchangDong } from './maps/pyeongchang-dong';
 import { junggokStationDefense } from './maps/junggok-station-defense';
+import { sewerDepths } from './maps/sewer-depths';
 import { assaultA } from './assaults/assault-a';
 import { assaultB } from './assaults/assault-b';
+import { assaultC } from './assaults/assault-c';
+import { advancedOf } from '@core/assault/advanced';
 
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
 export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES, ...MISC];
-export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense];
-export const ASSAULTS: AssaultDef[] = [assaultA, assaultB];
+export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense, sewerDepths];
+const BASE_ASSAULTS: AssaultDef[] = [assaultA, assaultB, assaultC];
+/** every mission plus its 고급 variant */
+export const ASSAULTS: AssaultDef[] = [...BASE_ASSAULTS, ...BASE_ASSAULTS.map(advancedOf)];
 
 const items = byId(ITEMS);
 const monsters = byId(MONSTERS);

@@ -31,6 +31,7 @@ export const TEX = {
   zombie_hardened: 'zombie_hardened',
   zombie_worker: 'zombie_worker',
   ogurin: 'ogurin',
+  ogurin_mutant: 'ogurin_mutant',
   // street decor (drawn with bottom origin)
   deco_lamp: 'deco_lamp',
   deco_vending: 'deco_vending',

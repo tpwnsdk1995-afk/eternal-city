@@ -19,6 +19,7 @@ import {
   type AssaultRuntime,
 } from '@core/assault/assaultMachine';
 import { dist } from '@core/math/vec';
+import { advancedMonster } from '@core/assault/advanced';
 import type { AssaultFailReason } from '@data/schema/assault';
 import { BaseWorldScene, type WorldSceneData } from './BaseWorldScene';
 import type { InputIntent } from '../systems/input/InputMapper';
@@ -177,7 +178,8 @@ export class AssaultScene extends BaseWorldScene {
           const sp = this.def.spawnPoints[e.spawnPoint];
           const c = tileCenter(this.def, sp.x, sp.y);
           const jitter = e.tag === 'boss' ? 0 : 20;
-          const en = this.spawnEnemyAt(e.monsterId, c.x + gameRng.range(-jitter, jitter), c.y + gameRng.range(-jitter, jitter));
+          const mdef = this.adef.advanced ? advancedMonster(registry.monster(e.monsterId)) : registry.monster(e.monsterId);
+          const en = this.spawnEnemyAt(e.monsterId, c.x + gameRng.range(-jitter, jitter), c.y + gameRng.range(-jitter, jitter), mdef);
           if (en) {
             en.tag = e.tag;
             // mission spawns hunt: anchor their leash on what they are after (booth or the hunter)

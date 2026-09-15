@@ -90,8 +90,10 @@ export const balance = {
     respawnPoint: 'default',
   },
   assault: {
-    /** M1 testing gate; defs keep their real levelRange. */
-    entryLevelOverride: 3 as number | null,
+    /** Testing gate for the reception desk; null = real levelRange (e2e starts missions through the debug hook). */
+    entryLevelOverride: null as number | null,
+    /** 고급 어설트 scaling */
+    advanced: { levelOffset: 10, rewardMult: 2, hpMult: 1.7, defenseBonus: 8, dmgMult: 1.4, xpMult: 1.6, wonMult: 1.5 },
   },
   loot: {
     /** chance an armor drop rolls a 접두 (checked in order: 전설 first) */

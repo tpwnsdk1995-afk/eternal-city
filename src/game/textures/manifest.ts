@@ -96,6 +96,7 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.zombie_hardened]: figure('zombie_hardened', 56),
   [TEX.zombie_worker]: figure('zombie_worker'),
   [TEX.ogurin]: figure('ogurin', 64),
+  [TEX.ogurin_mutant]: figure('ogurin_mutant'),
 
   [TEX.wito_recon]: figure('wito_recon'),
   [TEX.wito_airborne]: figure('wito_airborne'),

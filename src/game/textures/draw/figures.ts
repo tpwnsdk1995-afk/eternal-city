@@ -24,6 +24,7 @@ export const FIGURE_STYLES = {
   zombie_worker: { skin: ZOMBIE_SKIN, hair: '#3a2a1a', hairStyle: 'cap', shirt: '#3a4a5a', pants: '#2a3440', vest: '#e08a2a', zombie: true, blood: 0.55 } as FigureStyle,
   ogurin: { skin: '#5f7a5a', hair: '#1a2a1a', shirt: '#3a5a3a', pants: '#2a3a2a', zombie: true, blood: 0.8, size: 1.3, glow: 'rgba(80,220,120,0.35)', eyes: '#b6ff6b' } as FigureStyle,
 
+  ogurin_mutant: { skin: '#4a6a5a', hair: '#0a1a0a', shirt: '#2a4a3a', pants: '#1a2a2a', coat: '#123322', zombie: true, blood: 1, size: 1.4, glow: 'rgba(60,255,140,0.45)', eyes: '#d0ff70' } as FigureStyle,
   wito_recon: { skin: '#e3bd95', hair: '#3a3a2a', hairStyle: 'helmet', helmetColor: '#4a5530', shirt: '#5c6b3a', pants: '#4a5530', shoes: '#26281c', gun: 'rifle' } as FigureStyle,
   wito_airborne: { skin: '#e3bd95', hair: '#2a2a2a', hairStyle: 'helmet', helmetColor: '#2f3626', shirt: '#3f4a2f', pants: '#3a4228', shoes: '#1e2016', gun: 'rifle', pack: true } as FigureStyle,
 
