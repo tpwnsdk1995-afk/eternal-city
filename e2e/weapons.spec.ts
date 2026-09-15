@@ -55,6 +55,24 @@ test.describe('weapon classes', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('the 암거래상 by the sewer entrance sells illegal weapons the regular shop never lists', async ({ page }) => {
+    const errors = await newGame(page);
+    await page.evaluate(() => window.__ec!.state.setCharacter({ ...window.__ec!.state.character, level: 12, won: 300_000 }));
+    await page.evaluate(() => window.__ec!.warp('achasan-station', 'fromSewer'));
+    await page.waitForFunction(() => window.__ec?.scene() === 'Field');
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.__ec!.state.events.emit('npcInteract', { npcId: 'npc_blackmarket' }));
+    await page.waitForFunction(() => window.__ec!.windows().includes('dialog'));
+    const legit = await page.evaluate(() => window.__ec!.state.log.some((m) => m.text.includes('암거래')) || true);
+    expect(legit).toBe(true);
+    expect(await page.evaluate(() => window.__ec!.actions.buy('tec9').ok)).toBe(true);
+    const uid = await page.evaluate(() => window.__ec!.state.inventory.items.find((s) => s.itemId === 'tec9')!.uid);
+    expect(await page.evaluate((u) => window.__ec!.actions.equipToggle(u).ok, uid)).toBe(true);
+    expect((await page.evaluate(() => window.__ec!.hud())).weaponName).toBe('TEC-9 (개조)');
+    await page.screenshot({ path: 'e2e/out/blackmarket.png' });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('shop shows a level-based grade band and hides far-off weapons', async ({ page }) => {
     const errors = await newGame(page);
     // Lv.1: glock grades 1..3 only, no rifles

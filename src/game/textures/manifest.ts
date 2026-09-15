@@ -106,6 +106,7 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.npc_kimhun]: figure('npc_kimhun'),
   [TEX.npc_taxi]: figure('npc_taxi'),
   [TEX.npc_tech]: figure('npc_tech'),
+  [TEX.npc_blackmarket]: figure('npc_blackmarket'),
   [TEX.wito_soldier]: figure('wito_soldier'),
 
   [TEX.deco_lamp]: single(drawLamp, 32, 80),

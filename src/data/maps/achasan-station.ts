@@ -88,6 +88,10 @@ export const achasanStation: MapDef = {
     fromSewer: { x: 52, y: 39 },
     taxi: { x: 8, y: 24 },
   },
-  npcs: [{ id: 'npc_taxi', at: { x: 6, y: 24 } }],
+  npcs: [
+    { id: 'npc_taxi', at: { x: 6, y: 24 } },
+    // 하수도 입구 옆 그늘 — 불법무기·철갑탄·Slug
+    { id: 'npc_blackmarket', at: { x: 47, y: 42 } },
+  ],
   safeZone: false,
 };

@@ -30,7 +30,7 @@ export class WindowManager {
   constructor(scene: Phaser.Scene) {
     const inv = new InventoryWindow(scene, GAME_WIDTH - 400 - 12, 40);
     const status = new StatusWindow(scene, 12, 40);
-    const skills = new SkillWindow(scene, (GAME_WIDTH - 620) / 2, 24);
+    const skills = new SkillWindow(scene, (GAME_WIDTH - 620) / 2, 14);
     const shop = new ShopWindow(scene, (GAME_WIDTH - 800) / 2, 50);
     const dialog = new DialogBox(scene, (GAME_WIDTH - 760) / 2, GAME_HEIGHT - HUD_H - 160, 760);
     const result = new ResultWindow(scene, (GAME_WIDTH - 460) / 2, 140);

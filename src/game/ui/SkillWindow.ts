@@ -13,7 +13,7 @@ export class SkillWindow extends Window {
   elia = false;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, 'skills', x, y, 620, 640, '스킬 (K)');
+    super(scene, 'skills', x, y, 620, 690, '스킬 (K)');
     this.refresh();
   }
 
@@ -40,7 +40,7 @@ export class SkillWindow extends Window {
         const rank = learnedRank(s, def.id);
         const active = s.active[def.category] === def.id;
         const dormant = active && def.weaponClass && def.weaponClass !== equippedClass;
-        this.content.add(this.scene.add.rectangle(10, y - 3, this.w - 20, 44, 0xffffff, active ? 0.08 : 0.03).setOrigin(0, 0));
+        this.content.add(this.scene.add.rectangle(10, y - 3, this.w - 20, 41, 0xffffff, active ? 0.08 : 0.03).setOrigin(0, 0));
         this.content.add(this.scene.add.image(16, y + 3, def.iconTex).setOrigin(0, 0).setDisplaySize(32, 32));
         this.label(56, y - 1, def.name, rank ? '#ffffff' : theme.colors.muted, 14, { fontStyle: 'bold' });
         this.label(56 + def.name.length * 14 + 10, y + 2, `${def.weaponClass ? `${def.weaponClass} 전용 · ` : ''}${def.apDrainPerSec ? `행동력 ${def.apDrainPerSec}/s · ` : ''}기술등급 ${def.reqTechGrade}${dormant ? ' · (다른 무기 장착 중)' : ''}`, dormant ? theme.colors.bad : theme.colors.muted, 10);
@@ -60,10 +60,10 @@ export class SkillWindow extends Window {
           bx -= b.width;
           b.setX(bx);
         }
-        y += 48;
+        y += 44;
       }
-      y += 6;
+      y += 4;
     }
-    if (!this.elia) this.label(14, this.h - 62, '습득/랭크업은 광진구청 지하주차장의 EL.IA 기술정보원에게서 할 수 있습니다.', '#6b7280', 11);
+    if (!this.elia) this.label(14, this.h - 54, '습득/랭크업은 광진구청 지하주차장의 EL.IA 기술정보원에게서 할 수 있습니다.', '#6b7280', 11);
   }
 }

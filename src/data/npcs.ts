@@ -82,6 +82,14 @@ export const NPCS: NpcDef[] = [
     lines: ['강화는 운이고 개조는 실력이지. 돈만 있으면 둘 다 해 주마.', '7강 넘긴 총은 유니크 개조를 노려 볼 만해. 실패해도 총은 안 부러져.'],
   },
   {
+    id: 'npc_blackmarket',
+    name: '암거래상',
+    role: 'shop',
+    tex: TEX.npc_blackmarket,
+    lines: ['……경찰서 쪽엔 말하지 마. 개조품은 손맛이 다르지.', '철갑탄이랑 Slug도 있어. 값은 좀 나가.'],
+    stock: ['tec9', 'sawed_off', 'ammo_9mm_ap', 'ammo_45_ap', 'ammo_12ga_slug', 'ammo_556_ap', 'ammo_762_ap'],
+  },
+  {
     id: 'npc_kimhun',
     name: '김훈 소대장',
     role: 'quest',
