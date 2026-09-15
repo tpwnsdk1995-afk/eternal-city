@@ -14,7 +14,7 @@ export const createInventory = (): Inventory => ({ items: [], nextUid: 1 });
  * Adds an item. Ammo boxes and weapons/armor are individual stacks (a box's `qty` is rounds left);
  * consumables merge into an existing stack of the same item.
  */
-export function addItem(inv: Inventory, def: ItemDef, qty = 1, opts: { grade?: number } = {}): Inventory {
+export function addItem(inv: Inventory, def: ItemDef, qty = 1, opts: { grade?: number; prefix?: ItemStack['prefix'] } = {}): Inventory {
   if (def.kind === 'consumable' || def.kind === 'misc') {
     const existing = inv.items.find((s) => s.itemId === def.id);
     if (existing) {
@@ -23,6 +23,7 @@ export function addItem(inv: Inventory, def: ItemDef, qty = 1, opts: { grade?: n
   }
   const stack: ItemStack = { uid: `i${inv.nextUid}`, itemId: def.id, qty };
   if (def.kind === 'weapon') stack.grade = opts.grade ?? def.gradeMin;
+  if (def.kind === 'armor' && opts.prefix) stack.prefix = opts.prefix;
   return { items: [...inv.items, stack], nextUid: inv.nextUid + 1 };
 }
 

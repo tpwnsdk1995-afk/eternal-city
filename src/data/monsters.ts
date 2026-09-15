@@ -39,6 +39,8 @@ export const MONSTERS: MonsterDef[] = [
     drops: [
       { itemId: 'ammo_45_normal', chance: 0.1, qtyMin: 15, qtyMax: 35 },
       { itemId: 'energy_drink', chance: 0.06, qtyMin: 1, qtyMax: 1 },
+      { itemId: 'armor_shoes_sneakers', chance: 0.03, qtyMin: 1, qtyMax: 1 },
+      { itemId: 'armor_hat_cap', chance: 0.03, qtyMin: 1, qtyMax: 1 },
     ],
     wonMin: 60,
     wonMax: 140,
@@ -63,6 +65,8 @@ export const MONSTERS: MonsterDef[] = [
       { itemId: 'ammo_9mm_incendiary', chance: 0.15, qtyMin: 15, qtyMax: 30 },
       { itemId: 'ammo_45_incendiary', chance: 0.1, qtyMin: 10, qtyMax: 25 },
       { itemId: 'bandage', chance: 0.12, qtyMin: 1, qtyMax: 2 },
+      { itemId: 'armor_coat_trench', chance: 0.04, qtyMin: 1, qtyMax: 1 },
+      { itemId: 'armor_shoes_boots', chance: 0.03, qtyMin: 1, qtyMax: 1 },
     ],
     wonMin: 120,
     wonMax: 260,
@@ -87,6 +91,8 @@ export const MONSTERS: MonsterDef[] = [
     xp: 380,
     drops: [
       { itemId: 'armor_bottom_basic', chance: 0.5, qtyMin: 1, qtyMax: 1 },
+      { itemId: 'armor_coat_leather', chance: 0.35, qtyMin: 1, qtyMax: 1 },
+      { itemId: 'armor_hat_helmet', chance: 0.3, qtyMin: 1, qtyMax: 1 },
       { itemId: 'ammo_45_incendiary', chance: 1, qtyMin: 40, qtyMax: 50 },
       { itemId: 'bandage', chance: 1, qtyMin: 2, qtyMax: 3 },
     ],
@@ -229,6 +235,8 @@ export const MONSTERS: MonsterDef[] = [
     drops: [
       { itemId: 'wito_dispatch_doc', chance: 0.35, qtyMin: 1, qtyMax: 1 },
       { itemId: 'ammo_9mm_normal', chance: 0.25, qtyMin: 20, qtyMax: 40 },
+      { itemId: 'armor_hat_helmet', chance: 0.05, qtyMin: 1, qtyMax: 1 },
+      { itemId: 'armor_bottom_police', chance: 0.04, qtyMin: 1, qtyMax: 1 },
     ],
     wonMin: 80,
     wonMax: 180,

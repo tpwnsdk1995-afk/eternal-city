@@ -1,5 +1,7 @@
 import type Phaser from 'phaser';
-import { STAT_KEYS, type StatKey } from '@data/schema/enums';
+import { ARMOR_SLOTS, STAT_KEYS, type StatKey } from '@data/schema/enums';
+import { TEX } from '@data/textureKeys';
+import { armorDefense, armorLabel, weaponLabel } from '@core/tuning/tuning';
 import { registry } from '@data/registry';
 import { statCap, xpToNext } from '@core/stats/levelCurve';
 import { totalWeightKg } from '@core/inventory/weight';
@@ -19,7 +21,7 @@ const STAT_DESC: Record<StatKey, string> = {
 
 export class StatusWindow extends Window {
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, 'status', x, y, 380, 560, '상태 (C)');
+    super(scene, 'status', x, y, 380, 640, '상태 (C)');
     this.refresh();
   }
 
@@ -68,5 +70,46 @@ export class StatusWindow extends Window {
       this.label(this.w - 14, y, val, theme.colors.text, 12).setOrigin(1, 0);
       y += 20;
     }
+
+    // ---- 장비 (무기 + 방어구 6부위): click a slot to unequip
+    y += 6;
+    this.content.add(this.scene.add.rectangle(10, y, this.w - 20, 1, 0x3a3f47).setOrigin(0, 0));
+    y += 8;
+    this.label(14, y, '장비', theme.colors.brass, 12, { fontStyle: 'bold' });
+    y += 18;
+    const eq = gameState.equipment;
+    const slotDefs: { key: string; label: string; uid: string | null }[] = [
+      { key: 'weapon', label: '무기', uid: eq.weaponUid },
+      ...ARMOR_SLOTS.map((slot) => ({ key: slot, label: slot, uid: eq.armor[slot] ?? null })),
+    ];
+    const size = 40;
+    const gap = 9;
+    slotDefs.forEach((sd, i) => {
+      const sx = 14 + i * (size + gap);
+      const frame = this.scene.add.image(sx, y, TEX.ui_slot).setOrigin(0, 0).setDisplaySize(size, size);
+      this.content.add(frame);
+      const stack = sd.uid ? gameState.inventory.items.find((s) => s.uid === sd.uid) : undefined;
+      const def = stack ? registry.item(stack.itemId) : null;
+      if (stack && def && (def.kind === 'weapon' || def.kind === 'armor')) {
+        const icon = this.scene.add.image(sx + 4, y + 4, def.iconTex).setOrigin(0, 0).setDisplaySize(size - 8, size - 8).setInteractive({ useHandCursor: true });
+        icon.on('pointerdown', () => actions.equipToggle(stack.uid));
+        this.content.add(icon);
+        if (def.kind === 'armor') this.label(sx + size - 2, y + size - 13, `${Math.round(armorDefense(def, stack))}`, theme.colors.text, 9, { stroke: '#000', strokeThickness: 2 }).setOrigin(1, 0);
+        if (stack.prefix) this.label(sx + 2, y + 1, stack.prefix === '전설' ? '★' : '◆', stack.prefix === '전설' ? '#ffd166' : '#c9a7ff', 9);
+      } else {
+        this.label(sx + size / 2, y + size / 2, '—', '#4b5563', 12).setOrigin(0.5);
+      }
+      this.label(sx + size / 2, y + size + 2, sd.label, theme.colors.muted, 9).setOrigin(0.5, 0);
+    });
+    y += size + 16;
+    const w = gameState.weapon();
+    const worn = ARMOR_SLOTS.map((slot) => {
+      const uid = eq.armor[slot];
+      const st = uid ? gameState.inventory.items.find((s) => s.uid === uid) : undefined;
+      const d = st ? registry.item(st.itemId) : null;
+      return st && d?.kind === 'armor' ? armorLabel(d, st) : null;
+    }).filter((x): x is string => !!x);
+    this.label(14, y, w ? weaponLabel(w.def, w.stack) : '무기 없음', w ? theme.colors.text : theme.colors.muted, 11);
+    this.label(14, y + 16, worn.length ? worn.join(' · ') : '착용한 방어구 없음', theme.colors.muted, 10, { wordWrap: { width: this.w - 28 } });
   }
 }

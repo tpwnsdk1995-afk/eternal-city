@@ -457,3 +457,59 @@ export function drawBooth(ctx: Ctx, frame: number, w: number, h: number): void {
   }
   if (frame === 2) fill(ctx, 10, 14, 18, 6, '#7a2e2e');
 }
+
+// ---------------------------------------------------------------- armor (M3-6: 코트 · 신발 · 모자 · 가발)
+
+export function drawIconArmorCoat(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  poly(ctx, [[9, 5], [23, 5], [29, 10], [27, 15], [24, 13], [25, 29], [7, 29], [8, 13], [5, 15], [3, 10]], '#3b3f4a'); // long coat
+  poly(ctx, [[13, 5], [16, 12], [19, 5]], '#1f2229'); // lapels
+  fill(ctx, 15.5, 12, 1, 17, '#22252c');
+  fill(ctx, 9, 20, 5, 4, '#2f333c'); // pockets
+  fill(ctx, 18, 20, 5, 4, '#2f333c');
+  fill(ctx, 14, 14, 1, 1, '#c9a227'); // buttons
+  fill(ctx, 14, 18, 1, 1, '#c9a227');
+}
+
+export function drawIconArmorShoes(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  poly(ctx, [[5, 16], [12, 12], [15, 14], [15, 24], [4, 24], [3, 20]], '#3a2a1f'); // left boot
+  poly(ctx, [[17, 16], [24, 12], [27, 14], [29, 20], [28, 24], [17, 24]], '#3a2a1f'); // right boot
+  fill(ctx, 3, 22, 12, 3, '#1a1512'); // soles
+  fill(ctx, 17, 22, 12, 3, '#1a1512');
+  fill(ctx, 11, 13, 2, 8, '#8a6a3a'); // laces
+  fill(ctx, 23, 13, 2, 8, '#8a6a3a');
+}
+
+export function drawIconArmorHat(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.fillStyle = '#2c3a2a';
+  ctx.beginPath();
+  ctx.ellipse(16, 20, 13, 4, 0, 0, Math.PI * 2); // brim
+  ctx.fill();
+  ctx.fillStyle = '#3d4f3a';
+  ctx.beginPath();
+  ctx.ellipse(16, 14, 8, 6, 0, Math.PI, 0); // dome
+  ctx.fill();
+  fill(ctx, 8, 14, 16, 5, '#3d4f3a');
+  fill(ctx, 8, 17, 16, 2, '#1f2a1e'); // band
+}
+
+export function drawIconArmorWig(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.fillStyle = '#5a3a8a';
+  ctx.beginPath();
+  ctx.ellipse(16, 13, 9, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  poly(ctx, [[7, 13], [6, 27], [11, 26], [11, 15]], '#5a3a8a'); // side locks
+  poly(ctx, [[25, 13], [26, 27], [21, 26], [21, 15]], '#5a3a8a');
+  fill(ctx, 11, 15, 10, 9, '#f1c9a5'); // face gap
+  fill(ctx, 9, 8, 14, 2, 'rgba(255,255,255,0.25)'); // sheen
+}
+
+export function drawIconSkillActive(ctx: Ctx, _f: number, w: number, h: number): void {
+  fill(ctx, 0, 0, w, h, '#1d2126');
+  fill(ctx, 1, 1, w - 2, h - 2, '#262b33');
+  poly(ctx, [[18, 3], [8, 18], [15, 18], [13, 29], [24, 13], [17, 13]], '#3b7bc2'); // lightning bolt (행동력)
+  poly(ctx, [[18, 3], [8, 18], [15, 18], [15, 15], [12, 15]], 'rgba(255,255,255,0.25)');
+}

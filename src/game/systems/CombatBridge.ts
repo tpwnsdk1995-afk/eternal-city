@@ -23,6 +23,7 @@ import { thinkEnemy, type BrainAction, type Perception } from '@core/ai/enemyBra
 import { applyXp, xpForKill } from '@core/world/xp';
 import { applyDeathPenalty } from '@core/world/death';
 import { rollLoot } from '@core/world/loot';
+import { drainAp } from '@core/skills/skillState';
 import { gameState } from '../state/GameState';
 import { questService } from '../state/questService';
 import { Enemy } from '../entities/Enemy';
@@ -98,6 +99,7 @@ export class CombatBridge {
     }
     if (intent.fireHeld && player.canFire) this.playerFire(now, intent.aimWorld);
     this.updateProjectiles(dtMs, now);
+    this.drainActiveSkill(dtMs);
 
     // enemies — far ones (off-screen) think at a lower rate to keep big fields cheap
     const grid = this.host.built.collision;
@@ -144,6 +146,18 @@ export class CombatBridge {
       gameState.status = r.state;
       if (r.damage > 0) this.hurtPlayerFinal(r.damage, now);
     }
+  }
+
+  /** 퍼스널 액티브 skills burn 행동력 while on; they switch off when it runs dry. */
+  private drainActiveSkill(dtMs: number): void {
+    const activeId = gameState.skills.active['퍼스널액티브'];
+    if (!activeId) return;
+    const r = drainAp(gameState.skills, registry.skill, gameState.vitals.ap, dtMs);
+    if (r.state !== gameState.skills) {
+      gameState.setSkills(r.state);
+      gameState.message(`${registry.skill(activeId).name} 해제 — 행동력이 바닥났습니다.`, 'bad');
+    }
+    gameState.setVitals({ ap: r.ap });
   }
 
   aliveEnemies(): Enemy[] {
@@ -362,10 +376,10 @@ export class CombatBridge {
   }
 
   private dropLoot(def: MonsterDef, at: Vec2): void {
-    const loot = rollLoot(def, gameRng);
+    const loot = rollLoot(def, gameRng, registry.item);
     const drops: Pickup[] = [];
     if (loot.won > 0) drops.push(new Pickup(this.host.scene, at.x, at.y, { kind: 'won', amount: loot.won }));
-    for (const it of loot.items) drops.push(new Pickup(this.host.scene, at.x, at.y, { kind: 'item', itemId: it.itemId, qty: it.qty }));
+    for (const it of loot.items) drops.push(new Pickup(this.host.scene, at.x, at.y, { kind: 'item', itemId: it.itemId, qty: it.qty, prefix: it.prefix }));
     drops.forEach((p, i) => {
       const a = (i / Math.max(1, drops.length)) * Math.PI * 2 + gameRng.range(0, 1);
       const r = drops.length > 1 ? 14 + gameRng.range(0, 8) : 0;
@@ -382,12 +396,12 @@ export class CombatBridge {
       this.floating.spawn(this.host.player.x, this.host.player.y - 16, `+₩${pay.amount}`, '#c9a227', 12);
     } else {
       const def = registry.item(pay.itemId);
-      const next = addItem(gameState.inventory, def, pay.qty);
+      const next = addItem(gameState.inventory, def, pay.qty, { prefix: pay.prefix });
       if (totalWeightKg(next, registry.item) > gameState.derived().maxWeightKg) {
         return this.throttled('overweight', '무게 초과 — 더 이상 들 수 없습니다.', 'bad');
       }
       gameState.setInventory(next);
-      gameState.message(`획득: ${def.name}${pay.qty > 1 ? ` ×${pay.qty}` : ''}`, def.kind === 'misc' && def.quest ? 'system' : 'good');
+      gameState.message(`획득: ${pay.prefix ? `${pay.prefix} ` : ''}${def.name}${pay.qty > 1 ? ` ×${pay.qty}` : ''}`, pay.prefix ? 'system' : def.kind === 'misc' && def.quest ? 'system' : 'good');
       questService.syncCollect(def.id);
     }
     p.destroy();

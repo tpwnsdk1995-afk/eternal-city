@@ -93,6 +93,10 @@ export const balance = {
     /** M1 testing gate; defs keep their real levelRange. */
     entryLevelOverride: 3 as number | null,
   },
+  loot: {
+    /** chance an armor drop rolls a 접두 (checked in order: 전설 first) */
+    prefixChance: { 전설: 0.03, 고대: 0.1 } as Record<'고대' | '전설', number>,
+  },
   tuning: {
     /** chance (%) that +n → +n+1 succeeds, n = 0..8 */
     enhanceSuccessPct: [50, 45, 40, 35, 30, 25, 20, 15, 10] as readonly number[],
