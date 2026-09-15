@@ -196,7 +196,7 @@ export class AssaultScene extends BaseWorldScene {
           const cells = openGate(this.built, gate);
           refreshTiles(this.tilemap, this.built, cells);
           this.cameras.main.shake(200, 0.004);
-          gameState.message('봉쇄선 게이트가 열렸습니다! 동쪽으로 전진하세요.', 'good');
+          gameState.message('길이 열렸습니다! 전진하세요.', 'good');
           break;
         }
         case 'success':
@@ -218,7 +218,7 @@ export class AssaultScene extends BaseWorldScene {
     const r = onObjectiveDestroyed(this.rt, id, this.def, this.destroyedObjectives);
     this.destroyedObjectives.add(id);
     this.rt = r.rt;
-    gameState.message('바리케이드 파괴!', 'good');
+    gameState.message(`${this.def.objectives?.find((o) => o.id === id)?.label ?? '바리케이드'} 파괴!`, 'good');
     this.handle(r.events);
   }
 

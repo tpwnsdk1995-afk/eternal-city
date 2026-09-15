@@ -36,6 +36,9 @@ export const FIGURE_STYLES = {
   larva: { skin: '#e0d0a0', hair: '#000', shirt: '#9a8a5a', pants: '#7a6a44', quadruped: true, zombie: true, blood: 0.5, eyes: '#ff8030', size: 0.8, glow: 'rgba(255,200,80,0.18)' } as FigureStyle,
   wito_elite_trooper: { skin: '#e3bd95', hair: '#1a1a1a', hairStyle: 'helmet', helmetColor: '#252a36', shirt: '#2f3644', pants: '#252b38', shoes: '#111', gun: 'rifle', pack: true, vest: '#3d4a66' } as FigureStyle,
   mongolian_deathworm: { skin: '#c9a27a', hair: '#000', shirt: '#6a3a4a', pants: '#4a2a34', quadruped: true, zombie: true, blood: 0.6, eyes: '#ff3030', size: 2.6, glow: 'rgba(200,60,80,0.35)' } as FigureStyle,
+  guest_scout: { skin: '#b8c4d8', hair: '#8090b0', hairStyle: 'bald', shirt: '#2a3550', pants: '#1c2440', shoes: '#111', eyes: '#00e5ff', glow: 'rgba(0,229,255,0.35)', size: 0.95 } as FigureStyle,
+  guest_warrior: { skin: '#9aa8c4', hair: '#6070a0', hairStyle: 'helmet', helmetColor: '#3a4a7a', shirt: '#2a3550', pants: '#1c2440', shoes: '#111', gun: 'rifle', vest: '#4a5a9a', eyes: '#00e5ff', glow: 'rgba(0,229,255,0.3)', size: 1.1 } as FigureStyle,
+  parasite_root: { skin: '#5a2a4a', hair: '#000', shirt: '#7a2a5a', pants: '#3a1030', quadruped: true, zombie: true, blood: 1, eyes: '#ff2050', size: 2.8, glow: 'rgba(255,40,120,0.4)' } as FigureStyle,
   wito_recon: { skin: '#e3bd95', hair: '#3a3a2a', hairStyle: 'helmet', helmetColor: '#4a5530', shirt: '#5c6b3a', pants: '#4a5530', shoes: '#26281c', gun: 'rifle' } as FigureStyle,
   wito_airborne: { skin: '#e3bd95', hair: '#2a2a2a', hairStyle: 'helmet', helmetColor: '#2f3626', shirt: '#3f4a2f', pants: '#3a4228', shoes: '#1e2016', gun: 'rifle', pack: true } as FigureStyle,
 

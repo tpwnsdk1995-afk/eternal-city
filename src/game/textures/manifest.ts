@@ -4,6 +4,7 @@ import { FIGURE_STYLES, figureDrawer, drawPortrait, type FigureKey } from './dra
 import { WALK_FRAMES } from '../systems/facing';
 import {
   drawBarricade,
+  drawRootNode,
   drawBooth,
   drawCasing,
   drawGate,
@@ -119,6 +120,10 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.larva]: figure('larva'),
   [TEX.wito_elite_trooper]: figure('wito_elite_trooper'),
   [TEX.mongolian_deathworm]: figure('mongolian_deathworm', 96),
+  [TEX.guest_scout]: figure('guest_scout'),
+  [TEX.guest_warrior]: figure('guest_warrior'),
+  [TEX.parasite_root]: figure('parasite_root', 96),
+  [TEX.root_node]: single(drawRootNode, 64),
 
   [TEX.wito_recon]: figure('wito_recon'),
   [TEX.wito_airborne]: figure('wito_airborne'),

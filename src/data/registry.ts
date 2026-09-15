@@ -29,10 +29,12 @@ import { jongnoStreet } from './maps/jongno-street';
 import { technomartShelter } from './maps/technomart-shelter';
 import { technomartBridge } from './maps/technomart-bridge';
 import { uijeongbu } from './maps/uijeongbu';
+import { parasiteNest } from './maps/parasite-nest';
 import { YEARS } from './years';
 import { assaultA } from './assaults/assault-a';
 import { assaultB } from './assaults/assault-b';
 import { assaultC } from './assaults/assault-c';
+import { assaultD } from './assaults/assault-d';
 import { advancedOf } from '@core/assault/advanced';
 import { CAMPAIGNS } from './campaigns';
 import { ACHIEVEMENTS } from './achievements';
@@ -44,8 +46,8 @@ import { isMeleeClass } from './schema/enums';
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
 export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES, ...MISC];
-export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense, sewerDepths, jongnoShelter, jongnoStreet, technomartShelter, technomartBridge, uijeongbu];
-const BASE_ASSAULTS: AssaultDef[] = [assaultA, assaultB, assaultC];
+export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense, sewerDepths, jongnoShelter, jongnoStreet, technomartShelter, technomartBridge, uijeongbu, parasiteNest];
+const BASE_ASSAULTS: AssaultDef[] = [assaultA, assaultB, assaultC, assaultD];
 /** every mission plus its 고급 variant */
 export const ASSAULTS: AssaultDef[] = [...BASE_ASSAULTS, ...BASE_ASSAULTS.map(advancedOf)];
 

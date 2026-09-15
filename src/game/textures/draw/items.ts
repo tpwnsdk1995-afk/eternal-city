@@ -665,3 +665,33 @@ export function drawIconBone(ctx: Ctx, _f: number, w: number, h: number): void {
   fill(ctx, -15, -3, 4, 6, '#7a6a5a'); // knuckle grip
   ctx.restore();
 }
+
+/** 패러사이트 뿌리 기물: pulsing organic mass with tendrils, 2×2 tiles. */
+export function drawRootNode(ctx: Ctx, _f: number, w: number, h: number): void {
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(w / 2, h - 8, w * 0.42, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#5a2a4a';
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(w / 2, h * 0.6);
+    ctx.quadraticCurveTo(w / 2 + Math.cos(a) * 18, h * 0.6 + Math.sin(a) * 12, w / 2 + Math.cos(a) * 30, h * 0.6 + Math.sin(a) * 20);
+    ctx.stroke();
+  }
+  const g = ctx.createRadialGradient(w / 2, h * 0.5, 3, w / 2, h * 0.5, 22);
+  g.addColorStop(0, '#ff5a9a');
+  g.addColorStop(0.5, '#8a2a5a');
+  g.addColorStop(1, '#3a1030');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.ellipse(w / 2, h * 0.5, 20, 24, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.beginPath();
+  ctx.ellipse(w / 2 - 6, h * 0.4, 5, 8, -0.4, 0, Math.PI * 2);
+  ctx.fill();
+}

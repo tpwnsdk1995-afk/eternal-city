@@ -45,6 +45,10 @@ export const TEX = {
   larva: 'larva',
   wito_elite_trooper: 'wito_elite_trooper',
   mongolian_deathworm: 'mongolian_deathworm',
+  guest_scout: 'guest_scout',
+  guest_warrior: 'guest_warrior',
+  parasite_root: 'parasite_root',
+  root_node: 'root_node',
   // street decor (drawn with bottom origin)
   deco_lamp: 'deco_lamp',
   deco_vending: 'deco_vending',

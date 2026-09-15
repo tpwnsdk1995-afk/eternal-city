@@ -11,6 +11,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'ach_elite_guard', name: '엘리트 격파', desc: '위토 엘리트 가드를 처치한다.', cond: { kind: 'killMonster', monsterId: 'wito_elite_guard', count: 1 }, reward: { won: 10_000, xp: 800 } },
   { id: 'ach_mutant', name: '변종 사냥', desc: '변종 오구린을 처치한다.', cond: { kind: 'killMonster', monsterId: 'ogurin_mutant', count: 1 }, reward: { won: 20_000, xp: 2_000, title: '심층 정복자' } },
   { id: 'ach_deathworm', name: '웜 슬레이어', desc: '의정부의 레이드 보스 몽골리안 데스웜을 처치한다.', cond: { kind: 'killMonster', monsterId: 'mongolian_deathworm', count: 1 }, reward: { won: 100_000, xp: 8_000, title: '웜 슬레이어' } },
+  { id: 'ach_parasite', name: '근절', desc: '패러사이트 루트를 제거한다.', cond: { kind: 'killMonster', monsterId: 'parasite_root', count: 1 }, reward: { won: 150_000, xp: 10_000, title: '근절자' } },
   { id: 'ach_boss_10', name: '보스 헌터', desc: '보스급 적을 10회 처치한다.', cond: { kind: 'bossKills', count: 10 }, reward: { won: 30_000, xp: 2_500, title: '보스 헌터' } },
   { id: 'ach_assault_first', name: '첫 작전', desc: '어설트를 처음 성공한다.', cond: { kind: 'assaultClears', count: 1 }, reward: { won: 2_000, xp: 200 } },
   { id: 'ach_assault_10', name: '베테랑', desc: '어설트를 10회 성공한다.', cond: { kind: 'assaultClears', count: 10 }, reward: { won: 25_000, xp: 2_000, title: '베테랑' } },
