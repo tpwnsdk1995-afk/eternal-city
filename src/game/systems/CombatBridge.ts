@@ -14,6 +14,7 @@ import { rollConsciousness } from '@core/combat/consciousness';
 import { enemyHitChance, playerDamageTaken } from '@core/combat/enemyAttack';
 import { markFired, toggleSubFire, tryFire } from '@core/weapons/fireController';
 import { fireProfile, subFireParams } from '@core/weapons/weaponMath';
+import { audio } from '../audio/AudioManager';
 import { targetsInArc } from '@core/combat/meleeArc';
 import type { WeaponDef } from '@data/schema/item';
 import { isMeleeClass } from '@data/schema/enums';
@@ -198,6 +199,7 @@ export class CombatBridge {
     const eff = w.eff.def; // 강화/부품/유니크 folded in
     const attempt = tryFire(gameState.fire, now, eff, d.attackSpeedMult, gameState.inventory, registry.item);
     if (!attempt.ok) {
+      if (attempt.reason === 'noAmmo' || attempt.reason === 'incompatibleAmmo') audio.play('no_ammo');
       if (attempt.reason === 'noAmmo') this.throttled('noAmmo', `탄약이 없습니다 (${w.def.caliber} ${gameState.fire.ammoKind})`, 'bad');
       else if (attempt.reason === 'incompatibleAmmo') this.throttled('incompat', `${w.def.name}에는 ${gameState.fire.ammoKind}을 사용할 수 없습니다.`, 'bad');
       return;
@@ -243,9 +245,13 @@ export class CombatBridge {
       crouching: player.crouching,
     };
 
-    if (eff.projectile) return this.launchProjectile(eff, origin, baseAngle, aim, ctx); // 산성 토사 is a 변이무기 that lobs
+    if (eff.projectile) {
+      audio.gunshot(w.def.class === '변이무기' ? '변이무기' : '투척중화기', false);
+      return this.launchProjectile(eff, origin, baseAngle, aim, ctx); // 산성 토사 is a 변이무기 that lobs
+    }
     if (melee) return this.meleeSwing(eff.range, origin, baseAngle, targets, byUid, objById, ctx, now);
 
+    audio.gunshot(w.def.class, gameState.fire.subFire);
     this.fx.muzzle(muzzle, baseAngle);
     if (w.def.caliber !== 'none') this.fx.casing({ x: origin.x + Math.cos(baseAngle) * 6, y: origin.y + Math.sin(baseAngle) * 6 }, baseAngle);
     this.host.scene.cameras.main.shake(40, w.def.class === '기관총' || w.def.class === '산탄총' ? 0.003 : 0.0012);
@@ -273,6 +279,7 @@ export class CombatBridge {
         continue;
       }
       this.fx.blood(hit.point);
+      if (res.crit) audio.play('hit_crit');
       this.floating.spawn(e.x, e.y, `${res.damage}`, res.crit ? '#ffe066' : '#ffffff', res.crit ? 16 : 13, res.crit);
       if (res.appliesBurn) {
         e.status = applyBurn(e.status, now);
@@ -383,6 +390,7 @@ export class CombatBridge {
 
   killEnemy(e: Enemy, now: number): void {
     e.kill();
+    audio.at('enemy_die', e.x, e.y);
     this.fx.blood({ x: e.x, y: e.y + 8 }, 1.6 * (e.def.scale ?? 1));
     const xp = Math.round(xpForKill(e.def, gameState.character.level) * gameState.xpMult());
     const r = applyXp(gameState.character, xp);
@@ -393,6 +401,7 @@ export class CombatBridge {
       gameState.setVitals({ hp: d.maxHp, stamina: d.maxStamina, ap: d.maxAp });
       gameState.message(`레벨 업! Lv.${r.character.level}  (+${r.pointsGained} 스탯 포인트 — C키 상태창에서 배분)`, 'good');
       this.floating.spawn(this.host.player.x, this.host.player.y - 10, 'LEVEL UP', '#7bd88f', 18, true);
+      audio.play('level_up');
     }
     this.dropLoot(e.def, e.pos);
     questService.onKill(e.def);
@@ -421,6 +430,7 @@ export class CombatBridge {
       const amount = Math.round(pay.amount * gameState.wonMult());
       gameState.setCharacter({ ...gameState.character, won: gameState.character.won + amount });
       progressService.recordWon(amount);
+      audio.play('pickup_won');
       this.floating.spawn(this.host.player.x, this.host.player.y - 16, `+₩${amount}`, '#c9a227', 12);
     } else {
       const def = registry.item(pay.itemId);
@@ -430,6 +440,7 @@ export class CombatBridge {
       }
       gameState.setInventory(next);
       gameState.message(`획득: ${pay.prefix ? `${pay.prefix} ` : ''}${def.name}${pay.qty > 1 ? ` ×${pay.qty}` : ''}`, pay.prefix ? 'system' : def.kind === 'misc' && def.quest ? 'system' : 'good');
+      audio.play('pickup_item');
       questService.syncCollect(def.id);
     }
     p.destroy();
@@ -453,6 +464,7 @@ export class CombatBridge {
       case 'shoot': {
         const R = e.def.ranged;
         if (!R) return;
+        audio.at('enemy_shot', e.x, e.y);
         const d = dist(e.pos, player.pos);
         const chance = enemyHitChance(R.accuracy, d, R.range, player.moving);
         const willHit = gameRng.chance(chance);
@@ -560,6 +572,7 @@ export class CombatBridge {
     const { player } = this.host;
     let hp = gameState.vitals.hp - dmg;
     this.fx.hitFlash(player);
+    audio.play('player_hurt');
     this.floating.spawn(player.x, player.y, `-${dmg}`, '#ff6b6b', 13);
     if (hp <= 0) {
       const roll = rollConsciousness(gameState.derived().consciousnessChance, gameState.consciousness, now, gameRng);
@@ -568,6 +581,7 @@ export class CombatBridge {
         gameState.status = { ...gameState.status, invulnUntil: roll.invulnUntil };
         hp = 1;
         gameState.message('의식 회복! 잠시 무적 상태입니다.', 'good');
+        audio.play('consciousness');
         this.floating.spawn(player.x, player.y - 14, '의식 회복', '#7bd88f', 15, true);
       } else {
         gameState.setVitals({ hp: 0 });
@@ -578,6 +592,7 @@ export class CombatBridge {
   }
 
   private playerDied(): void {
+    audio.play('player_die');
     this.playerDead = true;
     const before = gameState.character.won;
     gameState.setCharacter(applyDeathPenalty(gameState.character));

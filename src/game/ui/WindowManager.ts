@@ -21,6 +21,7 @@ import { SkillWindow } from './SkillWindow';
 import { ShopWindow } from './ShopWindow';
 import { DialogBox } from './DialogBox';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
+import { audio } from '../audio/AudioManager';
 
 export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu' | 'quest' | 'taxi' | 'tuning' | 'assault' | 'parallel';
 
@@ -68,6 +69,7 @@ export class WindowManager {
 
   open(key: WindowKey): void {
     const w = this.windows.get(key)!;
+    if (!this.isOpen(key)) audio.play('ui_open');
     w.refresh();
     w.setVisible(true);
     this.order = [...this.order.filter((k) => k !== key), key];
@@ -77,6 +79,7 @@ export class WindowManager {
 
   close(key: WindowKey): void {
     const w = this.windows.get(key)!;
+    if (this.isOpen(key)) audio.play('ui_close');
     w.setVisible(false);
     this.order = this.order.filter((k) => k !== key);
     if (key === 'skills') (w as SkillWindow).setElia(false);

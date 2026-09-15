@@ -20,6 +20,8 @@ import { questService } from '../state/questService';
 import { progressService } from '../state/progressService';
 import { hubForYear } from '@core/world/parallel';
 import { theme } from '../ui/theme';
+import { audio } from '../audio/AudioManager';
+import { ambientForMap } from '@core/audio/sfx';
 
 /** World camera zoom: 32px tiles render at 48px, so characters read like the original's ~50px sprites. */
 export const WORLD_ZOOM = 1.5;
@@ -155,6 +157,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     gameState.events.emit('mapChanged', { mapId: this.mapId, name: this.def.name, minimap: gameState.minimap });
 
     questService.onReach(this.mapId);
+    audio.ambient(ambientForMap({ safe: this.scene.key === 'SafeZone', dark: this.def.dark }));
     this.onCreateWorld();
   }
 

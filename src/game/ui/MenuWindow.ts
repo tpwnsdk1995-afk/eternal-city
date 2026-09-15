@@ -10,7 +10,7 @@ import { theme } from './theme';
 /** Esc menu: control scheme, FPS overlay, manual save, back to title. */
 export class MenuWindow extends Window {
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, 'menu', x, y, 440, 600, '메뉴 (Esc)');
+    super(scene, 'menu', x, y, 440, 634, '메뉴 (Esc)');
   }
 
   refresh(): void {
@@ -40,6 +40,14 @@ export class MenuWindow extends Window {
       y += 6;
     }
     this.button(20, y, `FPS 표시: ${s.showFps ? '켬' : '끔'}`, () => gameState.setSettings({ showFps: !s.showFps }), theme.colors.brass, 13);
+    y += 34;
+    // sound
+    const vol = Math.round(s.soundVolume * 100);
+    this.button(20, y, `효과음: ${s.sfxOn ? '켬' : '끔'}`, () => gameState.setSettings({ sfxOn: !s.sfxOn }), s.sfxOn ? theme.colors.good : theme.colors.muted, 13);
+    this.button(120, y, `환경음: ${s.ambientOn ? '켬' : '끔'}`, () => gameState.setSettings({ ambientOn: !s.ambientOn }), s.ambientOn ? theme.colors.good : theme.colors.muted, 13);
+    this.button(222, y, '−', () => gameState.setSettings({ soundVolume: Math.max(0, Math.round((s.soundVolume - 0.1) * 10) / 10) }), theme.colors.brass, 13);
+    this.label(252, y + 3, `볼륨 ${vol}%`, theme.colors.text, 12);
+    this.button(330, y, '+', () => gameState.setSettings({ soundVolume: Math.min(1, Math.round((s.soundVolume + 0.1) * 10) / 10) }), theme.colors.brass, 13);
     y += 40;
     this.button(20, y, '지금 저장', () => void saveService.save().then(() => gameState.message('저장했습니다.', 'good')), theme.colors.good, 13);
     this.button(130, y, '타이틀로 (저장 후)', () => gameState.events.emit('goTitle', undefined), theme.colors.bad, 13);

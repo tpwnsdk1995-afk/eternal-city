@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { ANIM, TEX } from '@data/textureKeys';
 import type { Vec2 } from '@core/math/vec';
+import { audio } from '../audio/AudioManager';
+import { gameState } from '../state/GameState';
 
 const DECAL_CAP = 70;
 
@@ -50,6 +52,7 @@ export class CombatFx {
   }
 
   blood(at: Vec2, scale = 1): void {
+    audio.at('hit_flesh', at.x, at.y);
     const img = this.scene.add
       .image(at.x, at.y, TEX.blood)
       .setDepth(3)
@@ -71,6 +74,7 @@ export class CombatFx {
 
   /** Melee swing arc that fades quickly. */
   swing(origin: Vec2, angle: number, range: number): void {
+    audio.gunshot(gameState.weapon()?.def.class ?? '근접무기', gameState.fire.subFire);
     const g = this.scene.add.graphics().setDepth(12);
     g.lineStyle(3, 0xf3f4f6, 0.85);
     g.beginPath();
@@ -84,6 +88,7 @@ export class CombatFx {
   }
 
   spark(at: Vec2): void {
+    audio.at('hit_wall', at.x, at.y);
     const img = this.scene.add.image(at.x, at.y, TEX.muzzle).setDepth(12).setScale(0.5).setTint(0xffe9a8).setBlendMode(Phaser.BlendModes.ADD);
     this.scene.tweens.add({ targets: img, alpha: 0, scale: 0.1, duration: 90, onComplete: () => img.destroy() });
   }
@@ -96,6 +101,7 @@ export class CombatFx {
 
   /** Launcher blast: animated fireball sized to the AoE radius, a fading ring and a scorch decal. */
   explosion(at: Vec2, radius: number): void {
+    audio.at('explode', at.x, at.y);
     const scorch = this.scene.add.image(at.x, at.y, TEX.scorch).setDepth(3).setDisplaySize(radius * 1.6, radius * 1.6).setRotation(Math.random() * Math.PI * 2);
     this.decals.push(scorch);
     if (this.decals.length > DECAL_CAP) this.decals.shift()?.destroy();

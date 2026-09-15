@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { TEX } from '@data/textureKeys';
 import { DIR_S, depthForY, dirFromAngle, figureFrame, type Dir } from '../systems/facing';
+import { audio } from '../audio/AudioManager';
 import { balance } from '@data/balance';
 import type { ControlScheme } from '@data/schema/enums';
 import type { Vec2 } from '@core/math/vec';
@@ -82,6 +83,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (intent.jumpPressed && !this.jumping && vit.stamina >= balance.stamina.jumpCost) {
       this.jumping = true;
       this.jumpT = 0;
+      audio.play('jump');
       this.crouching = false;
       gameState.setVitals({ stamina: vit.stamina - balance.stamina.jumpCost });
     }

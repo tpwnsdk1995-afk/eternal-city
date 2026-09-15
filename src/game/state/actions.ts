@@ -20,6 +20,7 @@ import { canTravel, yearDef } from '@core/world/parallel';
 import { canRebirth, rebirth } from '@core/stats/rebirth';
 import { balance } from '@data/balance';
 import { applyBuff, formatRemaining } from '@core/combat/buffs';
+import { audio } from '../audio/AudioManager';
 
 export interface ActionResult {
   ok: boolean;
@@ -91,6 +92,7 @@ export const actions = {
       return done(`${b.name} 적용 — ${b.desc} (${formatRemaining(b.durationMs)})`, 'good');
     }
     gameState.setInventory(removeQty(gameState.inventory, uid, 1));
+    audio.play('heal');
     return done(`${def.name} 사용`, 'good');
   },
 
@@ -188,6 +190,7 @@ export const actions = {
     }
     gameState.setCharacter({ ...gameState.character, won: r.won });
     gameState.message(`택시 이동: ${to.name} (₩${r.cost.toLocaleString('ko-KR')})`, 'system');
+    audio.play('travel');
     gameState.events.emit('travel', { mapId: to.id, spawn: 'taxi' });
     return { ok: true };
   },
@@ -209,6 +212,7 @@ export const actions = {
     gameState.setInventory(replaceStack(gameState.inventory, r.stack));
     gameState.setEquipment({ ...gameState.equipment }); // HUD/label refresh
     if (r.success) progressService.recordEnhance(r.stack.enhance ?? 0);
+    audio.play(r.success ? 'enhance_ok' : 'enhance_fail');
     return r.success ? done(`강화 성공! ${weaponLabel(def, r.stack)}`, 'good') : fail(`강화 실패… ${weaponLabel(def, r.stack)} (−₩${r.cost.toLocaleString('ko-KR')})`);
   },
 

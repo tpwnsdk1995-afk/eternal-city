@@ -16,6 +16,9 @@ export interface SaveSettings {
   showFps: boolean;
   showMinimap?: boolean;
   touchControls?: 'auto' | 'on' | 'off';
+  soundVolume?: number;
+  sfxOn?: boolean;
+  ambientOn?: boolean;
 }
 
 interface SaveCommon {

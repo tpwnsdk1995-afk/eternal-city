@@ -30,6 +30,7 @@ import { Objective } from '../entities/Objective';
 import type { Enemy } from '../entities/Enemy';
 import { gameState, type AssaultResult } from '../state/GameState';
 import { progressService } from '../state/progressService';
+import { audio } from '../audio/AudioManager';
 
 const BANNER_INTERVAL_MS = 150;
 const SUCCESS_LINGER_MS = 6000;
@@ -266,6 +267,7 @@ export class AssaultScene extends BaseWorldScene {
     }
     progressService.recordAssault(this.assaultId, success);
     if (success) progressService.recordWon(result.won);
+    audio.play(success ? 'assault_success' : 'assault_fail');
     gameState.events.emit('assaultResult', result);
     gameState.events.emit('assault', null);
   }

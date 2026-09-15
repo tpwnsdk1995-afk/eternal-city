@@ -8,6 +8,7 @@ import { addItem, countItem, removeItemQty } from '@core/inventory/inventory';
 import { applyXp } from '@core/world/xp';
 import { gameState } from './GameState';
 import type { ActionResult } from './actions';
+import { audio } from '../audio/AudioManager';
 
 function announce(changed: { questId: string; stepIndex: number }[]): void {
   for (const c of changed) {
@@ -77,6 +78,7 @@ export const questService = {
     gameState.setQuests(complete(gameState.quests, def));
     const rewardText = [`₩${def.rewards.won.toLocaleString('ko-KR')}`, `${def.rewards.xp} XP`, ...[...(def.rewards.items ?? []), ...rolled].map((i) => `${registry.item(i.itemId).name} ×${i.qty}`)].join(' · ');
     gameState.message(`[퀘스트 완료] ${def.name} — ${rewardText}`, 'good');
+    audio.play('quest_done');
     if (def.rewards.flags?.includes('parallelPermit')) gameState.message('패러렐 시스템 허가증을 획득했습니다!', 'good');
     if (rolled.some((r) => registry.item(r.itemId).kind === 'armor' && (registry.item(r.itemId) as { cl?: boolean }).cl)) gameState.message('CL 등급 장비를 획득했습니다!', 'good');
     progressService.recordWon(def.rewards.won);

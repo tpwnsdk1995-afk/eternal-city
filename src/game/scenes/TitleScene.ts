@@ -4,6 +4,7 @@ import { TEX } from '@data/textureKeys';
 import { gameState } from '../state/GameState';
 import { saveService } from '../state/SaveService';
 import { cloudSave } from '../state/CloudSave';
+import { audio } from '../audio/AudioManager';
 import { migrateSave } from '@core/save/saveSchema';
 import type { SaveRow } from '../state/db';
 import { theme } from '../ui/theme';
@@ -25,6 +26,7 @@ export class TitleScene extends Phaser.Scene {
 
   create(): void {
     this.busy = false;
+    audio.ambient('rain');
     this.add.image(0, 0, TEX.title_bg).setOrigin(0, 0);
     this.rain = new Rain(this, GAME_WIDTH, GAME_HEIGHT);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.rain.destroy());
