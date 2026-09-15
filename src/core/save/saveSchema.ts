@@ -20,6 +20,9 @@ export interface SaveSettings {
   soundVolume?: number;
   sfxOn?: boolean;
   ambientOn?: boolean;
+  bgmOn?: boolean;
+  bgmVolume?: number;
+  uiScale?: number;
 }
 
 interface SaveCommon {

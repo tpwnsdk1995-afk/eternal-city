@@ -128,6 +128,8 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 - **고레벨 방어구 2세트**: 강남 전술 세트(Lv.55, 상의/하의/코트/신발/모자 + CL 상의·코트)와 서울 특무 세트(Lv.85, 동일 구성). 무기상 재고에 추가되며 레벨 미달이면 잠금 표시
 - **스킬 4종 추가**: 퍼스널 패시브 강철 피부(방어 +3%/랭크)·집중력(행동력 +5%, 치명 +0.5%), 퍼스널 액티브 아드레날린(이동 +4%·공속 +2%, AP 3/s)·철벽(방어 +5%·생명 +1%, AP 4/s)
 - **알파 훈련장(튜토리얼)**: 캐릭터 생성 화면에서 `T`로 켜면 훈련장에서 시작. 교관 한지민의 첫 퀘스트(좀비견 3마리)와 조작 안내 대사, 램프로 광진구청 지하주차장 진입
+- **배경음악(합성)**: 씬별 무드 5종(타이틀 비 · 안전지역 · 필드 · 어설트 · 보스)을 4마디 코드 루프 + 베이스 + 아르페지오 + 16스텝 드럼으로 실시간 합성. 어설트 중 보스 체력바가 뜨면 보스 무드로 전환. Esc 메뉴에서 BGM 켬/끔·볼륨
+- **글자 크기 옵션**(Esc 메뉴: 보통/크게) — 창을 다시 열면 적용. 성능 e2e(`perf.spec.ts`, 200마리 스폰 평균 FPS 기록)
 
 ## 다음 단계
 
@@ -139,7 +141,7 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 src/core/   순수 TS 게임 규칙 (Phaser 금지, 전부 유닛 테스트)  stats · combat · weapons · tuning · inventory · skills · ai · assault · progress · map · quest · economy · save
 src/data/   콘텐츠 데이터 + 스키마 + balance.ts (부팅 시 validateAll로 참조 검증)
 src/game/   Phaser 어댑터: scenes · entities · systems(InputMapper, CombatBridge, SpawnSystem) · ui(창들) · textures(코드 드로잉) · state
-e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch · save-transfer · cloud-save · audio · guild · late-years · assault-ef · tutorial)
+e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch · save-transfer · cloud-save · audio · guild · late-years · assault-ef · tutorial · perf)
 ```
 
 `window.__ec` 디버그 훅으로 상태 조회/스폰/텔레포트/어설트 진행을 제어할 수 있습니다(e2e에서 사용).

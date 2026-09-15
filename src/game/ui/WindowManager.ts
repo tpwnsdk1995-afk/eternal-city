@@ -40,7 +40,7 @@ export class WindowManager {
     const shop = new ShopWindow(scene, (GAME_WIDTH - 800) / 2, 50);
     const dialog = new DialogBox(scene, (GAME_WIDTH - 760) / 2, GAME_HEIGHT - HUD_H - 160, 760);
     const result = new ResultWindow(scene, (GAME_WIDTH - 460) / 2, 140);
-    const menu = new MenuWindow(scene, (GAME_WIDTH - 440) / 2, 36);
+    const menu = new MenuWindow(scene, (GAME_WIDTH - 440) / 2, 20);
     const quest = new QuestWindow(scene, GAME_WIDTH - 460 - 12, 24);
     const taxiW = new TaxiWindow(scene, (GAME_WIDTH - 520) / 2, 60);
     const tuning = new TuningWindow(scene, (GAME_WIDTH - 820) / 2, 44);

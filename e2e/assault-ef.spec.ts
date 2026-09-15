@@ -42,6 +42,7 @@ test.describe('assault E · F', () => {
     await page.evaluate(() => window.__ec!.teleport(85 * 32, 20 * 32));
     await page.waitForFunction(() => window.__ec!.assault()?.phaseKind === 'boss');
     await page.waitForFunction(() => window.__ec!.enemies().some((e) => e.id === 'zombie_ceo'), null, { timeout: 15000 });
+    await page.waitForFunction(() => window.__ec!.audio().bgm === 'boss', null, { timeout: 5000 }); // boss bar → boss mood
     await page.screenshot({ path: 'e2e/out/assault-e-boss.png' });
     const before = await page.evaluate(() => window.__ec!.hud());
     await page.waitForFunction(

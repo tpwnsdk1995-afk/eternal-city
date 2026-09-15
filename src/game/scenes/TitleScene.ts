@@ -27,6 +27,7 @@ export class TitleScene extends Phaser.Scene {
   create(): void {
     this.busy = false;
     audio.ambient('rain');
+    audio.bgm('title');
     this.add.image(0, 0, TEX.title_bg).setOrigin(0, 0);
     this.rain = new Rain(this, GAME_WIDTH, GAME_HEIGHT);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.rain.destroy());

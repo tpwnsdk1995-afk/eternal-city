@@ -10,7 +10,9 @@ test.describe('audio', () => {
     const errors = await newGame(page, '사운드');
     let a = await page.evaluate(() => window.__ec!.audio());
     expect(a.ambient).toBe('safe');
+    expect(a.bgm).toBe('safe');
     expect(a.recent).toContain('ambient:rain'); // title
+    expect(a.recent).toContain('bgm:title');
     expect(a.unlocked).toBe(true); // Enter on the title counted as the unlocking gesture
 
     // window open/close
@@ -27,6 +29,7 @@ test.describe('audio', () => {
     await page.evaluate(() => window.__ec!.god(true));
     a = await page.evaluate(() => window.__ec!.audio());
     expect(a.ambient).toBe('field');
+    expect(a.bgm).toBe('field');
     const uid = await page.evaluate(() => window.__ec!.spawn('zombie_casual_f', 90, 0));
     const ammo0 = (await page.evaluate(() => window.__ec!.hud())).ammo;
     const scr = (await page.evaluate(() => window.__ec!.toScreen(window.__ec!.player()!.x + 90, window.__ec!.player()!.y)))!;
@@ -50,13 +53,15 @@ test.describe('audio', () => {
     }
 
     // sound off: cues are still logged (for tests) but the setting flips and survives a save
-    await page.evaluate(() => window.__ec!.state.setSettings({ sfxOn: false, soundVolume: 0.3 }));
+    await page.evaluate(() => window.__ec!.state.setSettings({ sfxOn: false, soundVolume: 0.3, bgmOn: false, uiScale: 1.15 }));
     await page.evaluate(() => window.__ec!.save());
     await page.reload();
     await page.waitForFunction(() => window.__ec?.scene() === 'Title');
     await page.waitForTimeout(500);
     expect(await page.evaluate(() => window.__ec!.state.settings.sfxOn)).toBe(false);
     expect(await page.evaluate(() => window.__ec!.state.settings.soundVolume)).toBe(0.3);
+    expect(await page.evaluate(() => window.__ec!.state.settings.bgmOn)).toBe(false);
+    expect(await page.evaluate(() => window.__ec!.state.settings.uiScale)).toBe(1.15);
     expect(errors, errors.join('\n')).toEqual([]);
   });
 

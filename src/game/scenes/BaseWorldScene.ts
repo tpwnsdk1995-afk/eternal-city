@@ -22,6 +22,7 @@ import { hubForYear } from '@core/world/parallel';
 import { theme } from '../ui/theme';
 import { audio } from '../audio/AudioManager';
 import { ambientForMap } from '@core/audio/sfx';
+import { bgmForScene } from '@core/audio/bgm';
 
 /** World camera zoom: 32px tiles render at 48px, so characters read like the original's ~50px sprites. */
 export const WORLD_ZOOM = 1.5;
@@ -158,6 +159,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
 
     questService.onReach(this.mapId);
     audio.ambient(ambientForMap({ safe: this.scene.key === 'SafeZone', dark: this.def.dark }));
+    audio.bgm(bgmForScene(this.scene.key));
     this.onCreateWorld();
   }
 

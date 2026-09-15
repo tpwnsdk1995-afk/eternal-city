@@ -1,5 +1,6 @@
 import type { WeaponClass } from '@data/schema/enums';
 import { GUN_PROFILES, SFX_MIN_GAP_MS, spatialGain, subFireProfile, type AmbientKind, type GunProfile, type SfxName } from '@core/audio/sfx';
+import { BGM, midiHz, stepSeconds, type BgmKind } from '@core/audio/bgm';
 import { gameState } from '../state/GameState';
 
 const RECENT_CAP = 60;
@@ -36,6 +37,12 @@ class AudioManager {
   private master: GainNode | null = null;
   private sfxBus: GainNode | null = null;
   private ambBus: GainNode | null = null;
+  private bgmBus: GainNode | null = null;
+  bgmKind: BgmKind = 'none';
+  private bgmTimer: ReturnType<typeof setInterval> | null = null;
+  private bgmStep = 0;
+  private bgmNextAt = 0;
+  private bgmNodes: { stop(): void }[] = [];
   private noiseBuf: AudioBuffer | null = null;
   private ambientNodes: { stop(): void }[] = [];
   private ambientTimer: ReturnType<typeof setInterval> | null = null;
@@ -56,6 +63,7 @@ class AudioManager {
       if (ctx) {
         this.unlocked = true;
         if (this.ambientKind !== 'none') this.startAmbient(this.ambientKind);
+        if (this.bgmKind !== 'none') this.startBgm();
       }
       window.removeEventListener('pointerdown', unlock);
       window.removeEventListener('keydown', unlock);
@@ -65,6 +73,11 @@ class AudioManager {
     window.addEventListener('keydown', unlock);
     window.addEventListener('touchstart', unlock);
     gameState.events.on('settings', () => this.applySettings());
+    // boss bar up → boss mood, down → back to the assault mood
+    gameState.events.on('assault', (hud) => {
+      if (this.bgmKind === 'assault' && hud?.boss) this.bgm('boss');
+      else if (this.bgmKind === 'boss' && hud && !hud.boss) this.bgm('assault');
+    });
     document.addEventListener('visibilitychange', () => {
       if (!this.ctx) return;
       if (document.hidden) void this.ctx.suspend().catch(() => undefined);
@@ -85,8 +98,10 @@ class AudioManager {
     this.master = ctx.createGain();
     this.sfxBus = ctx.createGain();
     this.ambBus = ctx.createGain();
+    this.bgmBus = ctx.createGain();
     this.sfxBus.connect(this.master);
     this.ambBus.connect(this.master);
+    this.bgmBus.connect(this.master);
     this.master.connect(ctx.destination);
     const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * NOISE_SECONDS), ctx.sampleRate);
     const data = buf.getChannelData(0);
@@ -102,6 +117,7 @@ class AudioManager {
     this.master.gain.value = Math.max(0, Math.min(1, s.soundVolume));
     this.sfxBus.gain.value = s.sfxOn ? 1 : 0;
     this.ambBus.gain.value = s.ambientOn ? 1 : 0;
+    if (this.bgmBus) this.bgmBus.gain.value = s.bgmOn ? Math.max(0, Math.min(1, s.bgmVolume)) : 0;
   }
 
   private record(name: string): void {
@@ -477,8 +493,136 @@ class AudioManager {
     }
   }
 
-  snapshot(): { unlocked: boolean; ambient: AmbientKind; recent: string[] } {
-    return { unlocked: this.unlocked, ambient: this.ambientKind, recent: [...this.recent] };
+  // --- BGM (procedural sequencer) -----------------------------------------------------------
+
+  bgm(kind: BgmKind): void {
+    if (kind === this.bgmKind) return;
+    this.bgmKind = kind;
+    this.record(`bgm:${kind}`);
+    this.stopBgm();
+    if (!this.ctx || kind === 'none') return; // starts on unlock
+    this.startBgm();
+  }
+
+  private stopBgm(): void {
+    if (this.bgmTimer) clearInterval(this.bgmTimer);
+    this.bgmTimer = null;
+    for (const n of this.bgmNodes) n.stop();
+    this.bgmNodes = [];
+  }
+
+  private startBgm(): void {
+    const ctx = this.ctx;
+    if (!ctx || this.bgmKind === 'none' || this.bgmTimer) return;
+    const def = BGM[this.bgmKind];
+    const step = stepSeconds(def.bpm);
+    this.bgmStep = 0;
+    this.bgmNextAt = ctx.currentTime + 0.1;
+    const LOOKAHEAD = 0.35;
+    const tick = () => {
+      if (!this.ctx || this.bgmKind === 'none') return;
+      while (this.bgmNextAt < this.ctx.currentTime + LOOKAHEAD) {
+        this.scheduleStep(def, this.bgmStep, this.bgmNextAt, step);
+        this.bgmStep = (this.bgmStep + 1) % 64;
+        this.bgmNextAt += step;
+      }
+    };
+    tick();
+    this.bgmTimer = setInterval(tick, 120);
+  }
+
+  /** One 16th-note step of the 4-bar loop: pad on bar starts, bass on beats, arp every step, drums per pattern. */
+  private scheduleStep(def: (typeof BGM)[keyof typeof BGM], globalStep: number, t: number, step: number): void {
+    const ctx = this.ctx;
+    const bus = this.bgmBus;
+    if (!ctx || !bus) return;
+    const bar = Math.floor(globalStep / 16) % 4;
+    const s16 = globalStep % 16;
+    const chord = def.chords[bar];
+    if (s16 === 0 && def.padGain > 0) {
+      for (const n of chord) this.bgmTone(bus, midiHz(n), t, step * 16, def.padGain / chord.length, def.padType, 0.4);
+    }
+    if (s16 % 4 === 0 && def.bassGain > 0) this.bgmTone(bus, midiHz(def.bass[bar]), t, step * 3.5, def.bassGain, 'triangle', 0.01);
+    if (def.arp.length && def.arpGain > 0 && s16 % 2 === 0) {
+      const idx = def.arp[(s16 / 2) % def.arp.length];
+      this.bgmTone(bus, midiHz(chord[idx % chord.length] + 12), t, step * 1.6, def.arpGain, 'square', 0.005);
+    }
+    const d = def.drums[bar][s16] ?? '.';
+    if (def.drumGain > 0 && d !== '.') this.bgmDrum(bus, d, t, def.drumGain);
+  }
+
+  private bgmTone(bus: GainNode, hz: number, t: number, dur: number, gain: number, type: OscillatorType, attack: number): void {
+    const ctx = this.ctx!;
+    const osc = ctx.createOscillator();
+    osc.type = type;
+    osc.frequency.value = hz;
+    const f = ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.value = type === 'sawtooth' || type === 'square' ? Math.min(6000, hz * 6) : 12000;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t + attack);
+    g.gain.setValueAtTime(Math.max(0.0002, gain), t + Math.max(attack, dur * 0.6));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(f);
+    f.connect(g);
+    g.connect(bus);
+    osc.start(t);
+    osc.stop(t + dur + 0.05);
+    osc.onended = () => {
+      osc.disconnect();
+      g.disconnect();
+    };
+  }
+
+  private bgmDrum(bus: GainNode, kind: string, t: number, gain: number): void {
+    const ctx = this.ctx!;
+    if (!this.noiseBuf) return;
+    if (kind === 'k') {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(140, t);
+      osc.frequency.exponentialRampToValueAtTime(40, t + 0.18);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(gain * 1.6, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+      osc.connect(g);
+      g.connect(bus);
+      osc.start(t);
+      osc.stop(t + 0.22);
+      osc.onended = () => {
+        osc.disconnect();
+        g.disconnect();
+      };
+      return;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = this.noiseBuf;
+    const f = ctx.createBiquadFilter();
+    if (kind === 's') {
+      f.type = 'bandpass';
+      f.frequency.value = 1800;
+    } else {
+      f.type = 'highpass';
+      f.frequency.value = 7000;
+    }
+    const g = ctx.createGain();
+    const dur = kind === 's' ? 0.14 : 0.05;
+    g.gain.setValueAtTime(gain * (kind === 's' ? 1.1 : 0.5), t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f);
+    f.connect(g);
+    g.connect(bus);
+    src.start(t, Math.random() * (NOISE_SECONDS - 0.5));
+    src.stop(t + dur + 0.02);
+    src.onended = () => {
+      src.disconnect();
+      g.disconnect();
+    };
+  }
+
+  snapshot(): { unlocked: boolean; ambient: AmbientKind; bgm: BgmKind; recent: string[] } {
+    return { unlocked: this.unlocked, ambient: this.ambientKind, bgm: this.bgmKind, recent: [...this.recent] };
   }
 }
 

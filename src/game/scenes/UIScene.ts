@@ -9,7 +9,7 @@ import { xpToNext } from '@core/stats/levelCurve';
 import { progressText } from '@core/quest/questState';
 import { gameState, type AssaultHud, type GameEvents } from '../state/GameState';
 import { Gauge } from '../ui/Gauge';
-import { theme } from '../ui/theme';
+import { setUiScale, theme } from '../ui/theme';
 import { WindowManager } from '../ui/WindowManager';
 import { TouchControls } from '../ui/TouchControls';
 import { touchControlsEnabled } from '../systems/input/touchState';
@@ -137,6 +137,7 @@ export class UIScene extends Phaser.Scene {
     this.bossBar.setVisible(false);
     this.banner.add([bannerBg, this.bannerName, this.bannerPhase, this.bannerProgress, this.bannerTime, this.bossBar]);
 
+    setUiScale(gameState.settings.uiScale);
     this.windows = new WindowManager(this);
     // on-screen touch controls (phones/tablets, or forced from the Esc menu / ?touch=1)
     this.touch = new TouchControls(this);
@@ -189,6 +190,7 @@ export class UIScene extends Phaser.Scene {
       this.fpsText.setVisible(s.showFps);
       this.minimapPanel.setVisible(s.showMinimap);
       this.touch.setEnabled(touchControlsEnabled(s.touchControls));
+      setUiScale(s.uiScale);
       this.windows.refreshOpen();
     });
     on('quests', () => this.refreshQuests());

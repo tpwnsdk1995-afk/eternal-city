@@ -10,7 +10,7 @@ import { theme } from './theme';
 /** Esc menu: control scheme, FPS overlay, manual save, back to title. */
 export class MenuWindow extends Window {
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, 'menu', x, y, 440, 634, '메뉴 (Esc)');
+    super(scene, 'menu', x, y, 440, 666, '메뉴 (Esc)');
   }
 
   refresh(): void {
@@ -48,6 +48,13 @@ export class MenuWindow extends Window {
     this.button(222, y, '−', () => gameState.setSettings({ soundVolume: Math.max(0, Math.round((s.soundVolume - 0.1) * 10) / 10) }), theme.colors.brass, 13);
     this.label(252, y + 3, `볼륨 ${vol}%`, theme.colors.text, 12);
     this.button(330, y, '+', () => gameState.setSettings({ soundVolume: Math.min(1, Math.round((s.soundVolume + 0.1) * 10) / 10) }), theme.colors.brass, 13);
+    y += 32;
+    const bvol = Math.round(s.bgmVolume * 100);
+    this.button(20, y, `배경음악: ${s.bgmOn ? '켬' : '끔'}`, () => gameState.setSettings({ bgmOn: !s.bgmOn }), s.bgmOn ? theme.colors.good : theme.colors.muted, 13);
+    this.button(130, y, '−', () => gameState.setSettings({ bgmVolume: Math.max(0, Math.round((s.bgmVolume - 0.1) * 10) / 10) }), theme.colors.brass, 13);
+    this.label(160, y + 3, `BGM ${bvol}%`, theme.colors.text, 12);
+    this.button(226, y, '+', () => gameState.setSettings({ bgmVolume: Math.min(1, Math.round((s.bgmVolume + 0.1) * 10) / 10) }), theme.colors.brass, 13);
+    this.button(270, y, `글자 크기: ${s.uiScale > 1 ? '크게' : '보통'}`, () => gameState.setSettings({ uiScale: s.uiScale > 1 ? 1 : 1.15 }), theme.colors.brass, 13);
     y += 40;
     this.button(20, y, '지금 저장', () => void saveService.save().then(() => gameState.message('저장했습니다.', 'good')), theme.colors.good, 13);
     this.button(130, y, '타이틀로 (저장 후)', () => gameState.events.emit('goTitle', undefined), theme.colors.bad, 13);
