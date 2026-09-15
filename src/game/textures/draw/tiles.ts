@@ -259,6 +259,62 @@ const tileDrawers: Record<number, (ctx: Ctx, x: number) => void> = {
     fill(ctx, x, 16, T, 1, '#a99d86');
     grain(ctx, x, 0, T, T, '#cfc3aa', 30, 61);
   },
+  [TILE.platform]: (ctx, x) => {
+    fill(ctx, x, 0, T, T, '#a8a49a');
+    fill(ctx, x, 0, T, 1, '#8a867c');
+    fill(ctx, x, 0, 1, T, '#8a867c');
+    fill(ctx, x, 27, T, 5, '#d8c45a'); // yellow safety line
+    grain(ctx, x, 0, T, 26, '#b5b1a6', 30, 71);
+  },
+  [TILE.rail]: (ctx, x) => {
+    fill(ctx, x, 0, T, T, '#4a4640');
+    grain(ctx, x, 0, T, T, '#5a554d', 60, 73, 2); // ballast
+    for (let i = 2; i < T; i += 8) fill(ctx, x + i, 0, 5, T, '#6b5a44'); // sleepers
+    fill(ctx, x, 9, T, 3, '#9aa0a6');
+    fill(ctx, x, 21, T, 3, '#9aa0a6');
+    fill(ctx, x, 9, T, 1, '#c8ccd2');
+    fill(ctx, x, 21, T, 1, '#c8ccd2');
+  },
+  [TILE.water]: (ctx, x) => {
+    fill(ctx, x, 0, T, T, '#2c4a6b');
+    grain(ctx, x, 0, T, T, '#35587d', 40, 77, 2);
+    fill(ctx, x + 4, 8, 10, 1, 'rgba(180,210,240,0.35)');
+    fill(ctx, x + 18, 20, 9, 1, 'rgba(180,210,240,0.3)');
+  },
+  [TILE.riverbank]: (ctx, x) => {
+    fill(ctx, x, 0, T, T, '#7f7a6a');
+    grain(ctx, x, 0, T, T, '#8f8a78', 40, 79, 2);
+    fill(ctx, x, 0, T, 6, '#2c4a6b');
+    fill(ctx, x, 6, T, 2, 'rgba(200,220,240,0.35)');
+  },
+  [TILE.sewerFloor]: (ctx, x) => {
+    fill(ctx, x, 0, T, T, '#3a3f3c');
+    grain(ctx, x, 0, T, T, '#454b47', 50, 83);
+    grain(ctx, x, 0, T, T, '#2c302e', 40, 89);
+    fill(ctx, x, 0, T, 1, '#2c302e');
+    fill(ctx, x, 0, 1, T, '#2c302e');
+  },
+  [TILE.sewerWall]: (ctx, x) => {
+    fill(ctx, x, 0, T, T, '#4b4f4c');
+    for (let r = 0; r < 4; r++) {
+      const off = r % 2 ? 8 : 0;
+      for (let c = -1; c < 3; c++) {
+        fill(ctx, x + c * 16 + off + 1, r * 8 + 1, 14, 6, r % 2 ? '#5a5f5b' : '#555a56');
+      }
+    }
+    fill(ctx, x, 26, T, 6, '#2f5a48'); // moss line
+    fill(ctx, x, 30, T, 2, 'rgba(0,0,0,0.35)');
+  },
+  [TILE.sewerWater]: (ctx, x) => {
+    fill(ctx, x, 0, T, T, '#233a2f');
+    grain(ctx, x, 0, T, T, '#2c4a3a', 50, 97, 2);
+    fill(ctx, x + 6, 12, 12, 1, 'rgba(160,200,170,0.25)');
+  },
+  [TILE.bikeLane]: (ctx, x) => {
+    fill(ctx, x, 0, T, T, '#6b4a3a');
+    grain(ctx, x, 0, T, T, '#7a5645', 40, 101);
+    fill(ctx, x, 15, T, 2, '#e8e2d2');
+  },
   [TILE.sidewalkCrack]: (ctx, x) => {
     sidewalk(ctx, x);
     crack(ctx, x, [[4, 28], [11, 21], [13, 12], [22, 6]], '#5e5b53');

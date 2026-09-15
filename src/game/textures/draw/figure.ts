@@ -25,6 +25,8 @@ export interface FigureStyle {
   pack?: boolean;
   vest?: string;
   eyes?: string;
+  /** four-legged (좀비견): uses the animal renderer; `shirt` = fur, `skin` = muzzle/belly */
+  quadruped?: boolean;
 }
 
 const shade = (hex: string, amt: number): string => {
@@ -64,6 +66,7 @@ const GUN_LEN: Record<GunKind, number> = { pistol: 7, smg: 11, rifle: 16 };
  * `frame` 0..3 is the walk cycle with 0 as the neutral stance.
  */
 export function drawFigure(ctx: Ctx, dir: Dir, frame: number, w: number, h: number, s: FigureStyle): void {
+  if (s.quadruped) return drawQuadruped(ctx, dir, frame, w, h, s);
   const k = (s.size ?? 1) * (w / 48);
   const mirror = dir === 3 || dir === 4 || dir === 5; // SW, W, NW drawn as SE, E, NE mirrored
   const pose: 'front' | 'back' | 'side' = dir === 2 ? 'front' : dir === 6 ? 'back' : dir === 0 || dir === 4 ? 'side' : dir === 1 || dir === 3 ? 'front' : 'back';
@@ -271,7 +274,11 @@ export function drawFigure(ctx: Ctx, dir: Dir, frame: number, w: number, h: numb
     }
   }
 
-  // blood splatter
+  bloodSplatter(ctx, s, dir);
+  ctx.restore();
+}
+
+function bloodSplatter(ctx: Ctx, s: FigureStyle, dir: Dir): void {
   if (s.blood) {
     ctx.fillStyle = 'rgba(120,14,14,0.85)';
     let seed = Math.floor(s.blood * 1000) + dir * 7;
@@ -284,6 +291,82 @@ export function drawFigure(ctx: Ctx, dir: Dir, frame: number, w: number, h: numb
       ctx.fillRect(x, y, 1.6, 1.6);
     }
   }
+}
 
+/** Dog-sized four-legged creature, ~22px long at size 1. */
+function drawQuadruped(ctx: Ctx, dir: Dir, frame: number, w: number, h: number, s: FigureStyle): void {
+  const k = (s.size ?? 1) * (w / 48);
+  const mirror = dir === 3 || dir === 4 || dir === 5;
+  const pose: 'front' | 'back' | 'side' = dir === 2 || dir === 1 || dir === 3 ? 'front' : dir === 6 || dir === 5 || dir === 7 ? 'back' : 'side';
+  const diagonal = dir % 2 === 1;
+  ctx.save();
+  if (mirror) {
+    ctx.translate(w, 0);
+    ctx.scale(-1, 1);
+  }
+  ctx.translate(w / 2, h - 6 * k);
+  ctx.scale(k, k);
+  const t = (frame % 4) / 4;
+  const swing = frame % 4 === 0 ? 0 : Math.sin(t * Math.PI * 2);
+  const fur = s.shirt;
+  const dark = shade(fur, 0.7);
+
+  if (s.glow) {
+    const g = ctx.createRadialGradient(0, -8, 2, 0, -8, 18);
+    g.addColorStop(0, s.glow);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(-24, -30, 48, 36);
+  }
+  ctx.fillStyle = 'rgba(0,0,0,0.38)';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, pose === 'side' ? 12 : 7, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (pose === 'side') {
+    // legs (back pair darker)
+    rr(ctx, -9 - swing * 2, -8, 3, 8, 1, dark);
+    rr(ctx, 6 + swing * 2, -8, 3, 8, 1, dark);
+    rr(ctx, -7 + swing * 2, -8, 3, 8, 1, fur);
+    rr(ctx, 8 - swing * 2, -8, 3, 8, 1, fur);
+    // body
+    ctx.fillStyle = fur;
+    ctx.beginPath();
+    ctx.ellipse(0, -11, 11, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // tail
+    rr(ctx, -14, -14, 5, 2, 1, dark);
+    // head + muzzle + ear
+    circle(ctx, 11, -14, 4.5, fur);
+    rr(ctx, 13, -13, 5, 3, 1, s.skin);
+    rr(ctx, 9, -19, 2.5, 4, 1, dark);
+    ctx.fillStyle = s.eyes ?? '#c62828';
+    ctx.fillRect(12, -15.5, 1.6, 1.6);
+  } else {
+    const front = pose === 'front';
+    // legs: two visible pairs
+    rr(ctx, -6, -8 + (front ? 0 : 1), 3, 8, 1, swing > 0 ? fur : dark);
+    rr(ctx, 3, -8 + (front ? 0 : 1), 3, 8, 1, swing > 0 ? dark : fur);
+    // body (foreshortened)
+    ctx.fillStyle = fur;
+    ctx.beginPath();
+    ctx.ellipse(diagonal ? 1 : 0, -12, 6.5, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    if (front) {
+      circle(ctx, diagonal ? 2 : 0, -8, 4.8, fur);
+      rr(ctx, (diagonal ? 2 : 0) - 2, -6.5, 4, 2.5, 1, s.skin);
+      rr(ctx, (diagonal ? 2 : 0) - 5, -13, 2.5, 4, 1, dark);
+      rr(ctx, (diagonal ? 2 : 0) + 2.5, -13, 2.5, 4, 1, dark);
+      ctx.fillStyle = s.eyes ?? '#c62828';
+      ctx.fillRect((diagonal ? 2 : 0) - 2.6, -10, 1.6, 1.6);
+      ctx.fillRect((diagonal ? 2 : 0) + 1, -10, 1.6, 1.6);
+    } else {
+      circle(ctx, 0, -18, 4.5, fur);
+      rr(ctx, -5, -22, 2.5, 4, 1, dark);
+      rr(ctx, 2.5, -22, 2.5, 4, 1, dark);
+      rr(ctx, -1, -5, 2, 5, 1, dark); // tail
+    }
+  }
+  bloodSplatter(ctx, s, dir);
   ctx.restore();
 }

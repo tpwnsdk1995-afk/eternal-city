@@ -125,11 +125,15 @@ export const junggokDong: MapDef = {
   portals: [
     { id: 'toParking', rect: { x: 1, y: 74, w: 2, h: 4 }, toMap: 'gwangjin-gucheong-parking', toSpawn: 'fromField', label: '광진구청 지하주차장' },
     { id: 'toSchool', rect: { x: 46, y: 1, w: 5, h: 1 }, toMap: 'yonggok-middle-school', toSpawn: 'fromJunggok', label: '용곡중학교 (북쪽)' },
+    { id: 'toStation', rect: { x: 98, y: 41, w: 1, h: 5 }, toMap: 'junggok-station', toSpawn: 'fromJunggok', label: '중곡역 (동쪽)' },
+    { id: 'toHangang', rect: { x: 58, y: 78, w: 5, h: 1 }, toMap: 'hangang-park', toSpawn: 'fromJunggok', label: '한강공원 (남쪽)' },
   ],
   spawnPoints: {
     default: { x: 6, y: 72 },
     fromParking: { x: 6, y: 72 },
     fromSchool: { x: 48, y: 4 },
+    fromStation: { x: 95, y: 43 },
+    fromHangang: { x: 60, y: 75 },
   },
   // 중곡동 경찰서 앞 (구청 입구 옆 보도)
   npcs: [{ id: 'npc_kimhun', at: { x: 9, y: 71 } }],

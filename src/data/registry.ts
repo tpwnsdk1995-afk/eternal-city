@@ -17,12 +17,16 @@ import { gwangjinParking } from './maps/gwangjin-gucheong-parking';
 import { junggokDong } from './maps/junggok-dong';
 import { junggokBlockade } from './maps/junggok-blockade';
 import { yonggokMiddleSchool } from './maps/yonggok-middle-school';
+import { junggokStation } from './maps/junggok-station';
+import { achasanStation } from './maps/achasan-station';
+import { sewer } from './maps/sewer';
+import { hangangPark } from './maps/hangang-park';
 import { assaultA } from './assaults/assault-a';
 
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
 export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES, ...MISC];
-export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool];
+export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark];
 export const ASSAULTS: AssaultDef[] = [assaultA];
 
 const items = byId(ITEMS);

@@ -16,6 +16,11 @@ export const FIGURE_STYLES = {
   zombie_banshee: { skin: '#9a8fb5', hair: '#e8e0f0', hairStyle: 'long', shirt: '#4a2a6a', pants: '#3a2050', dress: true, zombie: true, blood: 0.3, glow: 'rgba(150,80,220,0.35)', eyes: '#f0e0ff' } as FigureStyle,
   zombie_lord: { skin: '#7f8f68', hair: '#000000', shirt: '#5a1a1a', pants: '#2a1a1a', coat: '#3a0f0f', zombie: true, blood: 0.9, glow: 'rgba(200,40,40,0.35)', size: 1.35 } as FigureStyle,
 
+  zombie_dog: { skin: '#8a7a68', hair: '#000', shirt: '#4a3a30', pants: '#3a2c24', quadruped: true, zombie: true, blood: 0.4, eyes: '#ff3030' } as FigureStyle,
+  zombie_hardened: { skin: '#6f7a6a', hair: '#1a1a1a', shirt: '#2a2d33', pants: '#1f2126', coat: '#3a3d44', zombie: true, blood: 0.9, size: 1.12, eyes: '#ffb03b' } as FigureStyle,
+  zombie_worker: { skin: ZOMBIE_SKIN, hair: '#3a2a1a', hairStyle: 'cap', shirt: '#3a4a5a', pants: '#2a3440', vest: '#e08a2a', zombie: true, blood: 0.55 } as FigureStyle,
+  ogurin: { skin: '#5f7a5a', hair: '#1a2a1a', shirt: '#3a5a3a', pants: '#2a3a2a', zombie: true, blood: 0.8, size: 1.3, glow: 'rgba(80,220,120,0.35)', eyes: '#b6ff6b' } as FigureStyle,
+
   wito_recon: { skin: '#e3bd95', hair: '#3a3a2a', hairStyle: 'helmet', helmetColor: '#4a5530', shirt: '#5c6b3a', pants: '#4a5530', shoes: '#26281c', gun: 'rifle' } as FigureStyle,
   wito_airborne: { skin: '#e3bd95', hair: '#2a2a2a', hairStyle: 'helmet', helmetColor: '#2f3626', shirt: '#3f4a2f', pants: '#3a4228', shoes: '#1e2016', gun: 'rifle', pack: true } as FigureStyle,
 

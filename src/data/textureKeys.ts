@@ -23,6 +23,10 @@ export const TEX = {
   npc_assault: 'npc_assault',
   npc_kimhun: 'npc_kimhun',
   wito_soldier: 'wito_soldier',
+  zombie_dog: 'zombie_dog',
+  zombie_hardened: 'zombie_hardened',
+  zombie_worker: 'zombie_worker',
+  ogurin: 'ogurin',
   // street decor (drawn with bottom origin)
   deco_lamp: 'deco_lamp',
   deco_vending: 'deco_vending',
@@ -115,6 +119,15 @@ export const TILE = {
   track: 26,
   schoolFloor: 27,
   trackLine: 28,
+  // 역 / 한강 / 하수도
+  platform: 29,
+  rail: 30,
+  water: 31,
+  riverbank: 32,
+  sewerFloor: 33,
+  sewerWall: 34,
+  sewerWater: 35,
+  bikeLane: 36,
 } as const;
 
 export type TileKey = keyof typeof TILE;

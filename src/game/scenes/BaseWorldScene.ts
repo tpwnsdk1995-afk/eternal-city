@@ -51,6 +51,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   enemies!: Phaser.Physics.Arcade.Group;
   pickups!: Phaser.Physics.Arcade.Group;
   protected combat: CombatBridge | null = null;
+  private lightMask: Phaser.GameObjects.Graphics | null = null;
   private portalArmed = false;
   private transitioning = false;
 
@@ -60,6 +61,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     this.npcs = [];
     this.portalArmed = false;
     this.transitioning = false;
+    this.lightMask = null;
   }
 
   create(): void {
@@ -104,6 +106,15 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, w, h);
     this.cameras.main.setZoom(WORLD_ZOOM);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+
+    if (this.def.dark) {
+      // darkness with a soft light radius punched out around the player
+      const dark = this.add.rectangle(0, 0, w, h, 0x02040a, 0.72).setOrigin(0, 0).setDepth(30);
+      this.lightMask = this.make.graphics({ x: 0, y: 0 }, false);
+      const mask = this.lightMask.createGeometryMask();
+      mask.invertAlpha = true;
+      dark.setMask(mask);
+    }
     this.cameras.main.setBackgroundColor('#05070a');
 
     this.mapper = new InputMapper(this, gameState.settings.controlScheme);
@@ -143,6 +154,16 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     if (this.transitioning) return;
     const intent = this.mapper.update();
     this.lastIntent = intent;
+
+    if (this.lightMask) {
+      this.lightMask.clear();
+      this.lightMask.fillStyle(0xffffff, 1);
+      this.lightMask.fillCircle(this.player.x, this.player.y - 6, 190);
+      for (const d of this.def.decor ?? []) {
+        if (d.tex !== 'deco_lamp') continue;
+        this.lightMask.fillCircle(d.at.x * this.def.tileSize + 16 + 16, (d.at.y + 1) * this.def.tileSize - 60, 110);
+      }
+    }
 
     if (intent.hotkey) gameState.events.emit('hotkey', intent.hotkey);
 

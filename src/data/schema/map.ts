@@ -67,4 +67,8 @@ export interface MapDef {
   /** Named zones used by assault phases (e.g. 'stage2', 'bossArena'). */
   zones?: Record<string, Rect>;
   safeZone: boolean;
+  /** Underground / night map: darkness overlay with a light radius around the player. */
+  dark?: boolean;
+  /** Recommended level band shown on portals and in the map list. */
+  levelRange?: [number, number];
 }
