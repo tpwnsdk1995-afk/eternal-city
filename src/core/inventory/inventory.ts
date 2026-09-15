@@ -15,7 +15,7 @@ export const createInventory = (): Inventory => ({ items: [], nextUid: 1 });
  * consumables merge into an existing stack of the same item.
  */
 export function addItem(inv: Inventory, def: ItemDef, qty = 1, opts: { grade?: number } = {}): Inventory {
-  if (def.kind === 'consumable') {
+  if (def.kind === 'consumable' || def.kind === 'misc') {
     const existing = inv.items.find((s) => s.itemId === def.id);
     if (existing) {
       return { ...inv, items: inv.items.map((s) => (s.uid === existing.uid ? { ...s, qty: s.qty + qty } : s)) };
@@ -56,3 +56,19 @@ export function totalRounds(inv: Inventory, lookup: ItemLookup, caliber: Caliber
 }
 
 export const consumeRound = (inv: Inventory, uid: string): Inventory => removeQty(inv, uid, 1);
+
+/** Total quantity of an item across all stacks. */
+export const countItem = (inv: Inventory, itemId: string): number => inv.items.filter((s) => s.itemId === itemId).reduce((n, s) => n + s.qty, 0);
+
+/** Removes `n` units of an item across stacks (smallest stacks first). */
+export function removeItemQty(inv: Inventory, itemId: string, n: number): Inventory {
+  let left = n;
+  let next = inv;
+  for (const s of [...inv.items].filter((x) => x.itemId === itemId).sort((a, b) => a.qty - b.qty)) {
+    if (left <= 0) break;
+    const take = Math.min(left, s.qty);
+    next = removeQty(next, s.uid, take);
+    left -= take;
+  }
+  return next;
+}

@@ -6,6 +6,7 @@ import { emptyEquipment, equippedWeapon, equipStack, totalDefense, type Equipmen
 import { emptySkillState, type SkillState } from '@core/skills/skillState';
 import { aggregateMods } from '@core/skills/modifiers';
 import { initialFireState, type FireState } from '@core/weapons/fireController';
+import { emptyQuestState, type QuestState } from '@core/quest/questState';
 import { emptyStatus, type StatusState } from '@core/combat/statusEffects';
 import type { ConsciousnessState } from '@core/combat/consciousness';
 import { balance } from '@data/balance';
@@ -47,6 +48,8 @@ export interface GameEvents extends Record<string, unknown> {
   equipment: Equipment;
   skills: SkillState;
   fire: FireState;
+  quests: QuestState;
+  flags: Record<string, boolean | number>;
   message: { text: string; tone?: 'info' | 'good' | 'bad' | 'system' };
   mapChanged: { mapId: string; name: string; minimap: MinimapInfo | null };
   settings: Settings;
@@ -72,6 +75,7 @@ class GameState {
   equipment: Equipment = emptyEquipment();
   skills: SkillState = emptySkillState();
   fire: FireState = initialFireState();
+  quests: QuestState = emptyQuestState();
   status: StatusState = emptyStatus();
   consciousness: ConsciousnessState = { lastTriggeredAt: -Infinity };
   currentMapId: string = balance.death.respawnMap;
@@ -97,6 +101,7 @@ class GameState {
     }
     this.skills = emptySkillState();
     this.fire = initialFireState();
+    this.quests = emptyQuestState();
     this.status = emptyStatus();
     this.consciousness = { lastTriggeredAt: -Infinity };
     this.currentMapId = balance.death.respawnMap;
@@ -159,6 +164,16 @@ class GameState {
     this.events.emit('fire', f);
   }
 
+  setQuests(q: QuestState): void {
+    this.quests = q;
+    this.events.emit('quests', q);
+  }
+
+  setFlag(key: string, value: boolean | number = true): void {
+    this.flags = { ...this.flags, [key]: value };
+    this.events.emit('flags', this.flags);
+  }
+
   setSettings(s: Partial<Settings>): void {
     this.settings = { ...this.settings, ...s };
     this.events.emit('settings', this.settings);
@@ -181,6 +196,8 @@ class GameState {
     this.events.emit('equipment', this.equipment);
     this.events.emit('skills', this.skills);
     this.events.emit('fire', this.fire);
+    this.events.emit('quests', this.quests);
+    this.events.emit('flags', this.flags);
     this.events.emit('settings', this.settings);
   }
 }

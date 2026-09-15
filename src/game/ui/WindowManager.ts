@@ -6,6 +6,8 @@ import { gameState, type AssaultResult } from '../state/GameState';
 import { actions } from '../state/actions';
 import { ResultWindow } from './ResultWindow';
 import { MenuWindow } from './MenuWindow';
+import { QuestWindow } from './QuestWindow';
+import { questService } from '../state/questService';
 import type { Window } from './Window';
 import { InventoryWindow } from './InventoryWindow';
 import { StatusWindow } from './StatusWindow';
@@ -14,7 +16,7 @@ import { ShopWindow } from './ShopWindow';
 import { DialogBox } from './DialogBox';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 
-export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu';
+export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu' | 'quest';
 
 const HUD_H = 108;
 
@@ -31,7 +33,8 @@ export class WindowManager {
     const dialog = new DialogBox(scene, (GAME_WIDTH - 760) / 2, GAME_HEIGHT - HUD_H - 160, 760);
     const result = new ResultWindow(scene, (GAME_WIDTH - 460) / 2, 140);
     const menu = new MenuWindow(scene, (GAME_WIDTH - 440) / 2, 120);
-    for (const w of [inv, status, skills, shop, dialog, result, menu]) {
+    const quest = new QuestWindow(scene, GAME_WIDTH - 460 - 12, 40);
+    for (const w of [inv, status, skills, shop, dialog, result, menu, quest]) {
       this.windows.set(w.key as WindowKey, w);
       w.setVisible(false);
       w.on('close', () => this.close(w.key as WindowKey));
@@ -108,6 +111,8 @@ export class WindowManager {
         return this.toggle('status');
       case 'skills':
         return this.toggle('skills');
+      case 'quest':
+        return this.toggle('quest');
       case 'minimap':
         return gameState.setSettings({ showMinimap: !gameState.settings.showMinimap });
       case 'menu':
@@ -125,11 +130,30 @@ export class WindowManager {
   /** Opens the NPC's dialog with role-specific options. */
   talkTo(npcId: string): void {
     const npc = registry.npc(npcId);
+    questService.onTalk(npcId);
     const dialog = this.windows.get('dialog') as DialogBox;
-    const line = npc.lines[Math.floor(Math.random() * npc.lines.length)] ?? '...';
+    let line = npc.lines[Math.floor(Math.random() * npc.lines.length)] ?? '...';
     const closeOpt = { label: '닫기', onPick: () => this.close('dialog'), color: '#9aa0a6' };
+    const questOpts = questService.offerable(npcId).map((o) => {
+      if (o.status === 'ready') line = o.def.text.complete;
+      else if (o.status === 'active') line = o.def.text.progress;
+      else if (o.status === 'offer' && questService.offerable(npcId).every((x) => x.status === 'offer')) line = o.def.text.offer;
+      return {
+        label: o.status === 'ready' ? `완료 보고: ${o.def.name}` : o.status === 'active' ? `진행 중: ${o.def.name}` : `수락: ${o.def.name}`,
+        color: o.status === 'ready' ? '#7bd88f' : o.status === 'active' ? '#9aa0a6' : '#ffd166',
+        onPick: () => {
+          if (o.status === 'ready') actions.completeQuest(o.def.id);
+          else if (o.status === 'offer') actions.acceptQuest(o.def.id);
+          else this.open('quest');
+          this.close('dialog');
+          if (o.status !== 'active') this.talkTo(npcId);
+        },
+      };
+    });
     const opts = (() => {
       switch (npc.role) {
+        case 'quest':
+          return [...questOpts, closeOpt];
         case 'shop':
           return [
             {
@@ -160,9 +184,10 @@ export class WindowManager {
             closeOpt,
           ];
         default:
-          return [closeOpt];
+          return [...questOpts, closeOpt];
       }
     })();
+    if (npc.role === 'quest' && questOpts.length === 0 && questService.offerable(npcId).length === 0) line = npc.lines[1] ?? line;
     dialog.show(npc, line, opts);
     this.open('dialog');
   }

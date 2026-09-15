@@ -4,6 +4,7 @@ import { TEX } from '@data/textureKeys';
 import { registry } from '@data/registry';
 import { totalRounds } from '@core/inventory/inventory';
 import { xpToNext } from '@core/stats/levelCurve';
+import { progressText } from '@core/quest/questState';
 import { gameState, type AssaultHud, type GameEvents } from '../state/GameState';
 import { Gauge } from '../ui/Gauge';
 import { theme } from '../ui/theme';
@@ -49,6 +50,8 @@ export class UIScene extends Phaser.Scene {
   private minimapDots!: Phaser.GameObjects.Graphics;
   private minimapInfo: MinimapInfo | null = null;
   private minimapAt = 0;
+  private questTracker!: Phaser.GameObjects.Text;
+  private permitText!: Phaser.GameObjects.Text;
 
   constructor() {
     super('UI');
@@ -90,7 +93,6 @@ export class UIScene extends Phaser.Scene {
     this.wonText = this.add.text(GAME_WIDTH - 16, top + 14, '', theme.textStyle(18, theme.colors.brass, { fontStyle: 'bold' })).setOrigin(1, 0);
     this.mapText = this.add.text(GAME_WIDTH - 16, top + 42, '', theme.textStyle(13, theme.colors.muted)).setOrigin(1, 0);
     this.xp = new Gauge(this, GAME_WIDTH - 16 - 260, top + 66, 260, 12, theme.colors.xp, 'EXP');
-    this.add.text(GAME_WIDTH - 16, top + 84, '2002 · 패러렐 허가증 없음', theme.textStyle(10, '#6b7280')).setOrigin(1, 0);
     this.fpsText = this.add.text(GAME_WIDTH - 8, GAME_HEIGHT - HUD_H - 16, '', theme.textStyle(11, theme.colors.muted)).setOrigin(1, 0).setVisible(gameState.settings.showFps);
 
     // --- top-left log --------------------------------------------------------------------------
@@ -105,6 +107,10 @@ export class UIScene extends Phaser.Scene {
     this.minimapDots = this.add.graphics();
     this.minimapPanel.add([mmBg, mmTitle, this.minimapDots]);
     this.minimapPanel.setVisible(gameState.settings.showMinimap);
+
+    // quest tracker under the minimap
+    this.questTracker = this.add.text(GAME_WIDTH - 16, 12 + MINIMAP_MAX_H + 40, '', theme.textStyle(12, '#ffd166', { stroke: '#000', strokeThickness: 3, align: 'right' })).setOrigin(1, 0).setDepth(40);
+    this.permitText = this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - HUD_H + 84, '', theme.textStyle(10, '#6b7280')).setOrigin(1, 0);
 
     // --- assault banner (top centre) ---------------------------------------------------------
     this.banner = this.add.container(GAME_WIDTH / 2, 8).setDepth(50).setVisible(false);
@@ -158,6 +164,8 @@ export class UIScene extends Phaser.Scene {
       this.minimapPanel.setVisible(s.showMinimap);
       this.windows.refreshOpen();
     });
+    on('quests', () => this.refreshQuests());
+    on('flags', () => this.refreshQuests());
     on('hotkey', (k) => this.windows.handleHotkey(k));
     on('npcInteract', ({ npcId }) => this.windows.talkTo(npcId));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -169,6 +177,7 @@ export class UIScene extends Phaser.Scene {
     this.refreshCharacter();
     this.refreshWeapon();
     this.refreshQuickslots();
+    this.refreshQuests();
     this.mapText.setText(`2002 · ${registry.map(gameState.currentMapId).name}`);
     this.setMinimap(gameState.minimap);
     for (const m of gameState.log.slice(-LOG_MAX)) this.pushLog(m.text, m.tone);
@@ -264,6 +273,18 @@ export class UIScene extends Phaser.Scene {
       this.ammoText.setText(`${gameState.fire.ammoKind} ${w.def.caliber} · ${rounds}발`);
       this.ammoText.setColor(rounds === 0 ? theme.colors.bad : theme.colors.muted);
     }
+  }
+
+  private refreshQuests(): void {
+    const lines: string[] = [];
+    for (const q of gameState.quests.active) {
+      const def = registry.quest(q.id);
+      lines.push(`▸ ${def.name}`);
+      for (const p of progressText(gameState.quests, def)) lines.push(`   ${p}`);
+    }
+    this.questTracker.setText(lines.join('\n'));
+    this.permitText.setText(gameState.flags.parallelPermit ? '2002 · 패러렐 허가증 보유' : '2002 · 패러렐 허가증 없음');
+    this.permitText.setColor(gameState.flags.parallelPermit ? theme.colors.good : '#6b7280');
   }
 
   /** Quickslots mirror the consumables in the inventory (1..9); digits use them. */

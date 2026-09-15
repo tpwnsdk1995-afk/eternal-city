@@ -21,6 +21,7 @@ import { applyXp, xpForKill } from '@core/world/xp';
 import { applyDeathPenalty } from '@core/world/death';
 import { rollLoot } from '@core/world/loot';
 import { gameState } from '../state/GameState';
+import { questService } from '../state/questService';
 import { Enemy } from '../entities/Enemy';
 import { Pickup } from '../entities/Pickup';
 import type { Objective } from '../entities/Objective';
@@ -224,6 +225,7 @@ export class CombatBridge {
       this.floating.spawn(this.host.player.x, this.host.player.y - 10, 'LEVEL UP', '#7bd88f', 18, true);
     }
     this.dropLoot(e.def, e.pos);
+    questService.onKill(e.def);
     this.host.onEnemyKilled(e);
     void now;
   }
@@ -254,7 +256,8 @@ export class CombatBridge {
         return this.throttled('overweight', '무게 초과 — 더 이상 들 수 없습니다.', 'bad');
       }
       gameState.setInventory(next);
-      gameState.message(`획득: ${def.name}${pay.qty > 1 ? ` ×${pay.qty}` : ''}`, 'good');
+      gameState.message(`획득: ${def.name}${pay.qty > 1 ? ` ×${pay.qty}` : ''}`, def.kind === 'misc' && def.quest ? 'system' : 'good');
+      questService.syncCollect(def.id);
     }
     p.destroy();
   }

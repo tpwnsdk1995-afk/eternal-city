@@ -21,6 +21,8 @@ export const TEX = {
   npc_elia: 'npc_elia',
   npc_shop: 'npc_shop',
   npc_assault: 'npc_assault',
+  npc_kimhun: 'npc_kimhun',
+  wito_soldier: 'wito_soldier',
   // street decor (drawn with bottom origin)
   deco_lamp: 'deco_lamp',
   deco_vending: 'deco_vending',
@@ -60,6 +62,7 @@ export const TEX = {
   icon_uzi: 'icon_uzi',
   icon_bandage: 'icon_bandage',
   icon_energy_drink: 'icon_energy_drink',
+  icon_document: 'icon_document',
   icon_ammo_normal: 'icon_ammo_normal',
   icon_ammo_incendiary: 'icon_ammo_incendiary',
   icon_armor_top: 'icon_armor_top',

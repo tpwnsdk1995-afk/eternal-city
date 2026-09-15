@@ -1,6 +1,6 @@
 import type { TexKey } from '../textureKeys';
 
-export type NpcRole = 'skills' | 'shop' | 'assault' | 'dialog';
+export type NpcRole = 'skills' | 'shop' | 'assault' | 'dialog' | 'quest' | 'taxi';
 
 export interface NpcDef {
   id: string;
@@ -12,4 +12,6 @@ export interface NpcDef {
   stock?: string[];
   /** For role 'assault': assault ids offered. */
   assaults?: string[];
+  /** For role 'quest': quest ids given, in story order. */
+  quests?: string[];
 }

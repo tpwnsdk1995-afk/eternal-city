@@ -23,6 +23,7 @@ export function sellPrice(stack: ItemStack, lookup: ItemLookup): number {
     case 'ammo':
       return Math.round(def.price * (stack.qty / def.boxSize) * SELL_RATIO);
     case 'consumable':
+    case 'misc':
       return Math.round(def.price * SELL_RATIO);
   }
 }
@@ -40,13 +41,14 @@ export function buy(inv: Inventory, won: number, def: ItemDef, lookup: ItemLooku
   return { ok: true, inv: addItem(inv, def, buyQty(def), { grade }), won: won - cost, cost };
 }
 
-export type SellResult = { ok: true; inv: Inventory; won: number; gained: number } | { ok: false; reason: 'notFound' };
+export type SellResult = { ok: true; inv: Inventory; won: number; gained: number } | { ok: false; reason: 'notFound' | 'unsellable' };
 
 export function sell(inv: Inventory, won: number, uid: string, lookup: ItemLookup): SellResult {
   const stack = getStack(inv, uid);
   if (!stack) return { ok: false, reason: 'notFound' };
-  const gained = sellPrice(stack, lookup);
   const def = lookup(stack.itemId);
-  const next = def.kind === 'consumable' ? removeQty(inv, uid, 1) : removeStack(inv, uid);
+  if (def.kind === 'misc' && (def.quest || def.price <= 0)) return { ok: false, reason: 'unsellable' };
+  const gained = sellPrice(stack, lookup);
+  const next = def.kind === 'consumable' || def.kind === 'misc' ? removeQty(inv, uid, 1) : removeStack(inv, uid);
   return { ok: true, inv: next, won: won + gained, gained };
 }

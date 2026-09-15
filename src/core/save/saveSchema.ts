@@ -3,6 +3,7 @@ import type { Inventory } from '../inventory/inventory';
 import type { Equipment } from '../inventory/equipment';
 import type { SkillState } from '../skills/skillState';
 import type { FireState } from '../weapons/fireController';
+import type { QuestState } from '../quest/questState';
 import type { ControlScheme } from '@data/schema/enums';
 
 export const CURRENT_SAVE_VERSION = 1 as const;
@@ -22,6 +23,8 @@ export interface SaveGameV1 {
   equipment: Equipment;
   skills: SkillState;
   fire: FireState;
+  /** added mid-M2; absent in early v1 rows (treated as empty) */
+  quests?: QuestState;
   location: { mapId: string; spawn: string };
   flags: Record<string, boolean | number>;
   settings: SaveSettings;

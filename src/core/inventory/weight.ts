@@ -9,6 +9,7 @@ export function stackWeightKg(itemId: string, qty: number, lookup: ItemLookup): 
     case 'ammo':
       return def.weightKgPerRound * qty;
     case 'consumable':
+    case 'misc':
       return def.weightKg * qty;
   }
 }

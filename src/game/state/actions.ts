@@ -9,6 +9,7 @@ import { isAmmoCompatible, selectAmmoKind } from '@core/weapons/fireController';
 import { learnOrRankUp, toggleActive } from '@core/skills/skillState';
 import { buy, sell } from '@core/economy/shop';
 import { gameState } from './GameState';
+import { questService } from './questService';
 
 export interface ActionResult {
   ok: boolean;
@@ -105,7 +106,7 @@ export const actions = {
     if (!stack) return fail('아이템을 찾을 수 없습니다.');
     const def = registry.item(stack.itemId);
     const r = sell(gameState.inventory, gameState.character.won, uid, registry.item);
-    if (!r.ok) return fail('아이템을 찾을 수 없습니다.');
+    if (!r.ok) return fail(r.reason === 'unsellable' ? '판매할 수 없는 아이템입니다.' : '아이템을 찾을 수 없습니다.');
     gameState.setInventory(r.inv);
     gameState.setEquipment(pruneEquipment(gameState.equipment, r.inv));
     gameState.setCharacter({ ...gameState.character, won: r.won });
@@ -128,6 +129,14 @@ export const actions = {
     gameState.setCharacter({ ...gameState.character, won: gameState.character.won - r.cost });
     gameState.setVitals({});
     return done(`${def.name} 습득 (₩${r.cost.toLocaleString('ko-KR')})`, 'good');
+  },
+
+  acceptQuest(id: string): ActionResult {
+    return questService.accept(id);
+  },
+
+  completeQuest(id: string): ActionResult {
+    return questService.complete(id);
   },
 
   toggleSkill(id: string): ActionResult {

@@ -15,6 +15,7 @@ import { depthForY } from '../systems/facing';
 import { buildMinimapTexture } from '../systems/Minimap';
 import { gameState } from '../state/GameState';
 import { saveService } from '../state/SaveService';
+import { questService } from '../state/questService';
 import { theme } from '../ui/theme';
 
 /** World camera zoom: 32px tiles render at 48px, so characters read like the original's ~50px sprites. */
@@ -134,6 +135,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     gameState.minimap = buildMinimapTexture(this, this.built);
     gameState.events.emit('mapChanged', { mapId: this.mapId, name: this.def.name, minimap: gameState.minimap });
 
+    questService.onReach(this.mapId);
     this.onCreateWorld();
   }
 

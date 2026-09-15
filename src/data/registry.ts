@@ -4,9 +4,12 @@ import type { SkillDef } from './schema/skill';
 import type { NpcDef } from './schema/npc';
 import type { MapDef, Rect } from './schema/map';
 import type { AssaultDef } from './schema/assault';
+import type { QuestDef } from './schema/quest';
 import { WEAPONS } from './weapons';
 import { AMMO } from './ammo';
 import { ARMORS, CONSUMABLES } from './armors';
+import { MISC } from './misc';
+import { QUESTS } from './quests';
 import { MONSTERS } from './monsters';
 import { SKILLS } from './skills';
 import { NPCS } from './npcs';
@@ -17,7 +20,7 @@ import { assaultA } from './assaults/assault-a';
 
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
-export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES];
+export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES, ...MISC];
 export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade];
 export const ASSAULTS: AssaultDef[] = [assaultA];
 
@@ -27,6 +30,7 @@ const skills = byId(SKILLS);
 const npcs = byId(NPCS);
 const maps = byId(MAPS);
 const assaults = byId(ASSAULTS);
+const quests = byId(QUESTS);
 
 function must<T>(map: Map<string, T>, id: string, what: string): T {
   const v = map.get(id);
@@ -61,7 +65,9 @@ export const registry = {
   npc: (id: string): NpcDef => must(npcs, id, 'npc'),
   map: (id: string): MapDef => must(maps, id, 'map'),
   assault: (id: string): AssaultDef => must(assaults, id, 'assault'),
+  quest: (id: string): QuestDef => must(quests, id, 'quest'),
   hasItem: (id: string): boolean => items.has(id),
+  hasMap: (id: string): boolean => maps.has(id),
 };
 
 function rectInside(r: Rect, m: MapDef): boolean {
@@ -86,7 +92,23 @@ export function validateAll(): void {
   for (const n of NPCS) {
     for (const id of n.stock ?? []) if (!items.has(id)) errors.push(`npc ${n.id} stocks unknown item ${id}`);
     for (const id of n.assaults ?? []) if (!assaults.has(id)) errors.push(`npc ${n.id} offers unknown assault ${id}`);
+    for (const id of n.quests ?? []) if (!quests.has(id)) errors.push(`npc ${n.id} gives unknown quest ${id}`);
     if (n.role === 'shop' && !n.stock?.length) errors.push(`shop npc ${n.id} has empty stock`);
+    if (n.role === 'quest' && !n.quests?.length) errors.push(`quest npc ${n.id} has no quests`);
+  }
+
+  for (const q of QUESTS) {
+    const giver = npcs.get(q.giver);
+    if (!giver) errors.push(`quest ${q.id} giver ${q.giver} unknown`);
+    else if (!giver.quests?.includes(q.id)) errors.push(`quest ${q.id} not listed on giver ${q.giver}`);
+    for (const id of q.prereq?.quests ?? []) if (!quests.has(id)) errors.push(`quest ${q.id} prereq unknown quest ${id}`);
+    for (const st of q.steps) {
+      if (st.kind === 'kill' && st.monsterId && !monsters.has(st.monsterId)) errors.push(`quest ${q.id} kill step unknown monster ${st.monsterId}`);
+      if (st.kind === 'collect' && !items.has(st.itemId)) errors.push(`quest ${q.id} collect step unknown item ${st.itemId}`);
+      if (st.kind === 'talk' && !npcs.has(st.npcId)) errors.push(`quest ${q.id} talk step unknown npc ${st.npcId}`);
+      // reach steps may point at maps added in a later milestone; checked softly
+    }
+    for (const it of [...(q.rewards.items ?? []), ...(q.consumes ?? [])]) if (!items.has(it.itemId)) errors.push(`quest ${q.id} references unknown item ${it.itemId}`);
   }
 
   for (const w of WEAPONS) {

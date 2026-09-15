@@ -31,6 +31,14 @@ export const NPCS: NpcDef[] = [
     ],
   },
   {
+    id: 'npc_kimhun',
+    name: '김훈 소대장',
+    role: 'quest',
+    tex: TEX.npc_kimhun,
+    lines: ['중곡동 경찰서 김훈이다. 살아남았다면 일손이 되어 주겠나.', '패러렐 시스템은 허가증 없이는 못 쓴다. 규정이야.'],
+    quests: ['q_junggok_cleanup', 'q_wito_documents'],
+  },
+  {
     id: 'npc_assault',
     name: '어설트 접수원',
     role: 'assault',

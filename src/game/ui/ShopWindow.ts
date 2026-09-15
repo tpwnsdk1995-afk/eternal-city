@@ -66,7 +66,9 @@ export class ShopWindow extends Window {
           ? `${def.caliber} ${def.ammoKind} · ${buyQty(def)}발 박스`
           : def.kind === 'armor'
             ? `${def.slot} · 방어 ${def.defense} · Lv.${def.reqLevel}`
-            : `소모품 · ${[def.effect.hp ? `생명 +${def.effect.hp}` : '', def.effect.stamina ? `지구력 +${def.effect.stamina}` : ''].filter(Boolean).join(' ')}`;
+            : def.kind === 'consumable'
+              ? `소모품 · ${[def.effect.hp ? `생명 +${def.effect.hp}` : '', def.effect.stamina ? `지구력 +${def.effect.stamina}` : ''].filter(Boolean).join(' ')}`
+              : def.desc;
       buyRows.push({
         id,
         icon: def.iconTex,
@@ -84,6 +86,7 @@ export class ShopWindow extends Window {
     const sellRows: ListRow[] = gameState.inventory.items.map((s) => {
       const def = registry.item(s.itemId);
       const equipped = eq.weaponUid === s.uid || Object.values(eq.armor).includes(s.uid);
+      if (def.kind === 'misc') return { id: s.uid, icon: def.iconTex, text: def.name, sub: def.quest ? '퀘스트 아이템 — 판매 불가' : def.desc, right: def.quest || def.price <= 0 ? '—' : `+₩${sellPrice(s, registry.item)}`, rightColor: theme.colors.muted, disabled: def.quest || def.price <= 0, onClick: () => actions.sell(s.uid) };
       return {
         id: s.uid,
         icon: def.iconTex,

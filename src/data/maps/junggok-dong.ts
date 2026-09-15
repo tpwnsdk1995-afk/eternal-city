@@ -129,5 +129,7 @@ export const junggokDong: MapDef = {
     default: { x: 6, y: 72 },
     fromParking: { x: 6, y: 72 },
   },
+  // 중곡동 경찰서 앞 (구청 입구 옆 보도)
+  npcs: [{ id: 'npc_kimhun', at: { x: 9, y: 71 } }],
   safeZone: false,
 };

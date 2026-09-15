@@ -60,7 +60,19 @@ export interface ConsumableDef {
   iconTex: TexKey;
 }
 
-export type ItemDef = WeaponDef | AmmoDef | ArmorDef | ConsumableDef;
+/** Quest items, documents, keys — stackable, no direct use. */
+export interface MiscDef {
+  kind: 'misc';
+  id: string;
+  name: string;
+  desc: string;
+  weightKg: number;
+  price: number; // 0 = cannot be sold
+  quest?: boolean;
+  iconTex: TexKey;
+}
+
+export type ItemDef = WeaponDef | AmmoDef | ArmorDef | ConsumableDef | MiscDef;
 
 /** A concrete stack in an inventory. For ammo, `qty` is rounds left in the box. */
 export interface ItemStack {

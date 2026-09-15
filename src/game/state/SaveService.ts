@@ -2,6 +2,7 @@ import { balance } from '@data/balance';
 import { registry } from '@data/registry';
 import { initialFireState } from '@core/weapons/fireController';
 import { emptyStatus } from '@core/combat/statusEffects';
+import { emptyQuestState } from '@core/quest/questState';
 import { CURRENT_SAVE_VERSION, migrateSave, type SaveGame } from '@core/save/saveSchema';
 import { db, type SaveRow } from './db';
 import { gameState } from './GameState';
@@ -29,6 +30,7 @@ export function takeSnapshot(): SaveGame {
     equipment: gameState.equipment,
     skills: gameState.skills,
     fire: gameState.fire,
+    quests: gameState.quests,
     location: saveLocation(gameState.currentMapId),
     flags: { ...gameState.flags, god: false },
     settings: { ...gameState.settings },
@@ -43,6 +45,7 @@ export function applySnapshot(save: SaveGame): void {
   gameState.equipment = save.equipment;
   gameState.skills = save.skills;
   gameState.fire = { ...initialFireState(), ...save.fire, lastFireAt: -Infinity };
+  gameState.quests = save.quests ?? emptyQuestState();
   gameState.status = emptyStatus();
   gameState.consciousness = { lastTriggeredAt: -Infinity };
   gameState.flags = { ...save.flags };

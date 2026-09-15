@@ -152,6 +152,18 @@ export function drawIconEnergyDrink(ctx: Ctx, _f: number, w: number, h: number):
 
 export const drawIconConsumable = drawIconBandage;
 
+/** Folded military document with a red classification stamp */
+export function drawIconDocument(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  poly(ctx, [[7, 4], [21, 4], [26, 9], [26, 28], [7, 28]], '#e8e2d2');
+  poly(ctx, [[21, 4], [21, 9], [26, 9]], '#b8b2a2');
+  for (let y = 12; y < 26; y += 3.5) fill(ctx, 10, y, y % 7 < 3.5 ? 12 : 9, 1.2, '#6b6f7a');
+  ctx.strokeStyle = '#c23b3b';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(12.5, 17.5, 10, 6);
+  fill(ctx, 14, 19.5, 7, 2, '#c23b3b');
+}
+
 // ---------------------------------------------------------------- skills
 
 export function drawIconSkillPassive(ctx: Ctx, _f: number, w: number, h: number): void {

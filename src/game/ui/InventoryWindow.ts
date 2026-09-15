@@ -9,7 +9,7 @@ import { Window } from './Window';
 import { ListView, type ListRow } from './ListView';
 import { theme } from './theme';
 
-const KIND_ORDER = { weapon: 0, armor: 1, ammo: 2, consumable: 3 } as const;
+const KIND_ORDER = { weapon: 0, armor: 1, ammo: 2, consumable: 3, misc: 4 } as const;
 
 export class InventoryWindow extends Window {
   private rows: ListView;
@@ -83,6 +83,8 @@ export class InventoryWindow extends Window {
           onClick: () => actions.selectAmmo(s.uid),
         };
       }
+      case 'misc':
+        return { id: s.uid, icon: def.iconTex, text: def.name, sub: `${def.quest ? '퀘스트 아이템 · ' : ''}${def.desc}`, right: `×${s.qty}`, rightColor: theme.colors.muted, color: def.quest ? '#ffd166' : undefined };
       case 'consumable': {
         const e = def.effect;
         const eff = [e.hp ? `생명 +${e.hp}` : '', e.stamina ? `지구력 +${e.stamina}` : '', e.ap ? `행동력 +${e.ap}` : ''].filter(Boolean).join(' ');

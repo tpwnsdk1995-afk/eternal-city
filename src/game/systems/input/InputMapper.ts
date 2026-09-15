@@ -3,7 +3,7 @@ import type { Vec2 } from '@core/math/vec';
 import type { ControlScheme } from '@data/schema/enums';
 import { gameState } from '../../state/GameState';
 
-export type Hotkey = 'inventory' | 'status' | 'skills' | 'minimap' | 'menu' | `quick${number}`;
+export type Hotkey = 'inventory' | 'status' | 'skills' | 'quest' | 'minimap' | 'menu' | `quick${number}`;
 
 export interface InputIntent {
   /** classic: world position of the latest LMB press (null when none this frame) */
@@ -140,6 +140,8 @@ export class InputMapper {
         return 'inventory';
       case 'KeyK':
         return 'skills';
+      case 'KeyQ':
+        return 'quest';
       case 'Tab':
         return 'minimap';
       case 'Escape':
@@ -160,6 +162,6 @@ export class InputMapper {
 
 export function schemeHints(scheme: ControlScheme): string[] {
   return scheme === 'classic'
-    ? ['좌클릭 이동 (NPC 클릭 = 대화)', 'Shift+클릭 달리기 · CapsLock 상시 달리기', '우클릭 공격 (마우스 방향)', 'Space 웅크리기 → 다시 Space 점프', 'Ctrl 서브연사 토글', 'I 인벤토리 · C 상태 · K 스킬 · Esc 메뉴']
-    : ['WASD 이동 · Shift 달리기', '좌클릭 공격 (마우스 방향)', 'C 웅크리기 · Space 점프', 'E 상호작용 (NPC)', 'Ctrl 서브연사 토글', 'I 인벤토리 · V 상태 · K 스킬 · Esc 메뉴'];
+    ? ['좌클릭 이동 (NPC 클릭 = 대화)', 'Shift+클릭 달리기 · CapsLock 상시 달리기', '우클릭 공격 (마우스 방향)', 'Space 웅크리기 → 다시 Space 점프', 'Ctrl 서브연사 토글 · 1~9 퀵슬롯', 'I 인벤토리 · C 상태 · K 스킬 · Q 퀘스트 · Tab 지도 · Esc 메뉴']
+    : ['WASD 이동 · Shift 달리기', '좌클릭 공격 (마우스 방향)', 'C 웅크리기 · Space 점프', 'E 상호작용 (NPC)', 'Ctrl 서브연사 토글 · 1~9 퀵슬롯', 'I 인벤토리 · V 상태 · K 스킬 · Q 퀘스트 · Tab 지도 · Esc 메뉴'];
 }
