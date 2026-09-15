@@ -170,3 +170,44 @@ describe('loot + enemy attack maths', () => {
     expect(enemyHitChance(0.6, 100, 300, false)).toBeGreaterThan(enemyHitChance(0.6, 100, 300, true));
   });
 });
+
+describe('enemyBrain — burrower (몽골리안 데스웜)', () => {
+  const def = registry.monster('mongolian_deathworm');
+  const B = def.burrow!;
+  const player = { x: 800, y: 500 };
+
+  it('fights on the surface, dives after surfaceMs, tunnels toward the hunter, erupts, and broods every second eruption', () => {
+    let o = thinkEnemy(def, initialBrain(0), perceive({ now: 0, player }), rng);
+    expect(o.state.mode).toBe('chase');
+    expect(o.state.surfaceUntil).toBe(B.surfaceMs);
+
+    o = thinkEnemy(def, o.state, perceive({ now: B.surfaceMs, player }), rng);
+    expect(o.state.mode).toBe('burrow');
+    expect(o.speedMult).toBe(B.speedMult);
+    expect(o.move.x).toBeGreaterThan(0.99);
+    expect(o.action).toBeNull();
+
+    o = thinkEnemy(def, o.state, perceive({ now: B.surfaceMs + 1000, self: { x: 700, y: 500 }, player }), rng);
+    expect(o.state.mode).toBe('burrow');
+
+    const at = { x: 760, y: 500 };
+    o = thinkEnemy(def, o.state, perceive({ now: B.surfaceMs + B.burrowMs, self: at, player }), rng);
+    expect(o.action).toEqual({ kind: 'emerge', at, summon: false });
+    expect(o.state.mode).toBe('chase');
+    expect(o.state.emergeCount).toBe(1);
+
+    // second cycle → larva brood
+    const t2 = o.state.surfaceUntil;
+    o = thinkEnemy(def, o.state, perceive({ now: t2, self: at, player }), rng);
+    expect(o.state.mode).toBe('burrow');
+    o = thinkEnemy(def, o.state, perceive({ now: t2 + B.burrowMs, self: at, player }), rng);
+    expect(o.action).toMatchObject({ kind: 'emerge', summon: true });
+    expect(o.state.emergeCount).toBe(2);
+  });
+
+  it('stops tunnelling right next to the hunter instead of surfacing on top of them', () => {
+    const s = { ...initialBrain(0), mode: 'burrow' as const, burrowUntil: 5000 };
+    const o = thinkEnemy(def, s, perceive({ now: 1000, self: { x: 780, y: 500 }, player }), rng);
+    expect(o.move).toEqual({ x: 0, y: 0 });
+  });
+});

@@ -108,6 +108,25 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     return this.scene.time.now < this.knockbackUntil;
   }
 
+  /** burrower underground: dim, passes through everything, cannot be hit */
+  burrowed = false;
+
+  setBurrowed(on: boolean): void {
+    if (this.burrowed === on || !this.alive) return;
+    this.burrowed = on;
+    this.setAlpha(on ? 0.3 : 1);
+    (this.body as Phaser.Physics.Arcade.Body).checkCollision.none = on;
+    if (on) this.setTint(0x8a6a4a);
+    else this.clearTint();
+    this.bar.setVisible(!on);
+    if (this.label) this.label.setVisible(!on);
+  }
+
+  /** can the hunter's bullets/blasts/melee touch it right now */
+  get targetable(): boolean {
+    return this.alive && this.active && !this.burrowed;
+  }
+
   /** Applies the brain's movement/facing. Slides along walls instead of grinding into them. */
   applyBrain(o: BrainOutput): void {
     if (!this.alive) return;
@@ -132,7 +151,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   /** Subtracts HP and flashes. Returns true when this hit killed it (caller runs `kill`). */
   damage(n: number): boolean {
-    if (!this.alive) return false;
+    if (!this.alive || this.burrowed) return false;
     this.hp = Math.max(0, this.hp - n);
     this.setTintFill(0xffffff);
     this.scene.time.delayedCall(60, () => this.alive && this.clearTint());

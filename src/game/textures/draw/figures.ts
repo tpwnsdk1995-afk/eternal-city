@@ -31,6 +31,10 @@ export const FIGURE_STYLES = {
   wito_turret: { skin: '#3a3f47', hair: '#1a1d22', hairStyle: 'helmet', helmetColor: '#2a2f38', shirt: '#3a4048', pants: '#2a2f38', shoes: '#15181d', gun: 'rifle', pack: true, vest: '#4a5260', glow: 'rgba(255,60,60,0.28)', eyes: '#ff3030', size: 1.15 } as FigureStyle,
   zombie_fire_chief: { skin: '#7a6a5a', hair: '#1a1a1a', hairStyle: 'helmet', helmetColor: '#e0b030', shirt: '#8a2a1a', pants: '#3a2a1a', shoes: '#111', coat: '#a03a20', stripes: true, zombie: true, blood: 0.9, size: 1.4, glow: 'rgba(255,120,40,0.35)', eyes: '#ffb03b' } as FigureStyle,
   npc_parallel: { skin: '#f1c9a5', hair: '#d0d8f0', hairStyle: 'short', shirt: '#2a2f4a', pants: '#1a1e30', shoes: '#111', coat: '#3a4a8a', glow: 'rgba(120,180,255,0.3)' } as FigureStyle,
+  zombie_soldier: { skin: ZOMBIE_SKIN, hair: '#1a1a1a', hairStyle: 'helmet', helmetColor: '#3a4a2a', shirt: '#4a5a34', pants: '#3a4628', shoes: '#111', vest: '#2a3320', zombie: true, blood: 0.7, size: 1.05 } as FigureStyle,
+  larva: { skin: '#e0d0a0', hair: '#000', shirt: '#9a8a5a', pants: '#7a6a44', quadruped: true, zombie: true, blood: 0.5, eyes: '#ff8030', size: 0.8, glow: 'rgba(255,200,80,0.18)' } as FigureStyle,
+  wito_elite_trooper: { skin: '#e3bd95', hair: '#1a1a1a', hairStyle: 'helmet', helmetColor: '#252a36', shirt: '#2f3644', pants: '#252b38', shoes: '#111', gun: 'rifle', pack: true, vest: '#3d4a66' } as FigureStyle,
+  mongolian_deathworm: { skin: '#c9a27a', hair: '#000', shirt: '#6a3a4a', pants: '#4a2a34', quadruped: true, zombie: true, blood: 0.6, eyes: '#ff3030', size: 2.6, glow: 'rgba(200,60,80,0.35)' } as FigureStyle,
   wito_recon: { skin: '#e3bd95', hair: '#3a3a2a', hairStyle: 'helmet', helmetColor: '#4a5530', shirt: '#5c6b3a', pants: '#4a5530', shoes: '#26281c', gun: 'rifle' } as FigureStyle,
   wito_airborne: { skin: '#e3bd95', hair: '#2a2a2a', hairStyle: 'helmet', helmetColor: '#2f3626', shirt: '#3f4a2f', pants: '#3a4228', shoes: '#1e2016', gun: 'rifle', pack: true } as FigureStyle,
 

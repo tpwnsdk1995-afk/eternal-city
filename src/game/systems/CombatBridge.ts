@@ -55,6 +55,8 @@ export interface CombatHost {
    * null means "the player". The target takes the enemy's melee/shots/leap damage.
    */
   enemyTarget?(e: Enemy): EnemyTarget | null;
+  /** boss summons (데스웜 라바): the scene spawns a minion at a point */
+  spawnMinion?(monsterId: string, x: number, y: number): Enemy | null;
 }
 
 export interface EnemyTarget {
@@ -135,6 +137,7 @@ export class CombatBridge {
       };
       const o = thinkEnemy(e.def, e.brain, p, gameRng);
       e.brain = o.state;
+      if (e.def.burrow) e.setBurrowed(o.state.mode === 'burrow');
       e.applyBrain(o);
       if (o.action && !e.isKnockedBack) this.enemyAction(e, o.action, now, target);
       const wallDmg = e.tickKnockback(now);
@@ -179,6 +182,11 @@ export class CombatBridge {
 
   aliveEnemies(): Enemy[] {
     return (this.host.enemies.getChildren() as Enemy[]).filter((e) => e.alive && e.active);
+  }
+
+  /** alive and above ground — what the hunter can actually hit */
+  targetableEnemies(): Enemy[] {
+    return this.aliveEnemies().filter((e) => e.targetable);
   }
 
   // --- player firing ------------------------------------------------------------------------
@@ -316,7 +324,7 @@ export class CombatBridge {
 
   private updateProjectiles(dtMs: number, now: number): void {
     if (this.projectiles.length === 0) return;
-    const enemies = this.aliveEnemies();
+    const enemies = this.targetableEnemies();
     const objectives = this.host.objectives?.() ?? [];
     const targets: RayTarget[] = [
       ...enemies.map((e) => ({ id: e.uid, x: e.x, y: e.y, r: e.radius })),
@@ -333,7 +341,7 @@ export class CombatBridge {
   private explode(at: Vec2, radius: number, ctx: AttackerCtx, now: number): void {
     this.fx.explosion(at, radius);
     this.host.scene.cameras.main.shake(180, 0.008);
-    const enemies = this.aliveEnemies();
+    const enemies = this.targetableEnemies();
     const objectives = this.host.objectives?.() ?? [];
     const byUid = new Map(enemies.map((e) => [e.uid, e]));
     const objById = new Map(objectives.map((o) => [OBJ_PREFIX + o.def.id, o]));
@@ -466,6 +474,13 @@ export class CombatBridge {
         if (dist(player.pos, action.at) <= J.aoeRadius + PLAYER_RADIUS) this.hurtPlayer(e.def.attack.dmg * J.dmgMult, now);
         break;
       }
+      case 'emerge': {
+        const B = e.def.burrow;
+        if (!B) return;
+        this.eruption(e, action.at, action.summon);
+        if (dist(player.pos, action.at) <= B.aoeRadius + PLAYER_RADIUS) this.hurtPlayer(e.def.attack.dmg * B.dmgMult, now);
+        break;
+      }
     }
   }
 
@@ -501,6 +516,33 @@ export class CombatBridge {
         if (dist(t.pos, action.at) <= J.aoeRadius + t.radius) hit(e.def.attack.dmg * J.dmgMult);
         break;
       }
+      case 'emerge': {
+        const B = e.def.burrow;
+        if (!B) return;
+        this.eruption(e, action.at, action.summon);
+        if (dist(t.pos, action.at) <= B.aoeRadius + t.radius) hit(e.def.attack.dmg * B.dmgMult);
+        break;
+      }
+    }
+  }
+
+  /** 데스웜 eruption: ground burst FX, heavy shake, and a larva brood every other time. */
+  private eruption(e: Enemy, at: Vec2, summon: boolean): void {
+    const B = e.def.burrow!;
+    this.fx.aoeMarker(at, B.aoeRadius, 600);
+    this.fx.explosion(at, B.aoeRadius * 0.7);
+    this.host.scene.cameras.main.shake(320, 0.012);
+    this.floating.spawn(at.x, at.y - 40, `${e.def.name} 출현!`, '#ff9b9b', 16, true);
+    if (summon && B.summon && this.host.spawnMinion) {
+      for (let i = 0; i < B.summon.count; i++) {
+        const a = (i / B.summon.count) * Math.PI * 2 + gameRng.range(0, 1);
+        const m = this.host.spawnMinion(B.summon.monsterId, at.x + Math.cos(a) * 56, at.y + Math.sin(a) * 56);
+        if (m) {
+          m.tag = 'adds';
+          m.home = { x: at.x, y: at.y };
+        }
+      }
+      gameState.message(`${e.def.name}이(가) 라바 군집을 토해 냈다!`, 'bad');
     }
   }
 

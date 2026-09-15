@@ -24,6 +24,7 @@ export class FieldScene extends BaseWorldScene {
       built: this.built,
       onPlayerDeath: () => this.playerDied(),
       onEnemyKilled: (e: Enemy) => this.spawner.onDeath(e, this.time.now),
+      spawnMinion: (id: string, x: number, y: number) => this.spawnEnemyAt(id, x, y),
     });
     gameState.message(`${this.def.name}에 진입했습니다. 좀비를 조심하세요.`, 'system');
   }

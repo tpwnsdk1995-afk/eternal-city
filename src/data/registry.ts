@@ -26,6 +26,9 @@ import { junggokStationDefense } from './maps/junggok-station-defense';
 import { sewerDepths } from './maps/sewer-depths';
 import { jongnoShelter } from './maps/jongno-shelter';
 import { jongnoStreet } from './maps/jongno-street';
+import { technomartShelter } from './maps/technomart-shelter';
+import { technomartBridge } from './maps/technomart-bridge';
+import { uijeongbu } from './maps/uijeongbu';
 import { YEARS } from './years';
 import { assaultA } from './assaults/assault-a';
 import { assaultB } from './assaults/assault-b';
@@ -38,7 +41,7 @@ import type { AchievementDef, CampaignDef } from './schema/progress';
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
 export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES, ...MISC];
-export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense, sewerDepths, jongnoShelter, jongnoStreet];
+export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense, sewerDepths, jongnoShelter, jongnoStreet, technomartShelter, technomartBridge, uijeongbu];
 const BASE_ASSAULTS: AssaultDef[] = [assaultA, assaultB, assaultC];
 /** every mission plus its 고급 variant */
 export const ASSAULTS: AssaultDef[] = [...BASE_ASSAULTS, ...BASE_ASSAULTS.map(advancedOf)];
@@ -111,6 +114,8 @@ export function validateAll(): void {
     for (const d of m.drops) if (!items.has(d.itemId)) errors.push(`monster ${m.id} drops unknown item ${d.itemId}`);
     if ((m.ai === 'rangedKite' || m.ai === 'assaulter') && !m.ranged) errors.push(`monster ${m.id} ai ${m.ai} needs ranged`);
     if (m.ai === 'banshee' && !m.jump) errors.push(`monster ${m.id} ai banshee needs jump`);
+    if (m.ai === 'burrower' && !m.burrow) errors.push(`monster ${m.id} ai burrower needs burrow`);
+    if (m.burrow?.summon && !MONSTERS.some((x) => x.id === m.burrow!.summon!.monsterId)) errors.push(`monster ${m.id} summons unknown monster ${m.burrow.summon.monsterId}`);
   }
 
   for (const n of NPCS) {

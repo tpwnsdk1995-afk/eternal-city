@@ -2,7 +2,7 @@ import type { MonsterDef } from '@data/schema/monster';
 import type { Rng } from '../rng';
 import { dist, normalize, perp, scale, sub, type Vec2 } from '../math/vec';
 
-export type BrainMode = 'idle' | 'wander' | 'chase' | 'windup' | 'shoot' | 'jump' | 'flee' | 'return' | 'dead';
+export type BrainMode = 'idle' | 'wander' | 'chase' | 'windup' | 'shoot' | 'jump' | 'flee' | 'return' | 'burrow' | 'dead';
 
 export interface BrainState {
   mode: BrainMode;
@@ -18,6 +18,10 @@ export interface BrainState {
   strafeFlipAt: number;
   jumpFrom: Vec2 | null;
   jumpTarget: Vec2 | null;
+  /** burrower cycle */
+  burrowUntil: number;
+  surfaceUntil: number;
+  emergeCount: number;
 }
 
 /** What the enemy knows this frame. Built by the Phaser layer, consumed by pure logic. */
@@ -33,7 +37,7 @@ export interface Perception {
   forceAggro?: boolean;
 }
 
-export type BrainAction = { kind: 'melee' } | { kind: 'shoot' } | { kind: 'jumpLand'; at: Vec2 } | null;
+export type BrainAction = { kind: 'melee' } | { kind: 'shoot' } | { kind: 'jumpLand'; at: Vec2 } | { kind: 'emerge'; at: Vec2; summon: boolean } | null;
 
 export interface BrainOutput {
   state: BrainState;
@@ -67,6 +71,9 @@ export function initialBrain(now: number): BrainState {
     strafeFlipAt: now + STRAFE_FLIP_MS,
     jumpFrom: null,
     jumpTarget: null,
+    burrowUntil: 0,
+    surfaceUntil: 0,
+    emergeCount: 0,
   };
 }
 
@@ -84,6 +91,8 @@ const out = (state: BrainState, move: Vec2 = ZERO, speedMult = 1, face: Vec2 | n
  * banshee    melee + leaping AoE attack when the player is in the jump band
  * rangedKite keeps preferredRange (backs off / strafes), burst fire with LOS, flees when hurt
  * assaulter  pushes toward preferredRange and keeps shooting; melee when touched
+ * burrower   melee on the surface for surfaceMs, then dives: untargetable, tunnels toward the hunter
+ *            at speedMult, erupts with an AoE (and a larva brood every N-th time), repeats
  */
 export function thinkEnemy(def: MonsterDef, prev: BrainState, p: Perception, rng: Rng): BrainOutput {
   const { now } = p;
@@ -96,6 +105,18 @@ export function thinkEnemy(def: MonsterDef, prev: BrainState, p: Perception, rng
   const dHome = dist(p.self, p.home);
 
   // --- committed animations first -------------------------------------------------------------
+  if (s.mode === 'burrow' && def.burrow) {
+    const B = def.burrow;
+    if (now >= s.burrowUntil) {
+      const count = s.emergeCount + 1;
+      const summon = !!B.summon && count % B.summon.everyN === 0;
+      s = { ...enter(s, 'chase', now), surfaceUntil: now + B.surfaceMs, emergeCount: count, meleeReadyAt: now + 600 };
+      return out(s, ZERO, 1, p.player, { kind: 'emerge', at: p.self, summon });
+    }
+    // tunnelling: close in fast, stop short so it surfaces beside the hunter rather than on top
+    return out(s, d > 48 ? dirToPlayer : ZERO, B.speedMult, null);
+  }
+
   if (s.mode === 'jump' && def.jump && s.jumpTarget && s.jumpFrom) {
     const t = now - s.since;
     if (t >= def.jump.airMs) {
@@ -130,6 +151,15 @@ export function thinkEnemy(def: MonsterDef, prev: BrainState, p: Perception, rng
   const aggro = p.playerAlive && (p.forceAggro || (d <= def.aggroRange && (p.hasLOS || engaged)) || (engaged && d <= def.leashRange));
 
   if (!aggro) return wander(def, s, p, rng);
+
+  // --- burrower: surface timer → dive ------------------------------------------------------
+  if (def.ai === 'burrower' && def.burrow) {
+    if (s.surfaceUntil === 0) s = { ...s, surfaceUntil: now + def.burrow.surfaceMs };
+    else if (now >= s.surfaceUntil) {
+      s = { ...enter(s, 'burrow', now), burrowUntil: now + def.burrow.burrowMs };
+      return out(s, dirToPlayer, def.burrow.speedMult, null);
+    }
+  }
 
   // --- ranged factions ------------------------------------------------------------------------
   if (def.ranged && (def.ai === 'rangedKite' || def.ai === 'assaulter')) {

@@ -39,6 +39,10 @@ export const TEX = {
   wito_turret: 'wito_turret',
   zombie_fire_chief: 'zombie_fire_chief',
   npc_parallel: 'npc_parallel',
+  zombie_soldier: 'zombie_soldier',
+  larva: 'larva',
+  wito_elite_trooper: 'wito_elite_trooper',
+  mongolian_deathworm: 'mongolian_deathworm',
   // street decor (drawn with bottom origin)
   deco_lamp: 'deco_lamp',
   deco_vending: 'deco_vending',

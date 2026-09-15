@@ -25,4 +25,11 @@ export const YEARS: YearDef[] = [
     hubMapId: 'jongno-shelter',
     unlock: { permit: true },
   },
+  {
+    year: 2004,
+    name: '2004년 · 테크노마트~의정부',
+    desc: '한강 북단 강변도로와 북쪽 외곽. 좀비 군인, 라바 군집, 그리고 땅속의 레이드 보스 몽골리안 데스웜.',
+    hubMapId: 'technomart-shelter',
+    unlock: { permit: true, level: 25, orFlag: 'campaign:2002:complete' },
+  },
 ];

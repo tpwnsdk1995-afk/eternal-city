@@ -103,6 +103,10 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.wito_turret]: figure('wito_turret'),
   [TEX.zombie_fire_chief]: figure('zombie_fire_chief', 64),
   [TEX.npc_parallel]: figure('npc_parallel'),
+  [TEX.zombie_soldier]: figure('zombie_soldier'),
+  [TEX.larva]: figure('larva'),
+  [TEX.wito_elite_trooper]: figure('wito_elite_trooper'),
+  [TEX.mongolian_deathworm]: figure('mongolian_deathworm', 96),
 
   [TEX.wito_recon]: figure('wito_recon'),
   [TEX.wito_airborne]: figure('wito_airborne'),

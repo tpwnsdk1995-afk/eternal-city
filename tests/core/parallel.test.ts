@@ -13,6 +13,14 @@ describe('패러렐 시스템', () => {
     expect(canTravel(1999, { flags: {}, level: 1, currentYear: 2002 })).toEqual({ ok: false, reason: 'unknown' });
   });
 
+  it('2004 opens with the permit plus Lv.25 or the finished 2002 campaign', () => {
+    expect(canTravel(2004, { flags: { parallelPermit: true }, level: 10, currentYear: 2002 })).toEqual({ ok: false, reason: 'milestone' });
+    expect(canTravel(2004, { flags: { parallelPermit: true }, level: 25, currentYear: 2002 })).toEqual({ ok: true });
+    expect(canTravel(2004, { flags: { parallelPermit: true, 'campaign:2002:complete': true }, level: 1, currentYear: 2003 })).toEqual({ ok: true });
+    expect(canTravel(2004, { flags: { 'campaign:2002:complete': true }, level: 60, currentYear: 2002 })).toEqual({ ok: false, reason: 'permit' });
+    expect(hubForYear(2004)).toBe('technomart-shelter');
+  });
+
   it('every year has a safe-zone hub of that year, used for respawn', () => {
     for (const y of YEARS) {
       const hub = registry.map(y.hubMapId);
@@ -22,6 +30,7 @@ describe('패러렐 시스템', () => {
     }
     expect(hubForYear(2003)).toBe('jongno-shelter');
     expect(hubForYear(2017)).toBe('gwangjin-gucheong-parking'); // unknown years fall back to the start
+    expect(YEARS.map((y) => y.year)).toEqual([2002, 2003, 2004]);
     expect(unlockText(YEARS[1])).toContain('허가증');
   });
 
