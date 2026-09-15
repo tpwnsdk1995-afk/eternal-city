@@ -10,6 +10,7 @@ import type { WindowKey } from '../game/ui/WindowManager';
 import { weaponLabel } from '@core/tuning/tuning';
 import { actions, type Actions } from '../game/state/actions';
 import { saveService } from '../game/state/SaveService';
+import { cloudSave } from '../game/state/CloudSave';
 
 declare global {
   interface Window {
@@ -60,6 +61,8 @@ export interface EcDebug {
   give(itemId: string, qty?: number): void;
   save(): Promise<unknown>;
   hasSave(): Promise<boolean>;
+  /** Cloud-save status (account-bound store on the play page; 'offline' elsewhere). */
+  cloud(): { state: string; lastSyncAt: number; text: string };
   /** Portable save text (what 내보내기 writes), or null without a save. */
   exportSave(): Promise<string | null>;
   /** Validate + store exported text into the slot (what 불러오기 does before loading). */
@@ -129,6 +132,7 @@ export function exposeDebug(game: Phaser.Game): void {
     },
     save: () => saveService.save(),
     hasSave: () => saveService.peek().then((r) => !!r),
+    cloud: () => ({ state: cloudSave.state, lastSyncAt: cloudSave.lastSyncAt, text: cloudSave.describe() }),
     exportSave: () => saveService.exportText(),
     importSave: (text) => saveService.importText(text).then((r) => (r.ok ? { ok: true } : { ok: false, reason: r.reason })),
     windows: () => uiScene()?.windows.openKeys() ?? [],

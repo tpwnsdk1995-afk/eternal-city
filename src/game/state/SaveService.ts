@@ -7,6 +7,7 @@ import { CURRENT_SAVE_VERSION, migrateSave, type SaveGame } from '@core/save/sav
 import { decodeSaveFile, describeDecodeFail, encodeSaveFile, saveFileName, type DecodeResult } from '@core/save/transfer';
 import { db, type SaveRow } from './db';
 import { gameState } from './GameState';
+import { cloudSave } from './CloudSave';
 
 export const DEFAULT_SLOT = 1;
 const AUTOSAVE_MIN_GAP_MS = 4000;
@@ -90,6 +91,7 @@ class SaveService {
     };
     await db.saves.put(row);
     this.lastAutosaveAt = performance.now();
+    void cloudSave.push(data); // account-bound copy when the play page provides one
     return row;
   }
 

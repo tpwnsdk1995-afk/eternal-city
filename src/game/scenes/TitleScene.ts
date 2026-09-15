@@ -3,6 +3,8 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 import { TEX } from '@data/textureKeys';
 import { gameState } from '../state/GameState';
 import { saveService } from '../state/SaveService';
+import { cloudSave } from '../state/CloudSave';
+import { migrateSave } from '@core/save/saveSchema';
 import type { SaveRow } from '../state/db';
 import { theme } from '../ui/theme';
 import { Rain } from '../ui/Rain';
@@ -15,6 +17,7 @@ export class TitleScene extends Phaser.Scene {
   private rain!: Rain;
   private importStatus!: Phaser.GameObjects.Text;
   private showSlot: ((row: SaveRow) => void) | null = null;
+  private cloudReady: Promise<void> = Promise.resolve();
 
   constructor() {
     super('Title');
@@ -55,15 +58,34 @@ export class TitleScene extends Phaser.Scene {
       info.setText(`${row.name}  Lv.${row.level} · ${row.mapName} · ${new Date(row.updatedAt).toLocaleString('ko-KR')}`);
     };
     this.showSlot = showSlot;
+    const cloudText = this.add.text(cx, GAME_HEIGHT - 48, cloudSave.describe(), theme.textStyle(11, '#8a8f9c')).setOrigin(0.5);
+    let keyArmed = false;
+    const armContinue = () => {
+      if (keyArmed) return;
+      keyArmed = true;
+      this.input.keyboard?.once('keydown-C', () => void this.continueGame());
+    };
+    // local slot first (instant), then the account-bound cloud copy if the play page provides one
     void saveService.peek().then((row: SaveRow | null) => {
       if (!row || !this.scene.isActive()) return;
       showSlot(row);
-      this.input.keyboard?.once('keydown-C', () => void this.continueGame());
+      armContinue();
     });
+    this.cloudReady = cloudSave
+      .reconcileSlot()
+      .then(({ row }) => {
+        if (!this.scene.isActive()) return;
+        cloudText.setText(cloudSave.describe()).setColor(cloudSave.state === 'pulled' ? theme.colors.good : cloudSave.state === 'error' ? theme.colors.bad : '#8a8f9c');
+        if (row && migrateSave(row.data)) {
+          showSlot(row);
+          armContinue();
+        }
+      })
+      .catch(() => undefined);
     this.input.keyboard?.once('keydown-ENTER', () => this.newGame());
 
     this.add
-      .text(cx, GAME_HEIGHT - 28, '팬 재현 개발 빌드 · 원작식(좌클릭 이동/우클릭 공격) 또는 현대식(WASD) — Esc 메뉴에서 전환', theme.textStyle(12, '#6b7280'))
+      .text(cx, GAME_HEIGHT - 24, '팬 재현 개발 빌드 · 원작식(좌클릭 이동/우클릭 공격) 또는 현대식(WASD) — Esc 메뉴에서 전환 · 터치 기기는 화면 조작 자동', theme.textStyle(12, '#6b7280'))
       .setOrigin(0.5);
   }
 
@@ -102,6 +124,7 @@ export class TitleScene extends Phaser.Scene {
   private async continueGame(): Promise<void> {
     if (this.busy) return;
     this.busy = true;
+    await this.cloudReady; // don't start on a stale local slot while a newer cloud save is arriving
     const save = await saveService.load();
     if (!save) {
       this.busy = false;

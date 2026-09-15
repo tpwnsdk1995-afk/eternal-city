@@ -104,6 +104,7 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 ## M8 — 마무리 (진행 중)
 
 - **세이브 파일 내보내기/불러오기**: Esc 메뉴 → `내보내기 (파일)`(`.json` 내려받기) / `클립보드 복사`, `불러오기 (파일)` / `클립보드 붙여넣기`(불러오면 그 캐릭터로 바뀌고 저장 위치로 이동). 타이틀 화면의 `세이브 파일 불러오기…`로 새 기기에서 바로 이어하기. 파일은 체크섬이 붙은 봉투 형식이며 예전 스키마(v1~)도 자동 마이그레이션, 손상·잘림·상위 버전 파일은 이유를 표시하고 거부
+- **자동 클라우드 저장(계정 연동)**: claude.ai 플레이 페이지에서 실행되면 저장할 때마다 계정에 묶인 문서 저장소(`saves/slot1`)에도 올라가고, 타이틀에서 로컬 슬롯과 비교해 더 새로운 쪽을 자동으로 씁니다 → 노트북·휴대폰이 로그인만 되어 있으면 같은 캐릭터로 이어집니다. 다른 곳(개발 서버·복사한 파일)에서는 조용히 브라우저 저장만 사용하며, 상태는 타이틀 하단과 Esc 메뉴에 표시됩니다
 - 저장 자체는 계속 자동(맵 이동·레벨 업·장비/스킬 변경·60초마다·탭 닫을 때, 브라우저 IndexedDB)
 
 ## 다음 단계
@@ -116,7 +117,7 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 src/core/   순수 TS 게임 규칙 (Phaser 금지, 전부 유닛 테스트)  stats · combat · weapons · tuning · inventory · skills · ai · assault · progress · map · quest · economy · save
 src/data/   콘텐츠 데이터 + 스키마 + balance.ts (부팅 시 validateAll로 참조 검증)
 src/game/   Phaser 어댑터: scenes · entities · systems(InputMapper, CombatBridge, SpawnSystem) · ui(창들) · textures(코드 드로잉) · state
-e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch · save-transfer)
+e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch · save-transfer · cloud-save)
 ```
 
 `window.__ec` 디버그 훅으로 상태 조회/스폰/텔레포트/어설트 진행을 제어할 수 있습니다(e2e에서 사용).

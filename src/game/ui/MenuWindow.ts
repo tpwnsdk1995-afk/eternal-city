@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import { gameState } from '../state/GameState';
 import { saveService } from '../state/SaveService';
+import { cloudSave } from '../state/CloudSave';
 import { schemeHints, touchHints } from '../systems/input/InputMapper';
 import { isTouchDevice, touchControlsEnabled } from '../systems/input/touchState';
 import { Window } from './Window';
@@ -9,7 +10,7 @@ import { theme } from './theme';
 /** Esc menu: control scheme, FPS overlay, manual save, back to title. */
 export class MenuWindow extends Window {
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, 'menu', x, y, 440, 584, '메뉴 (Esc)');
+    super(scene, 'menu', x, y, 440, 600, '메뉴 (Esc)');
   }
 
   refresh(): void {
@@ -44,6 +45,8 @@ export class MenuWindow extends Window {
     this.button(130, y, '타이틀로 (저장 후)', () => gameState.events.emit('goTitle', undefined), theme.colors.bad, 13);
     y += 40;
     this.label(20, y, '자동 저장: 맵 이동 · 레벨 업 · 장비/스킬 변경 · 60초마다 · 창 닫을 때', '#6b7280', 11);
+    y += 16;
+    this.label(20, y, cloudSave.describe(), cloudSave.state === 'error' ? theme.colors.bad : cloudSave.state === 'offline' ? '#6b7280' : theme.colors.good, 11);
     y += 24;
     this.label(20, y, '다른 기기로 옮기기 — 세이브 파일', theme.colors.muted, 12);
     y += 20;
