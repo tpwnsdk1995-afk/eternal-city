@@ -41,6 +41,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setDepth(depthForY(y));
     this.setCollideWorldBounds(true);
     this.stuck = newStuckTracker({ x, y });
+    this.refreshWeaponLook();
+    const off = gameState.events.on('equipment', () => this.refreshWeaponLook());
+    this.once(Phaser.GameObjects.Events.DESTROY, off);
+  }
+
+  /** Swap the figure sheet so the held weapon matches the equipped class. */
+  refreshWeaponLook(): void {
+    const cls = gameState.weapon()?.def.class;
+    const tex =
+      cls === '근접무기' ? TEX.player_melee
+      : cls === '기관단총' ? TEX.player_smg
+      : cls === '돌격소총' || cls === '저격소총' || cls === '기관총' || cls === '산탄총' || cls === '투척중화기' ? TEX.player_rifle
+      : TEX.player;
+    if (this.texture.key !== tex) this.setTexture(tex, this.frame.name);
   }
 
   get pos(): Vec2 {

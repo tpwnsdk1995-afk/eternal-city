@@ -9,6 +9,9 @@ const ZOMBIE_SKIN = '#9fae86';
 /** Every character look in the game, by texture key. */
 export const FIGURE_STYLES = {
   player: { skin: '#f1c9a5', hair: '#2b2118', shirt: '#2f5fa8', pants: '#2a3244', shoes: '#1a1a1a', gun: 'pistol' } as FigureStyle,
+  player_smg: { skin: '#f1c9a5', hair: '#2b2118', shirt: '#2f5fa8', pants: '#2a3244', shoes: '#1a1a1a', gun: 'smg' } as FigureStyle,
+  player_rifle: { skin: '#f1c9a5', hair: '#2b2118', shirt: '#2f5fa8', pants: '#2a3244', shoes: '#1a1a1a', gun: 'rifle' } as FigureStyle,
+  player_melee: { skin: '#f1c9a5', hair: '#2b2118', shirt: '#2f5fa8', pants: '#2a3244', shoes: '#1a1a1a', gun: 'melee' } as FigureStyle,
 
   zombie_casual_f: { skin: ZOMBIE_SKIN, hair: '#4a2c1f', hairStyle: 'long', shirt: '#d96b9a', pants: '#3b3b4a', zombie: true, blood: 0.5 } as FigureStyle,
   zombie_suit_m: { skin: ZOMBIE_SKIN, hair: '#1a1a1a', shirt: '#2b2f3a', pants: '#23262e', vest: '#d8d8d8', zombie: true, blood: 0.6 } as FigureStyle,

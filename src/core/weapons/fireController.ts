@@ -3,6 +3,7 @@ import type { AmmoDef, WeaponDef } from '@data/schema/item';
 import { isMeleeClass } from '@data/schema/enums';
 import { findAmmoBoxes, type Inventory, type ItemLookup } from '../inventory/inventory';
 import { cooldownMs, effectiveRpm } from './weaponMath';
+import { allowedAmmoKinds, isAmmoCompatible } from './ammoCompat';
 
 export interface FireState {
   lastFireAt: number;
@@ -16,9 +17,14 @@ export type FireAttempt =
   | { ok: true; boxUid: string | null; ammo: AmmoDef | null; cooldownMs: number; pellets: number }
   | { ok: false; reason: 'cooldown' | 'noAmmo' | 'incompatibleAmmo' };
 
-export function isAmmoCompatible(weapon: WeaponDef, kind: AmmoKind): boolean {
-  if (weapon.class === '산탄총' && kind === '철갑탄') return false;
-  return true;
+export { isAmmoCompatible } from './ammoCompat';
+
+/** Ammo kind to select when a weapon is equipped: the first allowed kind the character holds, else the caliber's default. */
+export function defaultAmmoKind(weapon: WeaponDef, inv: Inventory, lookup: ItemLookup, current: AmmoKind): AmmoKind {
+  const allowed = allowedAmmoKinds(weapon);
+  if (allowed.length === 0) return current;
+  if (allowed.includes(current) && findAmmoBoxes(inv, lookup, weapon.caliber, current).length) return current;
+  return allowed.find((k) => findAmmoBoxes(inv, lookup, weapon.caliber, k).length > 0) ?? (allowed.includes(current) ? current : allowed[0]);
 }
 
 /**

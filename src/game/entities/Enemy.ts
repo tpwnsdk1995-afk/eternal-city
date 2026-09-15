@@ -6,6 +6,7 @@ import { initialBrain, type BrainOutput, type BrainState } from '@core/ai/enemyB
 import { emptyStatus, type StatusState } from '@core/combat/statusEffects';
 import { theme } from '../ui/theme';
 import { DIR_S, depthForY, dirFromAngle, figureFrame, type Dir } from '../systems/facing';
+import { balance } from '@data/balance';
 
 let nextUid = 1;
 
@@ -71,9 +72,45 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     return this.hp / this.maxHp;
   }
 
+  private knockbackUntil = 0;
+  private knockbackWallBonus = 0;
+  private knockbackDir: Vec2 = { x: 0, y: 0 };
+
+  /**
+   * Shove the enemy along `dir` (Slug / melee). While shoved the brain's movement is ignored; hitting
+   * a wall mid-shove deals `wallBonus` extra damage once (original: Slug 벽 충돌 1.5배).
+   */
+  knockback(dir: Vec2, now: number, wallBonus: number, strength = 1): void {
+    if (!this.alive || this.def.boss) return;
+    const speed = (balance.combat.slugKnockbackPx / (balance.combat.slugKnockbackMs / 1000)) * strength;
+    this.knockbackDir = dir;
+    this.knockbackUntil = now + balance.combat.slugKnockbackMs * strength;
+    this.knockbackWallBonus = Math.round(wallBonus * balance.combat.slugWallBonus);
+    this.setVelocity(dir.x * speed, dir.y * speed);
+  }
+
+  /** Returns extra wall-impact damage to apply this frame (0 when none). */
+  tickKnockback(now: number): number {
+    if (now >= this.knockbackUntil) return 0;
+    const body = this.body as Phaser.Physics.Arcade.Body;
+    const hitWall = (body.blocked.left && this.knockbackDir.x < 0) || (body.blocked.right && this.knockbackDir.x > 0) || (body.blocked.up && this.knockbackDir.y < 0) || (body.blocked.down && this.knockbackDir.y > 0);
+    if (hitWall && this.knockbackWallBonus > 0) {
+      const bonus = this.knockbackWallBonus;
+      this.knockbackWallBonus = 0;
+      this.knockbackUntil = now;
+      return bonus;
+    }
+    return 0;
+  }
+
+  get isKnockedBack(): boolean {
+    return this.scene.time.now < this.knockbackUntil;
+  }
+
   /** Applies the brain's movement/facing. Slides along walls instead of grinding into them. */
   applyBrain(o: BrainOutput): void {
     if (!this.alive) return;
+    if (this.isKnockedBack) return; // shove in progress; velocity was set by knockback()
     const speed = this.def.moveSpeed * o.speedMult;
     let vx = o.move.x * speed;
     let vy = o.move.y * speed;

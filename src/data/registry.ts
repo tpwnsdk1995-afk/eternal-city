@@ -118,10 +118,12 @@ export function validateAll(): void {
   }
 
   for (const w of WEAPONS) {
-    if (w.class === '산탄총') {
-      // shotguns cannot use 철갑탄 — stock must not pair them (checked at fire time too)
-    }
     if (w.gradeMin < 1 || w.gradeMax < w.gradeMin) errors.push(`weapon ${w.id} bad grade range`);
+    const melee = w.class === '근접무기';
+    if (melee !== (w.caliber === 'none')) errors.push(`weapon ${w.id}: melee weapons and only melee weapons use caliber 'none'`);
+    if (!melee && !AMMO.some((a) => a.caliber === w.caliber)) errors.push(`weapon ${w.id} has no ammo for caliber ${w.caliber}`);
+    if (w.class === '산탄총' && !w.pellets) errors.push(`shotgun ${w.id} needs pellets`);
+    if ((w.class === '투척중화기') !== !!w.projectile) errors.push(`weapon ${w.id}: launchers and only launchers define projectile`);
   }
 
   for (const m of MAPS) {

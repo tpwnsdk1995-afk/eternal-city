@@ -6,7 +6,7 @@ import { statCap } from '@core/stats/levelCurve';
 import { getStack, removeQty, totalRounds } from '@core/inventory/inventory';
 import { equipStack, pruneEquipment, unequipArmor, unequipWeapon } from '@core/inventory/equipment';
 import { totalWeightKg } from '@core/inventory/weight';
-import { isAmmoCompatible, selectAmmoKind } from '@core/weapons/fireController';
+import { defaultAmmoKind, isAmmoCompatible, selectAmmoKind } from '@core/weapons/fireController';
 import { learnOrRankUp, toggleActive } from '@core/skills/skillState';
 import { buy, sell } from '@core/economy/shop';
 import { gameState } from './GameState';
@@ -51,6 +51,10 @@ export const actions = {
       return fail(why);
     }
     gameState.setEquipment(r.equipment);
+    if (def.kind === 'weapon') {
+      const kind = defaultAmmoKind(def, gameState.inventory, registry.item, gameState.fire.ammoKind);
+      if (kind !== gameState.fire.ammoKind) gameState.setFire(selectAmmoKind(gameState.fire, kind));
+    }
     gameState.setVitals({}); // max HP etc. may change with armour mods
     return done(`${def.name} 장착`);
   },

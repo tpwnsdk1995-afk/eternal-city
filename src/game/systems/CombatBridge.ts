@@ -12,7 +12,9 @@ import { applyBurn, isBurning, isInvulnerable, tickBurn } from '@core/combat/sta
 import { rollConsciousness } from '@core/combat/consciousness';
 import { enemyHitChance, playerDamageTaken } from '@core/combat/enemyAttack';
 import { markFired, toggleSubFire, tryFire } from '@core/weapons/fireController';
-import { subFireParams } from '@core/weapons/weaponMath';
+import { fireProfile, subFireParams } from '@core/weapons/weaponMath';
+import { targetsInArc } from '@core/combat/meleeArc';
+import type { WeaponDef } from '@data/schema/item';
 import { isMeleeClass } from '@data/schema/enums';
 import { addItem, consumeRound } from '@core/inventory/inventory';
 import { totalWeightKg } from '@core/inventory/weight';
@@ -41,6 +43,8 @@ export interface CombatHost {
   /** Destructible structures that also stop bullets (assault maps). */
   objectives?(): Objective[];
   onObjectiveDestroyed?(id: string): void;
+  /** Launcher fired: the scene spawns the projectile (see ProjectileSystem). */
+  onLaunch?(def: WeaponDef, origin: Vec2, angle: number, ctx: AttackerCtx): void;
 }
 
 const OBJ_PREFIX = 'obj:';
@@ -96,7 +100,13 @@ export class CombatBridge {
       const o = thinkEnemy(e.def, e.brain, p, gameRng);
       e.brain = o.state;
       e.applyBrain(o);
-      if (o.action) this.enemyAction(e, o.action, now);
+      if (o.action && !e.isKnockedBack) this.enemyAction(e, o.action, now);
+      const wallDmg = e.tickKnockback(now);
+      if (wallDmg > 0) {
+        this.fx.spark({ x: e.x, y: e.y });
+        this.floating.spawn(e.x, e.y - 6, `${wallDmg}`, '#ffb347', 13, true);
+        if (e.damage(wallDmg)) this.killEnemy(e, now);
+      }
 
       if (isBurning(e.status, now)) {
         const r = tickBurn(e.status, now, dtMs, e.maxHp);
@@ -142,11 +152,10 @@ export class CombatBridge {
     const origin = { x: player.x, y: player.y - 6 }; // chest height in the oblique view
     const baseAngle = angleTo(origin, aim);
     const tech = gameState.character.base['기술'];
-    const spread = spreadRadians(w.def.spreadDeg, tech) * (player.crouching ? 0.6 : 1) * (player.moving ? 1.4 : 1);
+    const profile = fireProfile(w.def.class);
+    const spread = spreadRadians(w.def.spreadDeg, tech) * (player.crouching ? profile.crouchSpreadMult : 1) * (player.moving ? profile.moveSpreadMult : 1);
     const muzzle = { x: origin.x + Math.cos(baseAngle) * MUZZLE_OFFSET, y: origin.y + Math.sin(baseAngle) * MUZZLE_OFFSET };
-    this.fx.muzzle(muzzle, baseAngle);
-    if (!isMeleeClass(w.def.class)) this.fx.casing({ x: origin.x + Math.cos(baseAngle) * 6, y: origin.y + Math.sin(baseAngle) * 6 }, baseAngle);
-    this.host.scene.cameras.main.shake(40, 0.0012);
+    const melee = isMeleeClass(w.def.class);
 
     const enemies = this.aliveEnemies();
     const objectives = this.host.objectives?.() ?? [];
@@ -156,9 +165,9 @@ export class CombatBridge {
     ];
     const byUid = new Map(enemies.map((e) => [e.uid, e]));
     const objById = new Map(objectives.map((o) => [OBJ_PREFIX + o.def.id, o]));
-    const melee = isMeleeClass(w.def.class);
+    const mods = gameState.mods();
     const ctx: AttackerCtx = {
-      baseDamage: w.def.baseDamage,
+      baseDamage: w.def.baseDamage * (player.crouching ? profile.crouchDmgMult : 1),
       grade: w.grade,
       subFire: gameState.fire.subFire,
       subFireDmgMult: subFireParams(w.def).dmgMult,
@@ -171,10 +180,17 @@ export class CombatBridge {
       statMult: melee ? d.meleeMult : d.rangedMult,
       critChance: d.critChance,
       critMult: d.critMult,
-      mods: gameState.mods(),
+      mods: player.moving ? { ...mods, accPct: mods.accPct - profile.moveAccPenalty } : mods,
       moving: player.moving,
       crouching: player.crouching,
     };
+
+    if (melee) return this.meleeSwing(w.def.range, origin, baseAngle, targets, byUid, objById, ctx, now);
+    if (w.def.projectile) return this.launchProjectile(w.def, origin, baseAngle, ctx);
+
+    this.fx.muzzle(muzzle, baseAngle);
+    this.fx.casing({ x: origin.x + Math.cos(baseAngle) * 6, y: origin.y + Math.sin(baseAngle) * 6 }, baseAngle);
+    this.host.scene.cameras.main.shake(40, w.def.class === '기관총' || w.def.class === '산탄총' ? 0.003 : 0.0012);
 
     for (let i = 0; i < attempt.pellets; i++) {
       const dir = fromAngle(baseAngle + gameRng.range(-spread, spread));
@@ -204,11 +220,47 @@ export class CombatBridge {
         e.status = applyBurn(e.status, now);
         e.setBurning(true);
       }
+      if (res.knockback) e.knockback(dir, now, res.damage);
       if (e.damage(res.damage)) {
         this.killEnemy(e, now);
         break;
       }
     }
+  }
+
+  /** 근접무기: everything inside the swing arc takes a hit; no ammo, no tracer. */
+  private meleeSwing(range: number, origin: Vec2, angle: number, targets: RayTarget[], byUid: Map<string, Enemy>, objById: Map<string, Objective>, ctx: AttackerCtx, now: number): void {
+    this.fx.swing(origin, angle, range);
+    const hits = targetsInArc(origin, angle, range, targets);
+    for (const t of hits) {
+      const obj = objById.get(t.id);
+      if (obj) {
+        const res = computeHit(ctx, { skin: '강성', defense: 0, maxHp: obj.maxHp, burning: false }, t.dist, gameRng);
+        if (!res.hit) continue;
+        this.fx.spark({ x: obj.x, y: obj.y });
+        this.floating.spawn(obj.x, obj.y - 20, `${res.damage}`, '#ffd166', 12);
+        if (obj.damage(res.damage)) this.host.onObjectiveDestroyed?.(obj.def.id);
+        continue;
+      }
+      const e = byUid.get(t.id);
+      if (!e || !e.alive) continue;
+      const res = computeHit(ctx, { skin: e.def.skin, defense: e.def.defense, maxHp: e.maxHp, burning: isBurning(e.status, now) }, t.dist, gameRng);
+      if (!res.hit) {
+        this.floating.spawn(e.x, e.y, 'MISS', '#9aa0a6', 11);
+        continue;
+      }
+      this.fx.blood({ x: e.x, y: e.y });
+      this.floating.spawn(e.x, e.y, `${res.damage}`, res.crit ? '#ffe066' : '#ffffff', res.crit ? 16 : 13, res.crit);
+      e.knockback(fromAngle(angle), now, Math.round(res.damage * 0.3), 0.35);
+      if (e.damage(res.damage)) this.killEnemy(e, now);
+    }
+  }
+
+  /** 투척/중화기: a visible shell that explodes on impact or at the aimed distance (M3-3 fleshes this out). */
+  private launchProjectile(def: WeaponDef, origin: Vec2, angle: number, ctx: AttackerCtx): void {
+    this.fx.muzzle({ x: origin.x + Math.cos(angle) * MUZZLE_OFFSET, y: origin.y + Math.sin(angle) * MUZZLE_OFFSET }, angle);
+    this.host.scene.cameras.main.shake(80, 0.004);
+    this.host.onLaunch?.(def, origin, angle, ctx);
   }
 
   killEnemy(e: Enemy, now: number): void {

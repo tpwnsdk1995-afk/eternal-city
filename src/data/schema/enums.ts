@@ -11,7 +11,7 @@ export type WeaponClass = (typeof WEAPON_CLASSES)[number];
 export const AMMO_KINDS = ['일반탄', '소이탄', '철갑탄', 'Slug', '대전차탄'] as const;
 export type AmmoKind = (typeof AMMO_KINDS)[number];
 
-export const CALIBERS = ['9mm', '.45ACP', '5.56mm', '7.62mm', '12ga', '.50BMG', 'rocket', 'grenade'] as const;
+export const CALIBERS = ['9mm', '.45ACP', '5.56mm', '7.62mm', '12ga', '.50BMG', 'rocket', 'grenade', 'none'] as const;
 export type Caliber = (typeof CALIBERS)[number];
 
 export const SKILL_CATEGORIES = ['퍼스널패시브', '퍼스널액티브', '웨폰마스터리'] as const;

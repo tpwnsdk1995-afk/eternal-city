@@ -14,6 +14,8 @@ export interface WeaponDef {
   baseAccuracy: number; // 0..1
   pellets?: number; // shotguns
   subFire?: { rpm: number; dmgMult: number }; // Ctrl toggle
+  /** launchers: slow projectile that explodes with area damage instead of hitscan */
+  projectile?: { speed: number; aoeRadius: number; arc: boolean };
   gradeMin: number;
   gradeMax: number;
   weightKg: number;

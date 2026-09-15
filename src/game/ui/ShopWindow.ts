@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import { registry } from '@data/registry';
 import { NPCS } from '@data/npcs';
+import { WEAPONS } from '@data/weapons';
 import type { NpcDef } from '@data/schema/npc';
 import { buyPrice, buyQty, sellPrice } from '@core/economy/shop';
 import { gradeMult } from '@core/weapons/weaponMath';
@@ -9,6 +10,18 @@ import { actions } from '../state/actions';
 import { Window } from './Window';
 import { ListView, type ListRow } from './ListView';
 import { theme } from './theme';
+
+/** Ammo shows up once any weapon of that caliber is within reach (owned or near the shop's display level). */
+function ammoRelevant(caliber: string, level: number): boolean {
+  if (gameState.inventory.items.some((s) => {
+    const d = registry.item(s.itemId);
+    return d.kind === 'weapon' && d.caliber === caliber;
+  })) return true;
+  return WEAPONS.some((w) => w.caliber === caliber && !w.illegal && w.reqLevel <= level + 6);
+}
+
+/** Highest weapon grade a shop displays at this level: 3 at Lv.1, +1 every 4 levels, capped at 11. */
+export const shopGradeCap = (level: number): number => Math.min(11, 3 + Math.floor(level / 4));
 
 export class ShopWindow extends Window {
   private buyList: ListView;
@@ -42,10 +55,15 @@ export class ShopWindow extends Window {
     const level = gameState.character.level;
     const buyRows: ListRow[] = [];
     const npc = this.npc ?? NPCS.find((n) => n.role === 'shop') ?? null;
+    // shops carry a band of grades that tracks the hunter's level (original: higher-grade stock appears as you progress)
+    const gradeCap = shopGradeCap(level);
     for (const id of npc?.stock ?? []) {
       const def = registry.item(id);
       if (def.kind === 'weapon') {
-        for (let g = def.gradeMin; g <= def.gradeMax; g++) {
+        if (def.reqLevel > level + 6) continue; // far-off weapons are not displayed yet
+        const hi = Math.min(def.gradeMax, gradeCap);
+        const lo = Math.max(def.gradeMin, hi - 2);
+        for (let g = lo; g <= hi; g++) {
           const price = buyPrice(def, g);
           buyRows.push({
             id: `${id}@${g}`,
@@ -61,6 +79,7 @@ export class ShopWindow extends Window {
         continue;
       }
       const price = buyPrice(def);
+      if (def.kind === 'ammo' && !ammoRelevant(def.caliber, level)) continue;
       const sub =
         def.kind === 'ammo'
           ? `${def.caliber} ${def.ammoKind} · ${buyQty(def)}발 박스`

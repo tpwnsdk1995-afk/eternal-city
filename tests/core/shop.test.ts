@@ -9,7 +9,7 @@ describe('shop', () => {
     expect(buyPrice(glock, 1)).toBe(8000);
     expect(buyPrice(glock, 2)).toBe(10000);
     expect(buy(createInventory(), 9000, glock, registry.item, 2)).toEqual({ ok: false, reason: 'noMoney' });
-    expect(buy(createInventory(), 9000, glock, registry.item, 9)).toEqual({ ok: false, reason: 'badGrade' });
+    expect(buy(createInventory(), 9000, glock, registry.item, 12)).toEqual({ ok: false, reason: 'badGrade' });
   });
 
   it('buying ammo adds a full box and buying a weapon records its grade', () => {

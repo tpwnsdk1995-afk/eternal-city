@@ -83,6 +83,121 @@ export function drawIconUzi(ctx: Ctx, _f: number, w: number, h: number): void {
   fill(ctx, 23, 7, 2, 2, '#3a3d42');
 }
 
+/** M16A2 — long black rifle with carry handle and triangular front sight */
+export function drawIconM16(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  fill(ctx, 1, 12, 8, 4, '#2a2d31'); // stock
+  fill(ctx, 8, 10, 16, 6, '#1f2226'); // receiver
+  fill(ctx, 10, 7, 9, 3, '#2a2d31'); // carry handle
+  fill(ctx, 24, 12, 7, 2.5, '#111'); // barrel
+  poly(ctx, [[27, 12], [29, 12], [28, 8]], '#3a3d42'); // front sight
+  poly(ctx, [[12, 16], [16, 16], [15, 24], [11, 24]], '#1f2226'); // grip
+  poly(ctx, [[17, 16], [21, 16], [20, 27], [16, 27]], '#15171a'); // magazine
+  fill(ctx, 21, 16, 5, 2, '#2a2d31'); // handguard
+}
+
+/** AK-47 — wooden stock/handguard, curved magazine */
+export function drawIconAk47(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  poly(ctx, [[1, 11], [8, 12], [8, 16], [1, 17]], '#6b4a2e'); // wood stock
+  fill(ctx, 8, 10, 14, 6, '#26292d');
+  fill(ctx, 8, 10, 14, 1.5, '#4a4e54');
+  fill(ctx, 22, 11, 4, 4, '#6b4a2e'); // wood handguard
+  fill(ctx, 26, 12, 5, 2.5, '#111');
+  fill(ctx, 27, 8, 1.5, 4, '#3a3d42'); // gas block / sight
+  poly(ctx, [[11, 16], [15, 16], [14, 24], [10, 24]], '#6b4a2e'); // grip
+  poly(ctx, [[16, 16], [20, 16], [23, 27], [19, 28]], '#15171a'); // curved mag
+}
+
+/** Pump shotgun — long barrel + tube, wooden stock */
+export function drawIconShotgun(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  poly(ctx, [[1, 12], [9, 12], [9, 17], [1, 19]], '#6b4a2e'); // stock
+  fill(ctx, 9, 11, 8, 6, '#26292d'); // receiver
+  fill(ctx, 17, 11, 14, 2.5, '#3a3d42'); // barrel
+  fill(ctx, 17, 14, 12, 2.5, '#6b4a2e'); // pump / tube
+  fill(ctx, 12, 17, 3, 3, '#26292d'); // trigger guard
+  fill(ctx, 30, 10, 1.5, 2, '#c9a227'); // bead sight
+}
+
+/** Bolt sniper rifle — scope, long barrel, bipod */
+export function drawIconSniper(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  poly(ctx, [[1, 13], [9, 13], [9, 17], [1, 19]], '#2f3a2a'); // synthetic stock
+  fill(ctx, 9, 12, 12, 5, '#26292d');
+  fill(ctx, 21, 13, 10, 2, '#3a3d42'); // barrel
+  fill(ctx, 11, 8, 10, 3, '#1f2226'); // scope
+  fill(ctx, 10, 7.5, 2, 4, '#3a3d42');
+  fill(ctx, 20, 7.5, 2, 4, '#3a3d42');
+  fill(ctx, 13, 17, 3, 5, '#26292d'); // magazine
+  fill(ctx, 24, 15, 1.5, 6, '#4a4e54'); // bipod
+  fill(ctx, 28, 15, 1.5, 6, '#4a4e54');
+}
+
+/** Belt-fed machine gun — thick body, bipod, ammo box */
+export function drawIconMg(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  fill(ctx, 1, 12, 7, 5, '#2a2d31');
+  fill(ctx, 8, 9, 15, 8, '#1f2226'); // receiver
+  fill(ctx, 8, 9, 15, 1.5, '#4a4e54');
+  fill(ctx, 23, 11, 8, 3, '#3a3d42'); // barrel
+  fill(ctx, 23, 10, 6, 1, '#6b7077'); // heat shield
+  fill(ctx, 11, 17, 8, 7, '#4a5530'); // ammo box
+  fill(ctx, 11, 17, 8, 1.5, '#5a6540');
+  fill(ctx, 25, 14, 1.5, 7, '#4a4e54');
+  fill(ctx, 29, 14, 1.5, 7, '#4a4e54');
+  for (let i = 0; i < 4; i++) fill(ctx, 19 + i * 1.6, 15, 1, 3, '#c9a227'); // belt
+}
+
+/** Police baton */
+export function drawIconBaton(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.save();
+  ctx.translate(16, 16);
+  ctx.rotate(-Math.PI / 4);
+  fill(ctx, -12, -2, 24, 4, '#1f2226');
+  fill(ctx, -12, -2, 24, 1, '#3a3d42');
+  fill(ctx, -12, -3, 8, 6, '#4a4e54'); // grip
+  fill(ctx, -6, -4, 2, 8, '#2a2d31'); // side handle
+  ctx.restore();
+}
+
+/** Machete */
+export function drawIconMachete(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.save();
+  ctx.translate(16, 16);
+  ctx.rotate(-Math.PI / 4);
+  poly(ctx, [[-4, -3], [13, -3], [15, 0], [12, 3], [-4, 3]], '#b8bcc2'); // blade
+  fill(ctx, -4, -3, 17, 1, '#e2e5e9');
+  fill(ctx, -12, -2.5, 8, 5, '#3a2a1a'); // handle
+  ctx.restore();
+}
+
+/** Fire axe */
+export function drawIconAxe(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.save();
+  ctx.translate(16, 16);
+  ctx.rotate(-Math.PI / 4);
+  fill(ctx, -13, -1.5, 22, 3, '#6b4a2e'); // haft
+  poly(ctx, [[6, -8], [13, -5], [13, 5], [6, 8], [8, 0]], '#c8402a'); // head
+  poly(ctx, [[11, -5], [13, -5], [13, 5], [11, 5]], '#e2e5e9'); // edge
+  poly(ctx, [[6, -1.5], [2, -4], [2, 4], [6, 1.5]], '#c8402a'); // pick
+  ctx.restore();
+}
+
+/** Grenade launcher / RPG — short fat tube */
+export function drawIconLauncher(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  poly(ctx, [[1, 13], [8, 13], [8, 17], [1, 19]], '#6b4a2e');
+  fill(ctx, 8, 10, 20, 7, '#4a5530'); // tube
+  fill(ctx, 8, 10, 20, 1.5, '#6b7a48');
+  fill(ctx, 26, 9, 5, 9, '#3a3d42'); // muzzle bell
+  fill(ctx, 12, 17, 3, 6, '#26292d'); // grip
+  fill(ctx, 14, 6, 6, 3, '#26292d'); // sight
+}
+
 /** generic class icons (HUD fallback) */
 export const drawIconPistol = drawIconGlock17;
 export const drawIconSmg = drawIconMp5;
@@ -102,6 +217,49 @@ const ammoBox = (color: string, incendiary: boolean) => (ctx: Ctx, _f: number, w
 };
 export const drawIconAmmoNormal = ammoBox('#556270', false);
 export const drawIconAmmoIncendiary = ammoBox('#8a3a1b', true);
+export const drawIconAmmoAp = (ctx: Ctx, f: number, w: number, h: number) => {
+  ammoBox('#2f3f5c', false)(ctx, f, w, h);
+  for (let i = 0; i < 5; i++) fill(ctx, 8 + i * 3.4, 16, 2, 2, '#1a1a1a'); // black tips
+};
+
+/** shotgun shells: red hulls with brass bases */
+export function drawIconAmmoShell(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  fill(ctx, 4, 9, 24, 17, '#5a4a3a');
+  fill(ctx, 4, 9, 24, 4, 'rgba(0,0,0,0.3)');
+  for (let i = 0; i < 5; i++) {
+    fill(ctx, 7 + i * 4, 14, 3, 9, '#c8402a');
+    fill(ctx, 7 + i * 4, 21, 3, 3, '#c9a227');
+  }
+}
+export const drawIconAmmoSlug = (ctx: Ctx, f: number, w: number, h: number) => {
+  drawIconAmmoShell(ctx, f, w, h);
+  for (let i = 0; i < 5; i++) fill(ctx, 7 + i * 4, 14, 3, 9, '#2a5a2a');
+};
+
+/** 40mm grenades in a crate */
+export function drawIconAmmoGrenade(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  fill(ctx, 4, 9, 24, 17, '#4a5530');
+  fill(ctx, 4, 9, 24, 4, 'rgba(0,0,0,0.3)');
+  for (let i = 0; i < 3; i++) {
+    fill(ctx, 7 + i * 7, 14, 5, 9, '#c9a227');
+    fill(ctx, 7 + i * 7, 14, 5, 3, '#7a5d10');
+  }
+}
+
+/** RPG rocket */
+export function drawIconAmmoRocket(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.save();
+  ctx.translate(16, 16);
+  ctx.rotate(-Math.PI / 4);
+  fill(ctx, -12, -2, 18, 4, '#4a5530'); // body
+  poly(ctx, [[6, -4], [13, 0], [6, 4]], '#6b7a48'); // warhead
+  poly(ctx, [[-12, -2], [-16, -5], [-12, 0]], '#3a3d42'); // fins
+  poly(ctx, [[-12, 2], [-16, 5], [-12, 0]], '#3a3d42');
+  ctx.restore();
+}
 
 // ---------------------------------------------------------------- armor
 

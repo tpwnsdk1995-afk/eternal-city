@@ -2,7 +2,7 @@ import type { Dir } from '../../systems/facing';
 
 type Ctx = CanvasRenderingContext2D;
 
-export type GunKind = 'pistol' | 'smg' | 'rifle';
+export type GunKind = 'pistol' | 'smg' | 'rifle' | 'melee';
 
 export interface FigureStyle {
   skin: string;
@@ -58,7 +58,8 @@ function circle(ctx: Ctx, x: number, y: number, r: number, color: string): void 
   ctx.fill();
 }
 
-const GUN_LEN: Record<GunKind, number> = { pistol: 7, smg: 11, rifle: 16 };
+const GUN_LEN: Record<GunKind, number> = { pistol: 7, smg: 11, rifle: 16, melee: 12 };
+const GUN_COLOR: Record<GunKind, string> = { pistol: '#15171a', smg: '#15171a', rifle: '#15171a', melee: '#4a4e54' };
 
 /**
  * Oblique (3/4 top-down) figure, ~34px tall at size 1 inside a 48px frame, feet near the bottom.
@@ -195,9 +196,10 @@ export function drawFigure(ctx: Ctx, dir: Dir, frame: number, w: number, h: numb
       rr(ctx, 1, torsoTop + 3, 9, armW, 1.5, shirt);
       circle(ctx, 10, torsoTop + 4.8, 2, skin);
       const len = GUN_LEN[s.gun];
-      ctx.fillStyle = '#15171a';
-      ctx.fillRect(9, torsoTop + 3.6, len, 2.4);
-      if (s.gun !== 'pistol') ctx.fillRect(12, torsoTop + 5.5, 2, 4); // magazine
+      ctx.fillStyle = GUN_COLOR[s.gun];
+      if (s.gun === 'melee') ctx.fillRect(9, torsoTop + 3.6, len, 2); // baton held forward
+      else ctx.fillRect(9, torsoTop + 3.6, len, 2.4);
+      if (s.gun === 'smg' || s.gun === 'rifle') ctx.fillRect(12, torsoTop + 5.5, 2, 4); // magazine
       if (s.gun === 'rifle') ctx.fillRect(3, torsoTop + 5, 6, 2.2); // stock
     } else {
       rr(ctx, 0 + armSwing, torsoTop + 2, armW, 10, 1.5, shirt);
@@ -210,15 +212,16 @@ export function drawFigure(ctx: Ctx, dir: Dir, frame: number, w: number, h: numb
     circle(ctx, 8.7, torsoTop + 12.5 - armSwing * 0.4, 2.1, skin);
     if (s.gun) {
       // held in the right hand, pointing at the viewer (slightly angled on diagonals)
-      ctx.fillStyle = '#15171a';
+      ctx.fillStyle = GUN_COLOR[s.gun];
       const gx = diagonal ? 9.5 : 8.7;
-      ctx.fillRect(gx - 1.4, torsoTop + 12.5, 2.8, 5 + (s.gun === 'rifle' ? 3 : s.gun === 'smg' ? 1.5 : 0));
+      if (s.gun === 'melee') ctx.fillRect(gx - 1, torsoTop + 4, 2, 10); // held upright
+      else ctx.fillRect(gx - 1.4, torsoTop + 12.5, 2.8, 5 + (s.gun === 'rifle' ? 3 : s.gun === 'smg' ? 1.5 : 0));
     }
   } else {
     rr(ctx, -10.5, torsoTop + 1.5, armW, 10 - armSwing * 0.4, 1.5, shade(shirt, 0.85));
     rr(ctx, 6.9, torsoTop + 1.5, armW, 10 + armSwing * 0.4, 1.5, shade(shirt, 0.85));
     if (s.gun) {
-      ctx.fillStyle = '#15171a';
+      ctx.fillStyle = GUN_COLOR[s.gun];
       const len = Math.min(8, GUN_LEN[s.gun]);
       ctx.fillRect(diagonal ? 7 : 6, torsoTop - len + 4, 2.4, len); // barrel peeking over the shoulder
     }

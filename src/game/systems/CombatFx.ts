@@ -69,6 +69,20 @@ export class CombatFx {
     });
   }
 
+  /** Melee swing arc that fades quickly. */
+  swing(origin: Vec2, angle: number, range: number): void {
+    const g = this.scene.add.graphics().setDepth(12);
+    g.lineStyle(3, 0xf3f4f6, 0.85);
+    g.beginPath();
+    g.arc(origin.x, origin.y, range, angle - 0.9, angle + 0.9, false);
+    g.strokePath();
+    g.lineStyle(1, 0xffffff, 0.4);
+    g.beginPath();
+    g.arc(origin.x, origin.y, range - 8, angle - 0.7, angle + 0.7, false);
+    g.strokePath();
+    this.scene.tweens.add({ targets: g, alpha: 0, duration: 140, onComplete: () => g.destroy() });
+  }
+
   spark(at: Vec2): void {
     const img = this.scene.add.image(at.x, at.y, TEX.muzzle).setDepth(12).setScale(0.5).setTint(0xffe9a8).setBlendMode(Phaser.BlendModes.ADD);
     this.scene.tweens.add({ targets: img, alpha: 0, scale: 0.1, duration: 90, onComplete: () => img.destroy() });
