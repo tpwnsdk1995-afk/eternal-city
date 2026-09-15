@@ -2,6 +2,18 @@ import type { QuestDef } from './schema/quest';
 
 export const QUESTS: QuestDef[] = [
   {
+    id: 'q_tutorial',
+    name: '알파 훈련장 · 첫 사격',
+    giver: 'npc_trainer',
+    text: {
+      offer: '울타리 안에 좀비견 세 마리를 풀어 놨다. 우클릭(현대식은 좌클릭)으로 세 마리를 잡고 돌아와. 탄약 상자는 자동으로 연결되니 재장전은 없다.',
+      progress: '아직 세 마리가 아니군. 이동하면서 쏘면 명중이 떨어진다. 멈추거나 웅크려서 쏴.',
+      complete: '됐다. 램프를 내려가면 광진구청 지하주차장이야. 무기상·EL.IA·어설트 접수처가 거기 있다. 경찰서 앞 김훈 소대장이 첫 임무를 줄 거야.',
+    },
+    steps: [{ kind: 'kill', monsterId: 'zombie_dog', count: 3, label: '훈련장 좀비견 처치' }],
+    rewards: { won: 1_000, xp: 60, items: [{ itemId: 'bandage', qty: 3 }, { itemId: 'ammo_9mm_normal', qty: 50 }] },
+  },
+  {
     id: 'q_junggok_cleanup',
     name: '중곡동 정리',
     giver: 'npc_kimhun',

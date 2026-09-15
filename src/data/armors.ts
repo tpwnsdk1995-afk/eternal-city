@@ -31,6 +31,22 @@ export const ARMORS: ArmorDef[] = [
   // 가발 (원작: 외형 + 소량 방어)
   { kind: 'armor', id: 'armor_wig_short', name: '단발 가발', slot: '가발', defense: 1, weightKg: 0.1, reqLevel: 1, price: 5_000, iconTex: TEX.icon_armor_wig },
   { kind: 'armor', id: 'armor_wig_long', name: '장발 가발', slot: '가발', defense: 3, weightKg: 0.15, reqLevel: 8, price: 25_000, iconTex: TEX.icon_armor_wig },
+  // ---------------------------------------------------------------- 2006 강남 전술 세트 (Lv.55)
+  { kind: 'armor', id: 'armor_top_gangnam', name: '강남 전술 방탄복', slot: '상의', defense: 46, weightKg: 4.8, reqLevel: 55, price: 900_000, iconTex: TEX.icon_armor_top },
+  { kind: 'armor', id: 'armor_top_gangnam_cl', name: 'CL 강남 전술 방탄복', slot: '상의', defense: 46, weightKg: 4.0, reqLevel: 55, price: 2_700_000, cl: true, iconTex: TEX.icon_armor_top },
+  { kind: 'armor', id: 'armor_bottom_gangnam', name: '강남 전술 팬츠', slot: '하의', defense: 30, weightKg: 2.6, reqLevel: 55, price: 600_000, iconTex: TEX.icon_armor_bottom },
+  { kind: 'armor', id: 'armor_coat_gangnam', name: '강남 방탄 코트', slot: '코트', defense: 38, weightKg: 5.0, reqLevel: 55, price: 1_200_000, iconTex: TEX.icon_armor_coat },
+  { kind: 'armor', id: 'armor_coat_gangnam_cl', name: 'CL 강남 방탄 코트', slot: '코트', defense: 38, weightKg: 4.2, reqLevel: 55, price: 3_600_000, cl: true, iconTex: TEX.icon_armor_coat },
+  { kind: 'armor', id: 'armor_shoes_gangnam', name: '강남 전술 부츠', slot: '신발', defense: 20, weightKg: 1.8, reqLevel: 55, price: 450_000, iconTex: TEX.icon_armor_shoes },
+  { kind: 'armor', id: 'armor_hat_gangnam', name: '강남 전술 헬멧', slot: '모자', defense: 24, weightKg: 1.7, reqLevel: 55, price: 520_000, iconTex: TEX.icon_armor_hat },
+  // ---------------------------------------------------------------- 2017 서울 특무 세트 (Lv.85)
+  { kind: 'armor', id: 'armor_top_seoul', name: '서울 특무 방탄복', slot: '상의', defense: 70, weightKg: 5.2, reqLevel: 85, price: 4_000_000, iconTex: TEX.icon_armor_top },
+  { kind: 'armor', id: 'armor_top_seoul_cl', name: 'CL 서울 특무 방탄복', slot: '상의', defense: 70, weightKg: 4.4, reqLevel: 85, price: 12_000_000, cl: true, iconTex: TEX.icon_armor_top },
+  { kind: 'armor', id: 'armor_bottom_seoul', name: '서울 특무 팬츠', slot: '하의', defense: 46, weightKg: 2.9, reqLevel: 85, price: 2_600_000, iconTex: TEX.icon_armor_bottom },
+  { kind: 'armor', id: 'armor_coat_seoul', name: '서울 특무 코트', slot: '코트', defense: 58, weightKg: 5.4, reqLevel: 85, price: 5_200_000, iconTex: TEX.icon_armor_coat },
+  { kind: 'armor', id: 'armor_coat_seoul_cl', name: 'CL 서울 특무 코트', slot: '코트', defense: 58, weightKg: 4.6, reqLevel: 85, price: 15_000_000, cl: true, iconTex: TEX.icon_armor_coat },
+  { kind: 'armor', id: 'armor_shoes_seoul', name: '서울 특무 부츠', slot: '신발', defense: 30, weightKg: 2.0, reqLevel: 85, price: 1_900_000, iconTex: TEX.icon_armor_shoes },
+  { kind: 'armor', id: 'armor_hat_seoul', name: '서울 특무 헬멧', slot: '모자', defense: 36, weightKg: 1.9, reqLevel: 85, price: 2_200_000, iconTex: TEX.icon_armor_hat },
 ];
 
 export const CONSUMABLES: ConsumableDef[] = [

@@ -76,6 +76,8 @@ export const NPCS: NpcDef[] = [
       'armor_wig_long',
       'bandage',
       'energy_drink',
+      'armor_top_gangnam', 'armor_top_gangnam_cl', 'armor_bottom_gangnam', 'armor_coat_gangnam', 'armor_coat_gangnam_cl', 'armor_shoes_gangnam', 'armor_hat_gangnam',
+      'armor_top_seoul', 'armor_top_seoul_cl', 'armor_bottom_seoul', 'armor_coat_seoul', 'armor_coat_seoul_cl', 'armor_shoes_seoul', 'armor_hat_seoul',
     ],
   },
   {
@@ -123,6 +125,18 @@ export const NPCS: NpcDef[] = [
     tex: TEX.npc_kimhun,
     lines: ['중곡동 경찰서 김훈이다. 살아남았다면 일손이 되어 주겠나.', '패러렐 시스템은 허가증 없이는 못 쓴다. 규정이야.'],
     quests: ['q_junggok_cleanup', 'q_wito_documents'],
+  },
+  {
+    id: 'npc_trainer',
+    name: '훈련 교관 한지민',
+    role: 'quest',
+    tex: TEX.npc_assault,
+    lines: [
+      '알파 훈련장이다. 원작식은 좌클릭 이동·우클릭 공격, 현대식은 WASD·좌클릭. Esc 메뉴에서 바꿀 수 있어.',
+      'Space로 웅크리면 명중이 오르고, 다시 Space로 점프해 근접 공격을 피한다.',
+      'I 인벤토리, C 상태창(스탯 배분), K 스킬, Q 퀘스트. 울타리 안 좀비견으로 연습해 봐.',
+    ],
+    quests: ['q_tutorial'],
   },
   {
     id: 'npc_taxi',

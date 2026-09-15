@@ -22,6 +22,8 @@ const STAT_DESC: Record<StatKey, string> = {
 
 /** 캐릭터 생성: 이름 + 생성 포인트 5 배분. */
 export class CharacterCreateScene extends Phaser.Scene {
+  private training = false;
+  private trainingBtn!: Phaser.GameObjects.Text;
   private alloc: Stats = emptyStats(0);
   private left = balance.stats.creationPoints;
   private valueTexts = new Map<StatKey, Phaser.GameObjects.Text>();
@@ -88,6 +90,12 @@ export class CharacterCreateScene extends Phaser.Scene {
     }
     this.previewText = this.add.text(cx, y + 10, '', theme.textStyle(12, theme.colors.muted, { align: 'center' })).setOrigin(0.5, 0);
 
+    // 알파 훈련장 (tutorial) toggle — T key or click
+    this.trainingBtn = this.add.text(cx, GAME_HEIGHT - 128, '', theme.textStyle(13, theme.colors.muted, { backgroundColor: '#1a1e24', padding: { left: 10, right: 10, top: 3, bottom: 3 } })).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.trainingBtn.on('pointerdown', () => this.setTraining(!this.training));
+    this.input.keyboard?.on('keydown-T', () => this.setTraining(!this.training));
+    this.setTraining(false);
+
     const start = this.add.text(cx, GAME_HEIGHT - 90, '▶ 시작  (Enter)', theme.textStyle(24, theme.colors.brass)).setOrigin(0.5).setInteractive({ useHandCursor: true });
     start.on('pointerover', () => start.setColor('#ffffff'));
     start.on('pointerout', () => start.setColor(theme.colors.brass));
@@ -146,6 +154,12 @@ export class CharacterCreateScene extends Phaser.Scene {
     saveService.hasCharacter = true;
     saveService.attach();
     void saveService.save();
-    this.scene.start('SafeZone', { mapId: balance.death.respawnMap, spawn: balance.death.respawnPoint } satisfies WorldSceneData);
+    if (this.training) this.scene.start('Field', { mapId: 'alpha-training', spawn: 'default' } satisfies WorldSceneData);
+    else this.scene.start('SafeZone', { mapId: balance.death.respawnMap, spawn: balance.death.respawnPoint } satisfies WorldSceneData);
+  }
+
+  private setTraining(on: boolean): void {
+    this.training = on;
+    this.trainingBtn.setText(on ? '☑ 알파 훈련장(튜토리얼)부터 시작  (T)' : '☐ 알파 훈련장(튜토리얼)부터 시작  (T)').setColor(on ? theme.colors.good : theme.colors.muted);
   }
 }

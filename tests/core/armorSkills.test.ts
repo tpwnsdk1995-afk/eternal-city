@@ -59,14 +59,14 @@ describe('방어구 전 부위', () => {
 });
 
 describe('스킬 확장', () => {
-  it('has a mastery for every weapon class except 투척중화기, and two AP-draining actives', () => {
+  it('has a mastery for every weapon class except 투척중화기, and four AP-draining actives', () => {
     const masteries = SKILLS.filter((s) => s.category === '웨폰마스터리');
     for (const cls of WEAPON_CLASSES) {
       if (cls === '투척중화기') continue;
       expect(masteries.some((m) => m.weaponClass === cls), cls).toBe(true);
     }
     const actives = SKILLS.filter((s) => s.category === '퍼스널액티브');
-    expect(actives.length).toBe(2);
+    expect(actives.length).toBe(4);
     expect(actives.every((a) => (a.apDrainPerSec ?? 0) > 0)).toBe(true);
   });
 
