@@ -34,6 +34,8 @@ export const TEX = {
   deco_bench: 'deco_bench',
   deco_busstop: 'deco_busstop',
   deco_pillar: 'deco_pillar',
+  deco_goal: 'deco_goal',
+  deco_flagpole: 'deco_flagpole',
   // objects
   barricade: 'barricade',
   gate: 'gate',
@@ -109,6 +111,10 @@ export const TILE = {
   carB: 23,
   sidewalkCrack: 24,
   roofEdge: 25,
+  // 용곡중학교
+  track: 26,
+  schoolFloor: 27,
+  trackLine: 28,
 } as const;
 
 export type TileKey = keyof typeof TILE;

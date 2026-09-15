@@ -242,6 +242,23 @@ const tileDrawers: Record<number, (ctx: Ctx, x: number) => void> = {
     for (let i = 2; i < T; i += 8) fill(ctx, x + i, 0, 4, T, '#d5d2c8');
     grain(ctx, x, 0, T, T, '#34373d', 30, 47);
   },
+  [TILE.track]: (ctx, x) => {
+    fill(ctx, x, 0, T, T, '#9a4b3c');
+    grain(ctx, x, 0, T, T, '#a8564a', 50, 53);
+    grain(ctx, x, 0, T, T, '#86402f', 40, 59);
+  },
+  [TILE.trackLine]: (ctx, x) => {
+    tileDrawers[TILE.track](ctx, x);
+    fill(ctx, x, 14, T, 3, '#e8e2d2');
+  },
+  [TILE.schoolFloor]: (ctx, x) => {
+    fill(ctx, x, 0, T, T, '#bfb39a');
+    fill(ctx, x, 0, T, 1, '#8f8570');
+    fill(ctx, x, 0, 1, T, '#8f8570');
+    fill(ctx, x + 16, 0, 1, T, '#a99d86');
+    fill(ctx, x, 16, T, 1, '#a99d86');
+    grain(ctx, x, 0, T, T, '#cfc3aa', 30, 61);
+  },
   [TILE.sidewalkCrack]: (ctx, x) => {
     sidewalk(ctx, x);
     crack(ctx, x, [[4, 28], [11, 21], [13, 12], [22, 6]], '#5e5b53');

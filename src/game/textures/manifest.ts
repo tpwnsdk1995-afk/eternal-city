@@ -28,7 +28,7 @@ import {
 } from './draw/items';
 import { drawTitleBackground } from './draw/title';
 import { drawBlood, drawFire, drawJumpMarker, drawMuzzle, drawTracer } from './draw/fx';
-import { drawBench, drawBusStop, drawHydrant, drawLamp, drawPhone, drawPillar, drawSign, drawTrash, drawTree, drawVending } from './draw/decor';
+import { drawBench, drawBusStop, drawFlagpole, drawGoal, drawHydrant, drawLamp, drawPhone, drawPillar, drawSign, drawTrash, drawTree, drawVending } from './draw/decor';
 import { drawCrosshair, drawUiPanel, drawUiSlot } from './draw/ui';
 
 export type DrawFn = (ctx: CanvasRenderingContext2D, frame: number, w: number, h: number) => void;
@@ -89,6 +89,8 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.deco_bench]: single(drawBench, 48, 24),
   [TEX.deco_busstop]: single(drawBusStop, 64, 72),
   [TEX.deco_pillar]: single(drawPillar, 32, 72),
+  [TEX.deco_goal]: single(drawGoal, 64, 40),
+  [TEX.deco_flagpole]: single(drawFlagpole, 24, 96),
 
   [TEX.barricade]: single(drawBarricade, 64),
   [TEX.gate]: single(drawGate, 32),

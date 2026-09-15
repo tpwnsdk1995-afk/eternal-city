@@ -16,12 +16,13 @@ import { NPCS } from './npcs';
 import { gwangjinParking } from './maps/gwangjin-gucheong-parking';
 import { junggokDong } from './maps/junggok-dong';
 import { junggokBlockade } from './maps/junggok-blockade';
+import { yonggokMiddleSchool } from './maps/yonggok-middle-school';
 import { assaultA } from './assaults/assault-a';
 
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
 export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES, ...MISC];
-export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade];
+export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool];
 export const ASSAULTS: AssaultDef[] = [assaultA];
 
 const items = byId(ITEMS);
@@ -106,7 +107,7 @@ export function validateAll(): void {
       if (st.kind === 'kill' && st.monsterId && !monsters.has(st.monsterId)) errors.push(`quest ${q.id} kill step unknown monster ${st.monsterId}`);
       if (st.kind === 'collect' && !items.has(st.itemId)) errors.push(`quest ${q.id} collect step unknown item ${st.itemId}`);
       if (st.kind === 'talk' && !npcs.has(st.npcId)) errors.push(`quest ${q.id} talk step unknown npc ${st.npcId}`);
-      // reach steps may point at maps added in a later milestone; checked softly
+      if (st.kind === 'reach' && !maps.has(st.mapId)) errors.push(`quest ${q.id} reach step unknown map ${st.mapId}`);
     }
     for (const it of [...(q.rewards.items ?? []), ...(q.consumes ?? [])]) if (!items.has(it.itemId)) errors.push(`quest ${q.id} references unknown item ${it.itemId}`);
   }
@@ -123,9 +124,14 @@ export function validateAll(): void {
     for (const p of m.portals) {
       const target = maps.get(p.toMap);
       if (!target) errors.push(`map ${m.id} portal ${p.id} → unknown map ${p.toMap}`);
-      else if (!target.spawnPoints[p.toSpawn]) errors.push(`map ${m.id} portal ${p.id} → unknown spawn ${p.toSpawn} in ${p.toMap}`);
+      else {
+        if (!target.spawnPoints[p.toSpawn]) errors.push(`map ${m.id} portal ${p.id} → unknown spawn ${p.toSpawn} in ${p.toMap}`);
+        // field ↔ field links must be walkable both ways (safe zone / assault maps are exempt)
+        if (!target.safeZone && !m.safeZone && target.portals.length && !target.portals.some((tp) => tp.toMap === m.id)) errors.push(`map ${m.id} portal ${p.id} → ${p.toMap} has no way back`);
+      }
       if (!rectInside(p.rect, m)) errors.push(`map ${m.id} portal ${p.id} out of bounds`);
     }
+    for (const d of m.decor ?? []) if (d.at.x < 0 || d.at.y < 0 || d.at.x >= m.width || d.at.y >= m.height) errors.push(`map ${m.id} decor out of bounds at ${d.at.x},${d.at.y}`);
     for (const z of m.spawnZones ?? []) {
       for (const mm of z.monsters) if (!monsters.has(mm.id)) errors.push(`map ${m.id} zone ${z.id} unknown monster ${mm.id}`);
       if (!rectInside(z.rect, m)) errors.push(`map ${m.id} zone ${z.id} out of bounds`);

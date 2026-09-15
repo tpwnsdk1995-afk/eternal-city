@@ -149,6 +149,46 @@ export function drawBusStop(ctx: Ctx, _f: number, w: number, h: number): void {
   fill(ctx, 8, 44, 48, 3, '#6b4a2e'); // bench
 }
 
+/** 64×40 football goal (posts, crossbar, net) */
+export function drawGoal(ctx: Ctx, _f: number, w: number, h: number): void {
+  const base = h - 3;
+  shadow(ctx, w / 2, base, 28, 4);
+  ctx.strokeStyle = 'rgba(230,230,230,0.5)';
+  ctx.lineWidth = 1;
+  for (let x = 6; x <= w - 6; x += 6) {
+    ctx.beginPath();
+    ctx.moveTo(x, 8);
+    ctx.lineTo(x, base);
+    ctx.stroke();
+  }
+  for (let y = 8; y <= base; y += 6) {
+    ctx.beginPath();
+    ctx.moveTo(4, y);
+    ctx.lineTo(w - 4, y);
+    ctx.stroke();
+  }
+  fill(ctx, 3, 6, 3, base - 6, '#f0f0f0');
+  fill(ctx, w - 6, 6, 3, base - 6, '#f0f0f0');
+  fill(ctx, 3, 5, w - 6, 3, '#f0f0f0');
+}
+
+/** 24×96 flag pole with a Korean flag */
+export function drawFlagpole(ctx: Ctx, _f: number, w: number, h: number): void {
+  const base = h - 3;
+  shadow(ctx, w / 2, base, 6, 2);
+  fill(ctx, w / 2 - 1, 6, 2, base - 6, '#9aa0a6');
+  fill(ctx, w / 2 - 4, base - 5, 8, 5, '#5b6069');
+  fill(ctx, w / 2 + 1, 8, 16, 11, '#f4f4f4');
+  ctx.fillStyle = '#c23b3b';
+  ctx.beginPath();
+  ctx.arc(w / 2 + 9, 13.5, 3, Math.PI, 0);
+  ctx.fill();
+  ctx.fillStyle = '#2f5fa8';
+  ctx.beginPath();
+  ctx.arc(w / 2 + 9, 13.5, 3, 0, Math.PI);
+  ctx.fill();
+}
+
 /** 32×72 parking-garage pillar (drawn tall so it occludes) */
 export function drawPillar(ctx: Ctx, _f: number, w: number, h: number): void {
   const base = h - 2;

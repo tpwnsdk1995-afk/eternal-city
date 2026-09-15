@@ -42,6 +42,9 @@ const COLORS: Record<number, string> = {
   [TILE.fence]: '#9aa0a6',
   [TILE.gateClosed]: '#a3282a',
   [TILE.dirt]: '#6b5a44',
+  [TILE.track]: '#9a4b3c',
+  [TILE.trackLine]: '#9a4b3c',
+  [TILE.schoolFloor]: '#bfb39a',
 };
 
 /** Rasterises the built map into a small canvas texture for the HUD minimap. Idempotent per map. */

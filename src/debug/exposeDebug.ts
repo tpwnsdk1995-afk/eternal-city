@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import { registry } from '@data/registry';
-import { totalRounds } from '@core/inventory/inventory';
+import { addItem, totalRounds } from '@core/inventory/inventory';
+import { questService } from '../game/state/questService';
 import { gameState } from '../game/state/GameState';
 import { BaseWorldScene } from '../game/scenes/BaseWorldScene';
 import type { UIScene } from '../game/scenes/UIScene';
@@ -50,6 +51,8 @@ export interface EcDebug {
   /** Assault runtime snapshot, or null outside an assault. */
   assault(): ReturnType<AssaultScene['assaultSnapshot']> | null;
   destroyObjectives(): void;
+  /** Debug: add an item straight into the inventory (quest progression hooks included). */
+  give(itemId: string, qty?: number): void;
   save(): Promise<unknown>;
   hasSave(): Promise<boolean>;
   /** Open window keys (top last). */
@@ -101,6 +104,10 @@ export function exposeDebug(game: Phaser.Game): void {
     destroyObjectives: () => {
       const s = worldScene();
       if (s instanceof AssaultScene) s.destroyAllObjectives();
+    },
+    give: (itemId, qty = 1) => {
+      gameState.setInventory(addItem(gameState.inventory, registry.item(itemId), qty));
+      questService.syncCollect(itemId);
     },
     save: () => saveService.save(),
     hasSave: () => saveService.peek().then((r) => !!r),
