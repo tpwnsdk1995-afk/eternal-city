@@ -17,6 +17,7 @@ export const TEX = {
   // W.I.T.O
   wito_recon: 'wito_recon',
   wito_airborne: 'wito_airborne',
+  wito_elite: 'wito_elite',
   // npcs
   npc_elia: 'npc_elia',
   npc_shop: 'npc_shop',

@@ -1,5 +1,5 @@
 import { balance } from '@data/balance';
-import { registry } from '@data/registry';
+import { ASSAULTS, registry } from '@data/registry';
 import { initialFireState } from '@core/weapons/fireController';
 import { emptyStatus } from '@core/combat/statusEffects';
 import { CURRENT_SAVE_VERSION, migrateSave, type SaveGame } from '@core/save/saveSchema';
@@ -11,7 +11,7 @@ const AUTOSAVE_MIN_GAP_MS = 4000;
 const AUTOSAVE_PERIOD_MS = 60_000;
 const SETTINGS_KEY = 'settings';
 
-const ASSAULT_MAP_IDS = new Set(['junggok-blockade']);
+const ASSAULT_MAP_IDS = new Set(ASSAULTS.map((a) => a.mapId));
 
 /** Where the character should reappear on load: never inside an assault instance. */
 export function saveLocation(mapId: string): { mapId: string; spawn: string } {

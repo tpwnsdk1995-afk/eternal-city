@@ -26,8 +26,18 @@ export class Objective extends Phaser.GameObjects.Image {
     this.setDisplaySize(def.size.w * ts, def.size.h * ts).setDepth(7);
     scene.add.existing(this);
     this.bar = scene.add.graphics().setDepth(11);
-    this.nameText = scene.add.text(this.x, this.y - (def.size.h * ts) / 2 - 14, '바리케이드', theme.textStyle(11, '#ffd166', { stroke: '#000', strokeThickness: 3 })).setOrigin(0.5).setDepth(11);
+    const label = def.label ?? (def.kind === 'booth' ? '부스' : '바리케이드');
+    const color = def.kind === 'booth' ? '#9be7ff' : '#ffd166';
+    this.nameText = scene.add.text(this.x, this.y - (def.size.h * ts) / 2 - 14, label, theme.textStyle(11, color, { stroke: '#000', strokeThickness: 3 })).setOrigin(0.5).setDepth(11);
     this.drawBar();
+  }
+
+  get isBooth(): boolean {
+    return this.def.kind === 'booth';
+  }
+
+  get hpRatio(): number {
+    return this.hp / this.maxHp;
   }
 
   get pos(): Vec2 {
@@ -44,6 +54,9 @@ export class Objective extends Phaser.GameObjects.Image {
     this.hp = Math.max(0, this.hp - n);
     this.setTintFill(0xffffff);
     this.scene.time.delayedCall(50, () => this.alive && this.clearTint());
+    // multi-frame structures (부스: intact → damaged → wrecked) show their state
+    const frames = this.texture.frameTotal - 1; // Phaser counts __BASE
+    if (frames >= 3) this.setFrame(this.hpRatio > 0.66 ? 0 : this.hpRatio > 0.33 ? 1 : 2);
     this.drawBar();
     if (this.hp <= 0) this.destroyStructure();
     return !this.alive;
@@ -55,7 +68,7 @@ export class Objective extends Phaser.GameObjects.Image {
     const x = this.x - w / 2;
     const y = this.y - this.displayHeight / 2 - 6;
     this.bar.fillStyle(0x000000, 0.7).fillRect(x - 1, y - 1, w + 2, 6);
-    this.bar.fillStyle(0xffd166, 1).fillRect(x, y, w * (this.hp / this.maxHp), 4);
+    this.bar.fillStyle(this.def.kind === 'booth' ? 0x9be7ff : 0xffd166, 1).fillRect(x, y, w * (this.hp / this.maxHp), 4);
   }
 
   private destroyStructure(): void {

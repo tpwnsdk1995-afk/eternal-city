@@ -1,4 +1,4 @@
-import type { AssaultDef, AssaultPhase, Wave } from '@data/schema/assault';
+import type { AssaultDef, AssaultFailReason, AssaultPhase, Wave } from '@data/schema/assault';
 import type { MapDef } from '@data/schema/map';
 
 export type SpawnTag = 'wave' | 'boss' | 'adds';
@@ -26,7 +26,7 @@ export interface AssaultRuntime {
   bossSpawned: boolean;
   bossAlive: boolean;
   kills: number;
-  failReason: 'death' | 'timeout' | null;
+  failReason: AssaultFailReason | null;
 }
 
 export type AssaultEvent =
@@ -34,7 +34,7 @@ export type AssaultEvent =
   | { kind: 'spawn'; monsterId: string; spawnPoint: string; tag: SpawnTag }
   | { kind: 'openGate'; gateId: string }
   | { kind: 'success' }
-  | { kind: 'failed'; reason: 'death' | 'timeout' };
+  | { kind: 'failed'; reason: AssaultFailReason };
 
 export interface AssaultInput {
   now: number;
@@ -202,15 +202,30 @@ export function onAssaultPlayerDied(rt: AssaultRuntime): Step {
   return { rt: { ...rt, status: 'failed', failReason: 'death' }, events: [{ kind: 'failed', reason: 'death' }] };
 }
 
+/** The defended booth fell: the mission fails on the spot. */
+export function onBoothDestroyed(rt: AssaultRuntime): Step {
+  if (rt.status !== 'running') return { rt, events: [] };
+  return { rt: { ...rt, status: 'failed', failReason: 'booth' }, events: [{ kind: 'failed', reason: 'booth' }] };
+}
+
+/** The booth a defend phase protects, or null outside defend phases. */
+export function defendedBoothId(rt: AssaultRuntime): string | null {
+  const p = currentPhase(rt);
+  return p?.kind === 'defend' ? p.boothId : null;
+}
+
 /** Summary line for the HUD banner. */
 export function assaultProgressText(rt: AssaultRuntime): string {
   const phase = currentPhase(rt);
   if (!phase) return '';
   switch (phase.kind) {
-    case 'clear':
-    case 'defend': {
+    case 'clear': {
       const waves = phaseWaves(phase);
       return `웨이브 ${Math.min(rt.waveIndex + 1, waves.length)} / ${waves.length} · 남은 적 ${rt.aliveWave}`;
+    }
+    case 'defend': {
+      const waves = phaseWaves(phase);
+      return `부스를 지켜라 · 웨이브 ${Math.min(rt.waveIndex + 1, waves.length)} / ${waves.length} · 남은 적 ${rt.aliveWave}`;
     }
     case 'destroy':
       return `남은 기물 ${rt.objectivesLeft.length} / ${phase.objectiveIds.length}`;

@@ -27,7 +27,7 @@ export interface PortalDef {
   label: string;
 }
 
-/** Destructible mission object (어설트 기물). */
+/** Destructible mission object (어설트 기물). `booth` objectives are defended, not destroyed. */
 export interface ObjectiveDef {
   id: string;
   at: Vec2; // tile coords
@@ -35,6 +35,9 @@ export interface ObjectiveDef {
   hp: number;
   /** Tiles occupied (solid while alive). */
   size: { w: number; h: number };
+  kind?: 'barricade' | 'booth';
+  /** name shown above the structure */
+  label?: string;
 }
 
 /** A blocking wall segment that opens when the listed objectives are destroyed. */

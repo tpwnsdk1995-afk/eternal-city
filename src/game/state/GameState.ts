@@ -33,7 +33,7 @@ export interface AssaultHud {
 export interface AssaultResult {
   name: string;
   success: boolean;
-  reason?: 'death' | 'timeout';
+  reason?: 'death' | 'timeout' | 'booth';
   won: number; // negative on failure penalty
   xp: number;
   items: { name: string; qty: number }[];

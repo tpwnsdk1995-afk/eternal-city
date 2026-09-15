@@ -22,13 +22,15 @@ import { achasanStation } from './maps/achasan-station';
 import { sewer } from './maps/sewer';
 import { hangangPark } from './maps/hangang-park';
 import { pyeongchangDong } from './maps/pyeongchang-dong';
+import { junggokStationDefense } from './maps/junggok-station-defense';
 import { assaultA } from './assaults/assault-a';
+import { assaultB } from './assaults/assault-b';
 
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
 export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES, ...MISC];
-export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong];
-export const ASSAULTS: AssaultDef[] = [assaultA];
+export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense];
+export const ASSAULTS: AssaultDef[] = [assaultA, assaultB];
 
 const items = byId(ITEMS);
 const monsters = byId(MONSTERS);
@@ -183,9 +185,13 @@ export function validateAll(): void {
           if (!m.spawnPoints[p.spawnPoint]) errors.push(`assault ${a.id} ${where} unknown spawn ${p.spawnPoint}`);
           checkWaves(p.adds, where);
           break;
-        case 'defend':
+        case 'defend': {
+          const booth = (m.objectives ?? []).find((o) => o.id === p.boothId);
+          if (!booth) errors.push(`assault ${a.id} ${where} unknown booth ${p.boothId}`);
+          else if (booth.kind !== 'booth') errors.push(`assault ${a.id} ${where} objective ${p.boothId} is not a booth`);
           checkWaves(p.waves, where);
           break;
+        }
       }
     });
     for (const r of a.rewards.items) if (!items.has(r.itemId)) errors.push(`assault ${a.id} rewards unknown item ${r.itemId}`);

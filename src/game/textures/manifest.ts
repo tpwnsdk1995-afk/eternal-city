@@ -99,6 +99,7 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
 
   [TEX.wito_recon]: figure('wito_recon'),
   [TEX.wito_airborne]: figure('wito_airborne'),
+  [TEX.wito_elite]: figure('wito_elite'),
 
   [TEX.npc_elia]: figure('npc_elia'),
   [TEX.npc_shop]: figure('npc_shop'),

@@ -24,7 +24,7 @@ export class ResultWindow extends Window {
     const s = r.timeSec % 60;
     this.label(this.w / 2, 6, r.success ? '작전 성공' : '작전 실패', r.success ? theme.colors.good : theme.colors.bad, 26, { fontStyle: 'bold' }).setOrigin(0.5, 0);
     this.label(this.w / 2, 42, r.name, theme.colors.muted, 13).setOrigin(0.5, 0);
-    if (!r.success) this.label(this.w / 2, 62, r.reason === 'timeout' ? '제한 시간을 초과했습니다.' : '작전 중 사망했습니다.', theme.colors.muted, 12).setOrigin(0.5, 0);
+    if (!r.success) this.label(this.w / 2, 62, r.reason === 'timeout' ? '제한 시간을 초과했습니다.' : r.reason === 'booth' ? '지켜야 할 부스가 파괴되었습니다.' : '작전 중 사망했습니다.', theme.colors.muted, 12).setOrigin(0.5, 0);
 
     let y = 92;
     const row = (k: string, v: string, color = theme.colors.text) => {

@@ -23,7 +23,9 @@ export type AssaultPhase =
   | { kind: 'advance'; label: string; toZone: string }
   | { kind: 'boss'; label: string; monsterId: string; spawnPoint: string; adds?: Wave[] }
   | { kind: 'moveTo'; label: string; toZone: string; timeLimitSec: number }
-  | { kind: 'defend'; label: string; boothId: string; boothHp: number; waves: Wave[] };
+  | { kind: 'defend'; label: string; boothId: string; waves: Wave[] };
+
+export type AssaultFailReason = 'death' | 'timeout' | 'booth';
 
 export interface AssaultDef {
   id: string;

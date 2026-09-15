@@ -18,7 +18,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   hp: number;
   brain: BrainState;
   status: StatusState = emptyStatus();
-  readonly home: Vec2;
+  /** leash anchor; assault spawns re-anchor it on their target so they never wander home */
+  home: Vec2;
   alive = true;
   /** index into the map's spawnZones, or -1 for scripted spawns */
   zoneIndex: number;

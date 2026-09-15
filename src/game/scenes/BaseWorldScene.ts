@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { MapDef } from '@data/schema/map';
-import { registry } from '@data/registry';
+import { ASSAULTS, registry } from '@data/registry';
+import type { MonsterDef } from '@data/schema/monster';
 import { TILE } from '@data/textureKeys';
 import { buildMap, pointInRect, tileCenter, type BuiltMap } from '@core/map/mapBuild';
 import { dist } from '@core/math/vec';
@@ -30,7 +31,7 @@ export interface WorldSceneData {
 
 export function sceneKeyForMap(def: MapDef): string {
   if (def.safeZone) return 'SafeZone';
-  if (def.id === 'junggok-blockade') return 'Assault';
+  if (ASSAULTS.some((a) => a.mapId === def.id)) return 'Assault';
   return 'Field';
 }
 
@@ -221,9 +222,9 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   }
 
   /** Scripted/debug spawn. Returns null on maps without combat. */
-  spawnEnemyAt(monsterId: string, x: number, y: number): Enemy | null {
+  spawnEnemyAt(monsterId: string, x: number, y: number, def: MonsterDef = registry.monster(monsterId)): Enemy | null {
     if (!this.combat) return null;
-    const e = new Enemy(this, x, y, registry.monster(monsterId), this.time.now);
+    const e = new Enemy(this, x, y, def, this.time.now);
     this.enemies.add(e);
     return e;
   }

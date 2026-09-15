@@ -27,6 +27,7 @@ export const FIGURE_STYLES = {
   wito_recon: { skin: '#e3bd95', hair: '#3a3a2a', hairStyle: 'helmet', helmetColor: '#4a5530', shirt: '#5c6b3a', pants: '#4a5530', shoes: '#26281c', gun: 'rifle' } as FigureStyle,
   wito_airborne: { skin: '#e3bd95', hair: '#2a2a2a', hairStyle: 'helmet', helmetColor: '#2f3626', shirt: '#3f4a2f', pants: '#3a4228', shoes: '#1e2016', gun: 'rifle', pack: true } as FigureStyle,
 
+  wito_elite: { skin: '#e3bd95', hair: '#1a1a1a', hairStyle: 'helmet', helmetColor: '#1f2430', shirt: '#2a3140', pants: '#22283a', shoes: '#111', gun: 'rifle', pack: true, vest: '#3d4a66', glow: 'rgba(80,120,255,0.25)', size: 1.05 } as FigureStyle,
   npc_elia: { skin: '#f1c9a5', hair: '#6b4fbb', hairStyle: 'long', shirt: '#e8e6ef', pants: '#d8d6e0', coat: '#f4f2f8', glow: 'rgba(120,120,255,0.22)' } as FigureStyle,
   npc_shop: { skin: '#e0b48c', hair: '#3a3a3a', hairStyle: 'cap', shirt: '#4b5a3a', pants: '#2f3a2a', vest: '#8a7a4a' } as FigureStyle,
   npc_assault: { skin: '#f1c9a5', hair: '#1a1a1a', shirt: '#7a2e2e', pants: '#2a2a33', coat: '#5a1f1f' } as FigureStyle,

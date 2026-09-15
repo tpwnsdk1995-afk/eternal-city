@@ -48,6 +48,18 @@ export interface CombatHost {
   onObjectiveDestroyed?(id: string): void;
   /** Launcher fired: the scene spawns the projectile (see ProjectileSystem). */
   onLaunch?(def: WeaponDef, origin: Vec2, angle: number, ctx: AttackerCtx): void;
+  /**
+   * Something other than the player this enemy should hunt right now (어설트 부스 방어). Returning
+   * null means "the player". The target takes the enemy's melee/shots/leap damage.
+   */
+  enemyTarget?(e: Enemy): EnemyTarget | null;
+}
+
+export interface EnemyTarget {
+  pos: Vec2;
+  radius: number;
+  /** returns true when this hit destroyed it */
+  damage(n: number): boolean;
 }
 
 const OBJ_PREFIX = 'obj:';
@@ -107,19 +119,22 @@ export class CombatBridge {
       if (now < e.nextThinkAt) continue;
       const far = dist(e.pos, player.pos) > AI_LOD_DISTANCE;
       e.nextThinkAt = far ? now + AI_LOD_INTERVAL_MS : 0;
+      const target = this.host.enemyTarget?.(e) ?? null;
+      const focus = target ? target.pos : player.pos;
       const p: Perception = {
         now,
         self: e.pos,
         home: e.home,
-        player: player.pos,
-        playerAlive: !this.playerDead,
-        hasLOS: grid.hasLineOfSight(e.pos, player.pos),
+        player: focus,
+        playerAlive: target ? true : !this.playerDead,
+        hasLOS: grid.hasLineOfSight(e.pos, focus),
         hpRatio: e.hpRatio,
+        forceAggro: !!target || e.tag === 'wave' || e.tag === 'adds' || e.tag === 'boss',
       };
       const o = thinkEnemy(e.def, e.brain, p, gameRng);
       e.brain = o.state;
       e.applyBrain(o);
-      if (o.action && !e.isKnockedBack) this.enemyAction(e, o.action, now);
+      if (o.action && !e.isKnockedBack) this.enemyAction(e, o.action, now, target);
       const wallDmg = e.tickKnockback(now);
       if (wallDmg > 0) {
         this.fx.spark({ x: e.x, y: e.y });
@@ -409,8 +424,10 @@ export class CombatBridge {
 
   // --- enemy attacks --------------------------------------------------------------------------
 
-  private enemyAction(e: Enemy, action: BrainAction, now: number): void {
-    if (!action || this.playerDead) return;
+  private enemyAction(e: Enemy, action: BrainAction, now: number, target: EnemyTarget | null = null): void {
+    if (!action) return;
+    if (target) return this.enemyActionOnTarget(e, action, target);
+    if (this.playerDead) return;
     const { player } = this.host;
     switch (action.kind) {
       case 'melee': {
@@ -443,6 +460,41 @@ export class CombatBridge {
         this.fx.aoeMarker(action.at, J.aoeRadius, 350);
         this.host.scene.cameras.main.shake(120, 0.004);
         if (dist(player.pos, action.at) <= J.aoeRadius + PLAYER_RADIUS) this.hurtPlayer(e.def.attack.dmg * J.dmgMult, now);
+        break;
+      }
+    }
+  }
+
+  /** The same attacks aimed at a structure (부스): no armour, no dodge, hits land on the circle. */
+  private enemyActionOnTarget(e: Enemy, action: BrainAction, t: EnemyTarget): void {
+    if (!action) return;
+    const hit = (dmg: number) => {
+      this.fx.spark({ x: t.pos.x + gameRng.range(-8, 8), y: t.pos.y + gameRng.range(-8, 8) });
+      this.floating.spawn(t.pos.x, t.pos.y - 18, `-${Math.round(dmg)}`, '#9be7ff', 12);
+      t.damage(Math.round(dmg));
+    };
+    switch (action.kind) {
+      case 'melee':
+        if (dist(e.pos, t.pos) <= e.def.attack.reach + t.radius + 6) hit(e.def.attack.dmg);
+        break;
+      case 'shoot': {
+        const R = e.def.ranged;
+        if (!R) return;
+        const angle = angleTo(e.pos, t.pos) + gameRng.range(-0.04, 0.04);
+        const dir = fromAngle(angle);
+        const from = { x: e.x + dir.x * 14, y: e.y + dir.y * 14 };
+        this.fx.muzzle(from, angle);
+        const ray = castRay(this.host.built.collision, from, dir, R.range, [{ id: 'target', x: t.pos.x, y: t.pos.y, r: t.radius }]);
+        this.fx.tracer(from, ray.point, ENEMY_TRACER);
+        if (ray.kind === 'target') hit(R.dmg);
+        else if (ray.kind === 'wall') this.fx.spark(ray.point);
+        break;
+      }
+      case 'jumpLand': {
+        const J = e.def.jump;
+        if (!J) return;
+        this.fx.aoeMarker(action.at, J.aoeRadius, 350);
+        if (dist(t.pos, action.at) <= J.aoeRadius + t.radius) hit(e.def.attack.dmg * J.dmgMult);
         break;
       }
     }

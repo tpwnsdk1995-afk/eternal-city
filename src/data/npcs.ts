@@ -117,7 +117,7 @@ export const NPCS: NpcDef[] = [
     name: '어설트 접수원',
     role: 'assault',
     tex: TEX.npc_assault,
-    lines: ['중곡동 봉쇄선 돌파 작전에 지원하시겠습니까? 바리케이드를 부수고 전진해 두목을 처리하는 임무입니다.'],
-    assaults: ['assault-a'],
+    lines: ['어설트 작전 접수처입니다. 레벨에 맞는 임무를 고르세요 — 기물 파괴 전진, 거점 방어, 보스 사냥이 있습니다.'],
+    assaults: ['assault-a', 'assault-b'],
   },
 ];

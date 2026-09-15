@@ -8,14 +8,18 @@ import { gameRng } from '@core/rng';
 import {
   assaultProgressText,
   currentPhase,
+  defendedBoothId,
   onAssaultEnemyDied,
   onAssaultPlayerDied,
+  onBoothDestroyed,
   onObjectiveDestroyed,
   startAssault,
   tickAssault,
   type AssaultEvent,
   type AssaultRuntime,
 } from '@core/assault/assaultMachine';
+import { dist } from '@core/math/vec';
+import type { AssaultFailReason } from '@data/schema/assault';
 import { BaseWorldScene, type WorldSceneData } from './BaseWorldScene';
 import type { InputIntent } from '../systems/input/InputMapper';
 import { CombatBridge } from '../systems/CombatBridge';
@@ -26,6 +30,8 @@ import { gameState, type AssaultResult } from '../state/GameState';
 
 const BANNER_INTERVAL_MS = 150;
 const SUCCESS_LINGER_MS = 6000;
+/** inside this distance a defender switches from the booth to the player */
+const BOOTH_PLAYER_PRIORITY_PX = 150;
 
 /**
  * 어설트 instance: a linear mission map driven by the pure assault machine. Spawns waves, tracks
@@ -65,8 +71,10 @@ export class AssaultScene extends BaseWorldScene {
       built: this.built,
       onPlayerDeath: () => this.onDeath(),
       onEnemyKilled: (e: Enemy) => this.onKilled(e),
-      objectives: () => this.objectives.filter((o) => o.alive),
+      // booths block bullets but aren't the player's targets (no friendly fire on the thing you defend)
+      objectives: () => this.objectives.filter((o) => o.alive && !o.isBooth),
       onObjectiveDestroyed: (id: string) => this.onObjectiveDestroyed(id),
+      enemyTarget: (e: Enemy) => this.enemyTarget(e),
     });
     const s = startAssault(this.adef, this.time.now);
     this.rt = s.rt;
@@ -95,17 +103,62 @@ export class AssaultScene extends BaseWorldScene {
   }
 
   /** Runtime snapshot for debug/e2e. */
-  assaultSnapshot(): { status: string; phaseIndex: number; phaseKind: string | null; label: string | null; alive: number; objectivesLeft: string[]; kills: number } {
+  assaultSnapshot(): { id: string; status: string; phaseIndex: number; phaseKind: string | null; label: string | null; alive: number; objectivesLeft: string[]; kills: number; boothHp: number | null; failReason: string | null } {
     const p = currentPhase(this.rt);
-    return { status: this.rt.status, phaseIndex: this.rt.phaseIndex, phaseKind: p?.kind ?? null, label: p?.label ?? null, alive: this.rt.aliveWave, objectivesLeft: [...this.rt.objectivesLeft], kills: this.rt.kills };
+    const booth = this.booth();
+    return {
+      id: this.assaultId,
+      status: this.rt.status,
+      phaseIndex: this.rt.phaseIndex,
+      phaseKind: p?.kind ?? null,
+      label: p?.label ?? null,
+      alive: this.rt.aliveWave,
+      objectivesLeft: [...this.rt.objectivesLeft],
+      kills: this.rt.kills,
+      boothHp: booth ? booth.hp : null,
+      failReason: this.rt.failReason,
+    };
   }
 
-  /** Debug: destroy every remaining objective. */
+  /** Debug: destroy every remaining objective (booths included — that fails a defend phase). */
   destroyAllObjectives(): void {
     for (const o of this.objectives.filter((x) => x.alive)) {
       o.damage(o.hp);
-      this.onObjectiveDestroyed(o.def.id);
+      if (o.isBooth) this.boothFell(o);
+      else this.onObjectiveDestroyed(o.def.id);
     }
+  }
+
+  /** The booth the current defend phase protects (alive), else null. */
+  private booth(): Objective | null {
+    const id = defendedBoothId(this.rt);
+    if (!id) return null;
+    return this.objectives.find((o) => o.def.id === id && o.alive) ?? null;
+  }
+
+  /** Defend phase: mission spawns go for the booth unless the player is right on top of them. */
+  private enemyTarget(e: Enemy) {
+    if (this.finished || e.tag === 'zone' || e.tag === 'debug') return null;
+    const booth = this.booth();
+    if (!booth) return null;
+    if (dist(e.pos, this.player.pos) < BOOTH_PLAYER_PRIORITY_PX) return null;
+    return {
+      pos: booth.pos,
+      radius: booth.radius,
+      damage: (n: number) => {
+        const fell = booth.damage(n);
+        if (fell) this.boothFell(booth);
+        return fell;
+      },
+    };
+  }
+
+  private boothFell(booth: Objective): void {
+    if (this.finished) return;
+    gameState.message(`${booth.def.label ?? '부스'}가 파괴되었습니다!`, 'bad');
+    const r = onBoothDestroyed(this.rt);
+    this.rt = r.rt;
+    this.handle(r.events);
   }
 
   private handle(events: AssaultEvent[]): void {
@@ -114,13 +167,23 @@ export class AssaultScene extends BaseWorldScene {
         case 'phase':
           gameState.message(`▶ ${e.phase.label}`, 'system');
           this.combat!.floating.spawn(this.player.x, this.player.y - 30, e.phase.label, '#ffd166', 16, true);
+          if (e.phase.kind === 'defend') {
+            // everything already alive turns on the booth
+            const booth = this.booth();
+            if (booth) for (const en of this.combat!.aliveEnemies()) if (en.tag !== 'zone') en.home = booth.pos;
+          }
           break;
         case 'spawn': {
           const sp = this.def.spawnPoints[e.spawnPoint];
           const c = tileCenter(this.def, sp.x, sp.y);
           const jitter = e.tag === 'boss' ? 0 : 20;
           const en = this.spawnEnemyAt(e.monsterId, c.x + gameRng.range(-jitter, jitter), c.y + gameRng.range(-jitter, jitter));
-          if (en) en.tag = e.tag;
+          if (en) {
+            en.tag = e.tag;
+            // mission spawns hunt: anchor their leash on what they are after (booth or the hunter)
+            const booth = this.booth();
+            en.home = booth ? booth.pos : this.player.pos;
+          }
           break;
         }
         case 'openGate': {
@@ -162,7 +225,7 @@ export class AssaultScene extends BaseWorldScene {
     this.playerDied();
   }
 
-  private finish(success: boolean, reason?: 'death' | 'timeout'): void {
+  private finish(success: boolean, reason?: AssaultFailReason): void {
     if (this.finished) return;
     this.finished = true;
     const timeSec = Math.round((this.time.now - this.rt.startedAt) / 1000);
@@ -193,8 +256,9 @@ export class AssaultScene extends BaseWorldScene {
       const penalty = Math.min(gameState.character.won, this.adef.failPenalty.won);
       result.won = -penalty;
       gameState.setCharacter({ ...gameState.character, won: gameState.character.won - penalty });
-      gameState.message(`어설트 실패 (${reason === 'timeout' ? '시간 초과' : '사망'}) — ₩${penalty.toLocaleString('ko-KR')} 차감`, 'bad');
-      if (reason === 'timeout') this.time.delayedCall(3000, () => this.goToMap(balance.death.respawnMap, balance.death.respawnPoint));
+      const why = reason === 'timeout' ? '시간 초과' : reason === 'booth' ? '부스 파괴' : '사망';
+      gameState.message(`어설트 실패 (${why}) — ₩${penalty.toLocaleString('ko-KR')} 차감`, 'bad');
+      if (reason !== 'death') this.time.delayedCall(3000, () => this.goToMap(balance.death.respawnMap, balance.death.respawnPoint));
     }
     gameState.events.emit('assaultResult', result);
     gameState.events.emit('assault', null);
@@ -204,10 +268,14 @@ export class AssaultScene extends BaseWorldScene {
     if (this.finished) return;
     const p = currentPhase(this.rt);
     const boss = (this.enemies.getChildren() as Enemy[]).find((e) => e.alive && e.def.boss);
+    const booth = this.booth();
+    let progress = assaultProgressText(this.rt);
+    if (booth) progress += ` · 부스 ${Math.ceil(booth.hpRatio * 100)}%`;
+    if (p?.kind === 'moveTo') progress += ` · 남은 시간 ${Math.max(0, Math.ceil((this.rt.phaseStartedAt + p.timeLimitSec * 1000 - this.time.now) / 1000))}초`;
     gameState.events.emit('assault', {
       name: this.adef.name,
       phaseLabel: p ? `${this.rt.phaseIndex + 1}/${this.adef.phases.length}  ${p.label}` : '',
-      progress: assaultProgressText(this.rt),
+      progress,
       elapsedSec: Math.floor((this.time.now - this.rt.startedAt) / 1000),
       boss: boss ? { name: boss.def.name, hp: boss.hp, max: boss.maxHp } : null,
     });

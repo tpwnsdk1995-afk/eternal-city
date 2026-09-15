@@ -29,6 +29,8 @@ export interface Perception {
   playerAlive: boolean;
   hasLOS: boolean;
   hpRatio: number;
+  /** mission spawns hunt their target regardless of aggro range */
+  forceAggro?: boolean;
 }
 
 export type BrainAction = { kind: 'melee' } | { kind: 'shoot' } | { kind: 'jumpLand'; at: Vec2 } | null;
@@ -125,7 +127,7 @@ export function thinkEnemy(def: MonsterDef, prev: BrainState, p: Perception, rng
   }
 
   const engaged = s.mode === 'chase' || s.mode === 'shoot' || s.mode === 'flee';
-  const aggro = p.playerAlive && (d <= def.aggroRange && (p.hasLOS || engaged) || (engaged && d <= def.leashRange));
+  const aggro = p.playerAlive && (p.forceAggro || (d <= def.aggroRange && (p.hasLOS || engaged)) || (engaged && d <= def.leashRange));
 
   if (!aggro) return wander(def, s, p, rng);
 
