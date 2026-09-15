@@ -28,6 +28,9 @@ import { assaultA } from './assaults/assault-a';
 import { assaultB } from './assaults/assault-b';
 import { assaultC } from './assaults/assault-c';
 import { advancedOf } from '@core/assault/advanced';
+import { CAMPAIGNS } from './campaigns';
+import { ACHIEVEMENTS } from './achievements';
+import type { AchievementDef, CampaignDef } from './schema/progress';
 
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
@@ -43,6 +46,9 @@ const skills = byId(SKILLS);
 const npcs = byId(NPCS);
 const maps = byId(MAPS);
 const assaults = byId(ASSAULTS);
+const campaigns = byId(CAMPAIGNS);
+const achievements = byId(ACHIEVEMENTS);
+export { CAMPAIGNS, ACHIEVEMENTS };
 const quests = byId(QUESTS);
 
 function must<T>(map: Map<string, T>, id: string, what: string): T {
@@ -79,6 +85,8 @@ export const registry = {
   map: (id: string): MapDef => must(maps, id, 'map'),
   assault: (id: string): AssaultDef => must(assaults, id, 'assault'),
   quest: (id: string): QuestDef => must(quests, id, 'quest'),
+  campaign: (id: string): CampaignDef => must(campaigns, id, 'campaign'),
+  achievement: (id: string): AchievementDef => must(achievements, id, 'achievement'),
   hasItem: (id: string): boolean => items.has(id),
   hasMap: (id: string): boolean => maps.has(id),
 };
@@ -121,7 +129,23 @@ export function validateAll(): void {
       if (st.kind === 'talk' && !npcs.has(st.npcId)) errors.push(`quest ${q.id} talk step unknown npc ${st.npcId}`);
       if (st.kind === 'reach' && !maps.has(st.mapId)) errors.push(`quest ${q.id} reach step unknown map ${st.mapId}`);
     }
-    for (const it of [...(q.rewards.items ?? []), ...(q.consumes ?? [])]) if (!items.has(it.itemId)) errors.push(`quest ${q.id} references unknown item ${it.itemId}`);
+    for (const it of [...(q.rewards.items ?? []), ...(q.rewards.itemChances ?? []), ...(q.consumes ?? [])]) if (!items.has(it.itemId)) errors.push(`quest ${q.id} references unknown item ${it.itemId}`);
+  }
+
+  for (const c of CAMPAIGNS) {
+    c.chapters.forEach((ch, i) => {
+      const where = `campaign ${c.id} chapter[${i}]`;
+      for (const q of ch.requires.quests ?? []) if (!quests.has(q)) errors.push(`${where} requires unknown quest ${q}`);
+      for (const a of ch.requires.assaultClears ?? []) if (!assaults.has(a.assaultId)) errors.push(`${where} requires unknown assault ${a.assaultId}`);
+      for (const k of ch.requires.kills ?? []) if (!monsters.has(k.monsterId)) errors.push(`${where} requires unknown monster ${k.monsterId}`);
+      for (const a of ch.requires.achievements ?? []) if (!achievements.has(a)) errors.push(`${where} requires unknown achievement ${a}`);
+      for (const it of ch.rewards.items ?? []) if (!items.has(it.itemId)) errors.push(`${where} rewards unknown item ${it.itemId}`);
+    });
+  }
+  for (const a of ACHIEVEMENTS) {
+    const c = a.cond;
+    if (c.kind === 'killMonster' && !monsters.has(c.monsterId)) errors.push(`achievement ${a.id} unknown monster ${c.monsterId}`);
+    if (c.kind === 'assaultClears' && c.assaultId && !assaults.has(c.assaultId)) errors.push(`achievement ${a.id} unknown assault ${c.assaultId}`);
   }
 
   for (const w of WEAPONS) {

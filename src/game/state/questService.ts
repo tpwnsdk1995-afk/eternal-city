@@ -1,7 +1,9 @@
 import { registry } from '@data/registry';
 import type { MonsterDef } from '@data/schema/monster';
 import type { QuestDef } from '@data/schema/quest';
-import { accept, canAccept, complete, isActive, isCompleted, isReadyToComplete, onKill, onReach, onTalk, syncCollect } from '@core/quest/questState';
+import { accept, canAccept, complete, dailyFlag, dayKey, doneToday, isActive, isCompleted, isReadyToComplete, onKill, onReach, onTalk, syncCollect } from '@core/quest/questState';
+import { gameRng } from '@core/rng';
+import { progressService } from './progressService';
 import { addItem, countItem, removeItemQty } from '@core/inventory/inventory';
 import { applyXp } from '@core/world/xp';
 import { gameState } from './GameState';
@@ -21,7 +23,7 @@ export const questService = {
     const out: { def: QuestDef; status: 'offer' | 'active' | 'ready' }[] = [];
     for (const id of npc.quests ?? []) {
       const def = registry.quest(id);
-      if (isCompleted(gameState.quests, id)) continue;
+      if (isCompleted(gameState.quests, id) || doneToday(def, gameState.flags)) continue;
       if (isActive(gameState.quests, id)) out.push({ def, status: isReadyToComplete(gameState.quests, def) ? 'ready' : 'active' });
       else if (canAccept(gameState.quests, def, { level: gameState.character.level, flags: gameState.flags }).ok) out.push({ def, status: 'offer' });
     }
@@ -32,7 +34,7 @@ export const questService = {
     const def = registry.quest(questId);
     const r = canAccept(gameState.quests, def, { level: gameState.character.level, flags: gameState.flags });
     if (!r.ok) {
-      const why = { active: '이미 진행 중인 퀘스트입니다.', completed: '이미 완료한 퀘스트입니다.', level: `레벨 ${def.prereq?.level} 이상이 필요합니다.`, flags: '조건을 만족하지 않습니다.', quests: '선행 퀘스트를 먼저 완료해야 합니다.' }[r.reason];
+      const why = { active: '이미 진행 중인 퀘스트입니다.', completed: '이미 완료한 퀘스트입니다.', level: `레벨 ${def.prereq?.level} 이상이 필요합니다.`, flags: '조건을 만족하지 않습니다.', quests: '선행 퀘스트를 먼저 완료해야 합니다.', daily: '오늘은 이미 완료한 메인스트림입니다. 내일 다시 오세요.' }[r.reason] ?? '수락할 수 없습니다.';
       gameState.message(why, 'bad');
       return { ok: false, message: why };
     }
@@ -55,7 +57,13 @@ export const questService = {
     }
     let inv = gameState.inventory;
     for (const c of def.consumes ?? []) inv = removeItemQty(inv, c.itemId, c.qty);
+    const rolled: { itemId: string; qty: number }[] = [];
     for (const it of def.rewards.items ?? []) inv = addItem(inv, registry.item(it.itemId), it.qty);
+    for (const it of def.rewards.itemChances ?? []) {
+      if (!gameRng.chance(it.chance)) continue;
+      inv = addItem(inv, registry.item(it.itemId), it.qty);
+      rolled.push({ itemId: it.itemId, qty: it.qty });
+    }
     gameState.setInventory(inv);
     const xr = applyXp({ ...gameState.character, won: gameState.character.won + def.rewards.won }, def.rewards.xp);
     gameState.setCharacter(xr.character);
@@ -65,10 +73,14 @@ export const questService = {
       gameState.message(`레벨 업! Lv.${xr.character.level}`, 'good');
     }
     for (const f of def.rewards.flags ?? []) gameState.setFlag(f, true);
+    if (def.daily) gameState.setFlag(dailyFlag(def.id), dayKey());
     gameState.setQuests(complete(gameState.quests, def));
-    const rewardText = [`₩${def.rewards.won.toLocaleString('ko-KR')}`, `${def.rewards.xp} XP`, ...(def.rewards.items ?? []).map((i) => `${registry.item(i.itemId).name} ×${i.qty}`)].join(' · ');
+    const rewardText = [`₩${def.rewards.won.toLocaleString('ko-KR')}`, `${def.rewards.xp} XP`, ...[...(def.rewards.items ?? []), ...rolled].map((i) => `${registry.item(i.itemId).name} ×${i.qty}`)].join(' · ');
     gameState.message(`[퀘스트 완료] ${def.name} — ${rewardText}`, 'good');
     if (def.rewards.flags?.includes('parallelPermit')) gameState.message('패러렐 시스템 허가증을 획득했습니다!', 'good');
+    if (rolled.some((r) => registry.item(r.itemId).kind === 'armor' && (registry.item(r.itemId) as { cl?: boolean }).cl)) gameState.message('CL 등급 장비를 획득했습니다!', 'good');
+    progressService.recordWon(def.rewards.won);
+    progressService.recordQuest();
     return { ok: true };
   },
 

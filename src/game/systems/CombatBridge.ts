@@ -26,6 +26,7 @@ import { rollLoot } from '@core/world/loot';
 import { drainAp } from '@core/skills/skillState';
 import { gameState } from '../state/GameState';
 import { questService } from '../state/questService';
+import { progressService } from '../state/progressService';
 import { Enemy } from '../entities/Enemy';
 import { Pickup } from '../entities/Pickup';
 import { Projectile } from '../entities/Projectile';
@@ -386,6 +387,7 @@ export class CombatBridge {
     }
     this.dropLoot(e.def, e.pos);
     questService.onKill(e.def);
+    progressService.recordKill(e.def);
     this.host.onEnemyKilled(e);
     void now;
   }
@@ -408,6 +410,7 @@ export class CombatBridge {
     const pay = p.payload;
     if (pay.kind === 'won') {
       gameState.setCharacter({ ...gameState.character, won: gameState.character.won + pay.amount });
+      progressService.recordWon(pay.amount);
       this.floating.spawn(this.host.player.x, this.host.player.y - 16, `+₩${pay.amount}`, '#c9a227', 12);
     } else {
       const def = registry.item(pay.itemId);

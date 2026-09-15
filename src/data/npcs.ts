@@ -90,6 +90,14 @@ export const NPCS: NpcDef[] = [
     stock: ['tec9', 'sawed_off', 'ammo_9mm_ap', 'ammo_45_ap', 'ammo_12ga_slug', 'ammo_556_ap', 'ammo_762_ap'],
   },
   {
+    id: 'npc_mainstream',
+    name: '광진구청 과장 오민석',
+    role: 'quest',
+    tex: TEX.npc_mainstream,
+    lines: ['구청 생존자 지원과입니다. 매일 순찰 임무를 발주하고 있습니다.', '메인스트림은 하루 한 번입니다. 일반과 CL 등급이 있어요.'],
+    quests: ['ms_2002_normal', 'ms_2002_cl'],
+  },
+  {
     id: 'npc_kimhun',
     name: '김훈 소대장',
     role: 'quest',

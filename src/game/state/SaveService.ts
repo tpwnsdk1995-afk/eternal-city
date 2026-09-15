@@ -30,6 +30,8 @@ export function takeSnapshot(): SaveGame {
     skills: gameState.skills,
     fire: gameState.fire,
     quests: gameState.quests,
+    stats: gameState.stats,
+    achievements: gameState.achievements,
     location: saveLocation(gameState.currentMapId),
     flags: { ...gameState.flags, god: false },
     settings: { ...gameState.settings },
@@ -45,6 +47,8 @@ export function applySnapshot(save: SaveGame): void {
   gameState.skills = save.skills;
   gameState.fire = { ...initialFireState(), ...save.fire, lastFireAt: -Infinity };
   gameState.quests = save.quests;
+  gameState.stats = save.stats;
+  gameState.achievements = save.achievements;
   gameState.status = emptyStatus();
   gameState.consciousness = { lastTriggeredAt: -Infinity };
   gameState.flags = { ...save.flags };

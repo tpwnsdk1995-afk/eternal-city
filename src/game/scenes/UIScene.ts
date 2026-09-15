@@ -157,6 +157,8 @@ export class UIScene extends Phaser.Scene {
       this.setBanner(null);
       this.setMinimap(m.minimap);
     });
+    on('stats', refreshWindows);
+    on('achievements', refreshWindows);
     on('assault', (hud) => this.setBanner(hud));
     on('assaultResult', (r) => this.windows.showResult(r));
     on('message', (m) => this.pushLog(m.text, m.tone));

@@ -63,6 +63,8 @@ export interface EcDebug {
   /** Open window keys (top last). */
   windows(): string[];
   openWindow(key: WindowKey): void;
+  /** Open the quest window on a tab (퀘스트/캠페인/업적). */
+  questTab(tab: 'quests' | 'campaign' | 'achievements'): void;
   closeWindows(): void;
   /** Same validated player actions the windows use (equip/use/allocate/buy/sell/skills). */
   actions: Actions;
@@ -119,6 +121,7 @@ export function exposeDebug(game: Phaser.Game): void {
     hasSave: () => saveService.peek().then((r) => !!r),
     windows: () => uiScene()?.windows.openKeys() ?? [],
     openWindow: (key) => uiScene()?.windows.open(key),
+    questTab: (tab) => uiScene()?.windows.questTab(tab),
     closeWindows: () => uiScene()?.windows.closeAll(),
     actions,
     fps: () => game.loop.actualFps,

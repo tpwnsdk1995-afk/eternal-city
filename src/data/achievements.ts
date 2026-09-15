@@ -1,0 +1,27 @@
+import type { AchievementDef } from './schema/progress';
+
+/** 업적 — lifetime goals with a little ₩/XP and, for the big ones, a title. */
+export const ACHIEVEMENTS: AchievementDef[] = [
+  { id: 'ach_first_blood', name: '첫 사냥', desc: '처음으로 적을 처치한다.', cond: { kind: 'kills', count: 1 }, reward: { won: 500, xp: 20 } },
+  { id: 'ach_zombie_100', name: '좀비 사냥꾼', desc: '좀비 100마리를 처치한다.', cond: { kind: 'killFaction', faction: 'zombie', count: 100 }, reward: { won: 5_000, xp: 300, title: '좀비 사냥꾼' } },
+  { id: 'ach_zombie_1000', name: '학살자', desc: '좀비 1,000마리를 처치한다.', cond: { kind: 'killFaction', faction: 'zombie', count: 1000 }, reward: { won: 50_000, xp: 3_000, title: '학살자' } },
+  { id: 'ach_wito_50', name: '위토 킬러', desc: 'W.I.T.O 병력 50명을 처치한다.', cond: { kind: 'killFaction', faction: 'WITO', count: 50 }, reward: { won: 8_000, xp: 500, title: '위토 킬러' } },
+  { id: 'ach_ogurin', name: '하수도의 주인', desc: '네임드 오구린을 처치한다.', cond: { kind: 'killMonster', monsterId: 'ogurin', count: 1 }, reward: { won: 5_000, xp: 400 } },
+  { id: 'ach_zombie_lord', name: '두목 사냥', desc: '좀비두목을 처치한다.', cond: { kind: 'killMonster', monsterId: 'zombie_lord', count: 1 }, reward: { won: 3_000, xp: 300 } },
+  { id: 'ach_elite_guard', name: '엘리트 격파', desc: '위토 엘리트 가드를 처치한다.', cond: { kind: 'killMonster', monsterId: 'wito_elite_guard', count: 1 }, reward: { won: 10_000, xp: 800 } },
+  { id: 'ach_mutant', name: '변종 사냥', desc: '변종 오구린을 처치한다.', cond: { kind: 'killMonster', monsterId: 'ogurin_mutant', count: 1 }, reward: { won: 20_000, xp: 2_000, title: '심층 정복자' } },
+  { id: 'ach_boss_10', name: '보스 헌터', desc: '보스급 적을 10회 처치한다.', cond: { kind: 'bossKills', count: 10 }, reward: { won: 30_000, xp: 2_500, title: '보스 헌터' } },
+  { id: 'ach_assault_first', name: '첫 작전', desc: '어설트를 처음 성공한다.', cond: { kind: 'assaultClears', count: 1 }, reward: { won: 2_000, xp: 200 } },
+  { id: 'ach_assault_10', name: '베테랑', desc: '어설트를 10회 성공한다.', cond: { kind: 'assaultClears', count: 10 }, reward: { won: 25_000, xp: 2_000, title: '베테랑' } },
+  { id: 'ach_assault_c', name: '심층 돌파', desc: '하수도 심층 어설트를 성공한다.', cond: { kind: 'assaultClears', count: 1, assaultId: 'assault-c' }, reward: { won: 15_000, xp: 1_500 } },
+  { id: 'ach_level_10', name: '신참 헌터', desc: '레벨 10에 도달한다.', cond: { kind: 'level', level: 10 }, reward: { won: 2_000, xp: 0 } },
+  { id: 'ach_level_20', name: '중견 헌터', desc: '레벨 20에 도달한다.', cond: { kind: 'level', level: 20 }, reward: { won: 8_000, xp: 0, title: '중견 헌터' } },
+  { id: 'ach_level_30', name: '고참 헌터', desc: '레벨 30에 도달한다.', cond: { kind: 'level', level: 30 }, reward: { won: 20_000, xp: 0, title: '고참 헌터' } },
+  { id: 'ach_permit', name: '패러렐 시스템 허가증', desc: '김훈 소대장에게서 허가증을 받는다.', cond: { kind: 'flag', flag: 'parallelPermit' }, reward: { won: 3_000, xp: 200 } },
+  { id: 'ach_quests_10', name: '믿을 만한 사람', desc: '퀘스트(메인스트림 포함)를 10회 완료한다.', cond: { kind: 'questsCompleted', count: 10 }, reward: { won: 10_000, xp: 800 } },
+  { id: 'ach_enhance_5', name: '손맛', desc: '무기를 +5까지 강화한다.', cond: { kind: 'enhance', level: 5 }, reward: { won: 5_000, xp: 300 } },
+  { id: 'ach_enhance_9', name: '장인의 총', desc: '무기를 +9까지 강화한다.', cond: { kind: 'enhance', level: 9 }, reward: { won: 50_000, xp: 3_000, title: '장인' } },
+  { id: 'ach_won_1m', name: '백만장자', desc: '누적 ₩1,000,000을 벌어들인다.', cond: { kind: 'wonEarned', amount: 1_000_000 }, reward: { won: 10_000, xp: 500, title: '백만장자' } },
+  { id: 'ach_deaths_10', name: '질긴 목숨', desc: '10번 사망하고도 살아 있다.', cond: { kind: 'deaths', count: 10 }, reward: { won: 1_000, xp: 100, title: '질긴 목숨' }, hidden: true },
+  { id: 'ach_campaign_2002', name: '2002년의 봄', desc: '2002 캠페인을 완주한다.', cond: { kind: 'flag', flag: 'campaign:2002:complete' }, reward: { won: 30_000, xp: 3_000, title: '중곡동의 영웅' } },
+];

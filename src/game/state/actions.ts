@@ -15,6 +15,7 @@ import { learnOrRankUp, toggleActive } from '@core/skills/skillState';
 import { buy, sell } from '@core/economy/shop';
 import { gameState } from './GameState';
 import { questService } from './questService';
+import { progressService } from './progressService';
 
 export interface ActionResult {
   ok: boolean;
@@ -185,6 +186,7 @@ export const actions = {
     gameState.setCharacter({ ...gameState.character, won: gameState.character.won - r.cost });
     gameState.setInventory(replaceStack(gameState.inventory, r.stack));
     gameState.setEquipment({ ...gameState.equipment }); // HUD/label refresh
+    if (r.success) progressService.recordEnhance(r.stack.enhance ?? 0);
     return r.success ? done(`강화 성공! ${weaponLabel(def, r.stack)}`, 'good') : fail(`강화 실패… ${weaponLabel(def, r.stack)} (−₩${r.cost.toLocaleString('ko-KR')})`);
   },
 
@@ -228,6 +230,11 @@ export const actions = {
     gameState.setInventory(replaceStack(gameState.inventory, r.stack));
     gameState.setEquipment({ ...gameState.equipment });
     return done(`플러스업 성공! ${def.name} +${r.stack.plusUp}`, 'good');
+  },
+
+  /** 캠페인 챕터 보상 수령 */
+  claimCampaign(campaignId: string, chapterId: string): ActionResult {
+    return progressService.claimCampaign(campaignId, chapterId);
   },
 
   acceptQuest(id: string): ActionResult {

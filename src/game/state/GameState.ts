@@ -8,6 +8,8 @@ import { aggregateMods } from '@core/skills/modifiers';
 import { initialFireState, type FireState } from '@core/weapons/fireController';
 import { emptyQuestState, type QuestState } from '@core/quest/questState';
 import { emptyStatus, type StatusState } from '@core/combat/statusEffects';
+import { emptyStats, type PlayerStats } from '@core/world/stats';
+import { emptyAchievements, type AchievementState } from '@core/progress/achievements';
 import type { ConsciousnessState } from '@core/combat/consciousness';
 import { balance } from '@data/balance';
 import { registry } from '@data/registry';
@@ -49,6 +51,8 @@ export interface GameEvents extends Record<string, unknown> {
   skills: SkillState;
   fire: FireState;
   quests: QuestState;
+  stats: PlayerStats;
+  achievements: AchievementState;
   flags: Record<string, boolean | number>;
   message: { text: string; tone?: 'info' | 'good' | 'bad' | 'system' };
   mapChanged: { mapId: string; name: string; minimap: MinimapInfo | null };
@@ -78,6 +82,8 @@ class GameState {
   skills: SkillState = emptySkillState();
   fire: FireState = initialFireState();
   quests: QuestState = emptyQuestState();
+  stats: PlayerStats = emptyStats();
+  achievements: AchievementState = emptyAchievements();
   status: StatusState = emptyStatus();
   consciousness: ConsciousnessState = { lastTriggeredAt: -Infinity };
   currentMapId: string = balance.death.respawnMap;
@@ -104,6 +110,8 @@ class GameState {
     this.skills = emptySkillState();
     this.fire = initialFireState();
     this.quests = emptyQuestState();
+    this.stats = emptyStats();
+    this.achievements = emptyAchievements();
     this.status = emptyStatus();
     this.consciousness = { lastTriggeredAt: -Infinity };
     this.currentMapId = balance.death.respawnMap;
@@ -171,6 +179,16 @@ class GameState {
     this.events.emit('quests', q);
   }
 
+  setStats(st: PlayerStats): void {
+    this.stats = st;
+    this.events.emit('stats', st);
+  }
+
+  setAchievements(a: AchievementState): void {
+    this.achievements = a;
+    this.events.emit('achievements', a);
+  }
+
   setFlag(key: string, value: boolean | number = true): void {
     this.flags = { ...this.flags, [key]: value };
     this.events.emit('flags', this.flags);
@@ -199,6 +217,8 @@ class GameState {
     this.events.emit('skills', this.skills);
     this.events.emit('fire', this.fire);
     this.events.emit('quests', this.quests);
+    this.events.emit('stats', this.stats);
+    this.events.emit('achievements', this.achievements);
     this.events.emit('flags', this.flags);
     this.events.emit('settings', this.settings);
   }

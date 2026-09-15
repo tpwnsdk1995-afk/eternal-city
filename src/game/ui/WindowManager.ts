@@ -5,7 +5,7 @@ import { gameState, type AssaultResult } from '../state/GameState';
 import { actions } from '../state/actions';
 import { ResultWindow } from './ResultWindow';
 import { MenuWindow } from './MenuWindow';
-import { QuestWindow } from './QuestWindow';
+import { QuestWindow, type QuestTab } from './QuestWindow';
 import { TaxiWindow } from './TaxiWindow';
 import { TuningWindow } from './TuningWindow';
 import { AssaultWindow } from './AssaultWindow';
@@ -35,7 +35,7 @@ export class WindowManager {
     const dialog = new DialogBox(scene, (GAME_WIDTH - 760) / 2, GAME_HEIGHT - HUD_H - 160, 760);
     const result = new ResultWindow(scene, (GAME_WIDTH - 460) / 2, 140);
     const menu = new MenuWindow(scene, (GAME_WIDTH - 440) / 2, 120);
-    const quest = new QuestWindow(scene, GAME_WIDTH - 460 - 12, 40);
+    const quest = new QuestWindow(scene, GAME_WIDTH - 460 - 12, 24);
     const taxiW = new TaxiWindow(scene, (GAME_WIDTH - 520) / 2, 60);
     const tuning = new TuningWindow(scene, (GAME_WIDTH - 820) / 2, 44);
     const assault = new AssaultWindow(scene, (GAME_WIDTH - 760) / 2, 50);
@@ -92,6 +92,12 @@ export class WindowManager {
 
   closeAll(except: WindowKey[] = []): void {
     for (const k of [...this.order]) if (!except.includes(k)) this.close(k);
+  }
+
+  /** Switch the quest window to a tab and open it. */
+  questTab(tab: QuestTab): void {
+    (this.windows.get('quest') as QuestWindow).setTab(tab);
+    this.open('quest');
   }
 
   showResult(r: AssaultResult): void {

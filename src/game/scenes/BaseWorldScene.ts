@@ -17,6 +17,7 @@ import { buildMinimapTexture } from '../systems/Minimap';
 import { gameState } from '../state/GameState';
 import { saveService } from '../state/SaveService';
 import { questService } from '../state/questService';
+import { progressService } from '../state/progressService';
 import { theme } from '../ui/theme';
 
 /** World camera zoom: 32px tiles render at 48px, so characters read like the original's ~50px sprites. */
@@ -242,6 +243,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   playerDied(): void {
     if (this.transitioning) return;
     this.transitioning = true;
+    progressService.recordDeath();
     this.time.delayedCall(1200, () => {
       const d = gameState.derived();
       gameState.setVitals({ hp: Math.max(1, Math.round(d.maxHp * balance.death.respawnHpPct)), stamina: d.maxStamina, ap: d.maxAp });

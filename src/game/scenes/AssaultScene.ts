@@ -28,6 +28,7 @@ import { refreshTiles } from '../systems/TilemapBuilder';
 import { Objective } from '../entities/Objective';
 import type { Enemy } from '../entities/Enemy';
 import { gameState, type AssaultResult } from '../state/GameState';
+import { progressService } from '../state/progressService';
 
 const BANNER_INTERVAL_MS = 150;
 const SUCCESS_LINGER_MS = 6000;
@@ -262,6 +263,8 @@ export class AssaultScene extends BaseWorldScene {
       gameState.message(`어설트 실패 (${why}) — ₩${penalty.toLocaleString('ko-KR')} 차감`, 'bad');
       if (reason !== 'death') this.time.delayedCall(3000, () => this.goToMap(balance.death.respawnMap, balance.death.respawnPoint));
     }
+    progressService.recordAssault(this.assaultId, success);
+    if (success) progressService.recordWon(result.won);
     gameState.events.emit('assaultResult', result);
     gameState.events.emit('assault', null);
   }

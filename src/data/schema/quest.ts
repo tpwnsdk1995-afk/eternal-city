@@ -16,7 +16,11 @@ export interface QuestDef {
   text: { offer: string; progress: string; complete: string };
   /** Steps are pursued in parallel; all must be done before turning in to the giver. */
   steps: QuestStep[];
-  rewards: { won: number; xp: number; items?: { itemId: string; qty: number }[]; flags?: string[] };
+  rewards: { won: number; xp: number; items?: { itemId: string; qty: number }[]; itemChances?: { itemId: string; qty: number; chance: number }[]; flags?: string[] };
   /** quest items removed on completion */
   consumes?: { itemId: string; qty: number }[];
+  /** 메인스트림: repeatable once per (UTC) day; completion is tracked by the `daily:<id>` flag, not the completed list */
+  daily?: boolean;
+  /** CL 메인스트림: harder targets, CL-grade reward roll */
+  cl?: boolean;
 }

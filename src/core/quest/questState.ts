@@ -19,14 +19,23 @@ export const emptyQuestState = (): QuestState => ({ active: [], completed: [] })
 export const isActive = (s: QuestState, id: string): boolean => s.active.some((q) => q.id === id);
 export const isCompleted = (s: QuestState, id: string): boolean => s.completed.includes(id);
 
+/** UTC day index used to reset 메인스트림 quests. */
+export const dayKey = (now = Date.now()): number => Math.floor(now / 86_400_000);
+export const dailyFlag = (id: string): string => `daily:${id}`;
+/** whether a daily quest was already turned in today */
+export const doneToday = (def: QuestDef, flags: Record<string, boolean | number>, day = dayKey()): boolean => !!def.daily && flags[dailyFlag(def.id)] === day;
+
 export function stepTarget(step: QuestStep): number {
   return step.kind === 'kill' || step.kind === 'collect' ? step.count : 1;
 }
 
 /** Whether the character may take the quest right now. */
-export function canAccept(s: QuestState, def: QuestDef, ctx: { level: number; flags: Record<string, boolean | number> }): { ok: true } | { ok: false; reason: 'active' | 'completed' | 'level' | 'flags' | 'quests' } {
+export type AcceptReason = 'active' | 'completed' | 'level' | 'flags' | 'quests' | 'daily';
+
+export function canAccept(s: QuestState, def: QuestDef, ctx: { level: number; flags: Record<string, boolean | number>; day?: number }): { ok: true } | { ok: false; reason: AcceptReason } {
   if (isActive(s, def.id)) return { ok: false, reason: 'active' };
   if (isCompleted(s, def.id)) return { ok: false, reason: 'completed' };
+  if (doneToday(def, ctx.flags, ctx.day)) return { ok: false, reason: 'daily' };
   const p = def.prereq;
   if (p?.level && ctx.level < p.level) return { ok: false, reason: 'level' };
   if (p?.flags && !p.flags.every((f) => !!ctx.flags[f])) return { ok: false, reason: 'flags' };
@@ -92,10 +101,11 @@ export function isReadyToComplete(s: QuestState, def: QuestDef): boolean {
   return def.steps.every((step, i) => q.progress[i] >= stepTarget(step));
 }
 
-/** Turns the quest in. Caller applies rewards/consumes. */
+/** Turns the quest in. Caller applies rewards/consumes (and, for dailies, sets the day flag). */
 export function complete(s: QuestState, def: QuestDef): QuestState {
   if (!isReadyToComplete(s, def)) return s;
-  return { active: s.active.filter((a) => a.id !== def.id), completed: [...s.completed, def.id] };
+  const active = s.active.filter((a) => a.id !== def.id);
+  return def.daily ? { ...s, active } : { active, completed: [...s.completed, def.id] };
 }
 
 export function abandon(s: QuestState, id: string): QuestState {

@@ -31,7 +31,7 @@ export class StatusWindow extends Window {
     const d = gameState.derived();
     const v = gameState.vitals;
 
-    this.label(14, 2, `${c.name}`, '#ffffff', 16, { fontStyle: 'bold' });
+    this.label(14, 2, `${c.name}${gameState.achievements.title ? `  [${gameState.achievements.title}]` : ''}`, '#ffffff', 16, { fontStyle: 'bold' });
     this.label(this.w - 14, 4, `Lv.${c.level}${c.rebirth ? `  환생 ${c.rebirth}` : ''}`, theme.colors.brass, 14).setOrigin(1, 0);
     this.label(14, 24, `경험치 ${c.xp.toLocaleString('ko-KR')} / ${xpToNext(c.level).toLocaleString('ko-KR')}`, theme.colors.muted, 12);
     this.label(14, 44, `미배분 스탯 포인트: ${c.unspentPoints}`, c.unspentPoints > 0 ? theme.colors.good : theme.colors.muted, 13, { fontStyle: c.unspentPoints ? 'bold' : 'normal' });
