@@ -9,6 +9,7 @@ import { QuestWindow, type QuestTab } from './QuestWindow';
 import { TaxiWindow } from './TaxiWindow';
 import { TuningWindow } from './TuningWindow';
 import { AssaultWindow } from './AssaultWindow';
+import { ParallelWindow } from './ParallelWindow';
 import { questService } from '../state/questService';
 import type { Window } from './Window';
 import { InventoryWindow } from './InventoryWindow';
@@ -18,7 +19,7 @@ import { ShopWindow } from './ShopWindow';
 import { DialogBox } from './DialogBox';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 
-export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu' | 'quest' | 'taxi' | 'tuning' | 'assault';
+export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu' | 'quest' | 'taxi' | 'tuning' | 'assault' | 'parallel';
 
 const HUD_H = 108;
 
@@ -39,7 +40,8 @@ export class WindowManager {
     const taxiW = new TaxiWindow(scene, (GAME_WIDTH - 520) / 2, 60);
     const tuning = new TuningWindow(scene, (GAME_WIDTH - 820) / 2, 44);
     const assault = new AssaultWindow(scene, (GAME_WIDTH - 760) / 2, 50);
-    for (const w of [inv, status, skills, shop, dialog, result, menu, quest, taxiW, tuning, assault]) {
+    const parallel = new ParallelWindow(scene, (GAME_WIDTH - 560) / 2, 90);
+    for (const w of [inv, status, skills, shop, dialog, result, menu, quest, taxiW, tuning, assault, parallel]) {
       this.windows.set(w.key as WindowKey, w);
       w.setVisible(false);
       w.on('close', () => this.close(w.key as WindowKey));
@@ -172,6 +174,18 @@ export class WindowManager {
               onPick: () => {
                 this.close('dialog');
                 this.open('taxi');
+              },
+            },
+            closeOpt,
+          ];
+        case 'parallel':
+          return [
+            {
+              label: '연도 이동',
+              color: '#9be7ff',
+              onPick: () => {
+                this.close('dialog');
+                this.open('parallel');
               },
             },
             closeOpt,

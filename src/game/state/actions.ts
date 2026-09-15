@@ -16,6 +16,7 @@ import { buy, sell } from '@core/economy/shop';
 import { gameState } from './GameState';
 import { questService } from './questService';
 import { progressService } from './progressService';
+import { canTravel, yearDef } from '@core/world/parallel';
 
 export interface ActionResult {
   ok: boolean;
@@ -163,6 +164,7 @@ export const actions = {
         noMoney: '요금이 부족합니다.',
         noStop: '그곳에는 정류장이 없습니다.',
         level: `${to.name}은(는) 레벨 ${to.levelRange?.[0]} 권장 지역입니다. 조합원이 태워 주지 않습니다.`,
+        year: '조합 차량은 같은 연도 안에서만 다닙니다. 패러렐 시스템을 이용하세요.',
       }[r.reason];
       return fail(why);
     }
@@ -235,6 +237,20 @@ export const actions = {
   /** 캠페인 챕터 보상 수령 */
   claimCampaign(campaignId: string, chapterId: string): ActionResult {
     return progressService.claimCampaign(campaignId, chapterId);
+  },
+
+  /** 패러렐 시스템: jump to another year's safe-zone hub. */
+  travelYear(year: number): ActionResult {
+    const here = registry.map(gameState.currentMapId);
+    const r = canTravel(year, { flags: gameState.flags, level: gameState.character.level, currentYear: here.year });
+    if (!r.ok) {
+      const why = { same: '이미 그 연도에 있습니다.', permit: '패러렐 시스템 허가증이 필요합니다. 김훈 소대장을 찾아가세요.', milestone: '아직 그 연도로 갈 조건을 갖추지 못했습니다.', unknown: '알 수 없는 연도입니다.' }[r.reason];
+      return fail(why);
+    }
+    const yd = yearDef(year)!;
+    gameState.message(`패러렐 시스템 가동 — ${yd.name}(으)로 이동합니다.`, 'system');
+    gameState.events.emit('travel', { mapId: yd.hubMapId, spawn: 'parallel' });
+    return { ok: true };
   },
 
   acceptQuest(id: string): ActionResult {

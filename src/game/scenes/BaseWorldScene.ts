@@ -18,6 +18,7 @@ import { gameState } from '../state/GameState';
 import { saveService } from '../state/SaveService';
 import { questService } from '../state/questService';
 import { progressService } from '../state/progressService';
+import { hubForYear } from '@core/world/parallel';
 import { theme } from '../ui/theme';
 
 /** World camera zoom: 32px tiles render at 48px, so characters read like the original's ~50px sprites. */
@@ -249,7 +250,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
       gameState.setVitals({ hp: Math.max(1, Math.round(d.maxHp * balance.death.respawnHpPct)), stamina: d.maxStamina, ap: d.maxAp });
       this.cameras.main.fadeOut(400, 0, 0, 0);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        this.scene.start('SafeZone', { mapId: balance.death.respawnMap, spawn: balance.death.respawnPoint } satisfies WorldSceneData);
+        this.scene.start('SafeZone', { mapId: hubForYear(this.def.year), spawn: balance.death.respawnPoint } satisfies WorldSceneData);
       });
     });
   }

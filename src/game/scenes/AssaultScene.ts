@@ -20,6 +20,7 @@ import {
 } from '@core/assault/assaultMachine';
 import { dist } from '@core/math/vec';
 import { advancedMonster } from '@core/assault/advanced';
+import { hubForYear } from '@core/world/parallel';
 import type { AssaultFailReason } from '@data/schema/assault';
 import { BaseWorldScene, type WorldSceneData } from './BaseWorldScene';
 import type { InputIntent } from '../systems/input/InputMapper';
@@ -254,14 +255,14 @@ export class AssaultScene extends BaseWorldScene {
         gameState.message(`레벨 업! Lv.${xr.character.level}`, 'good');
       }
       gameState.message(`어설트 성공! ₩${R.won.toLocaleString('ko-KR')} · ${R.xp} XP 획득`, 'good');
-      this.time.delayedCall(SUCCESS_LINGER_MS, () => this.goToMap(balance.death.respawnMap, balance.death.respawnPoint));
+      this.time.delayedCall(SUCCESS_LINGER_MS, () => this.goToMap(hubForYear(this.def.year), balance.death.respawnPoint));
     } else {
       const penalty = Math.min(gameState.character.won, this.adef.failPenalty.won);
       result.won = -penalty;
       gameState.setCharacter({ ...gameState.character, won: gameState.character.won - penalty });
       const why = reason === 'timeout' ? '시간 초과' : reason === 'booth' ? '부스 파괴' : '사망';
       gameState.message(`어설트 실패 (${why}) — ₩${penalty.toLocaleString('ko-KR')} 차감`, 'bad');
-      if (reason !== 'death') this.time.delayedCall(3000, () => this.goToMap(balance.death.respawnMap, balance.death.respawnPoint));
+      if (reason !== 'death') this.time.delayedCall(3000, () => this.goToMap(hubForYear(this.def.year), balance.death.respawnPoint));
     }
     progressService.recordAssault(this.assaultId, success);
     if (success) progressService.recordWon(result.won);

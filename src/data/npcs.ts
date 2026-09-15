@@ -98,6 +98,13 @@ export const NPCS: NpcDef[] = [
     quests: ['ms_2002_normal', 'ms_2002_cl'],
   },
   {
+    id: 'npc_parallel',
+    name: '패러렐 시스템 관리관',
+    role: 'parallel',
+    tex: TEX.npc_parallel,
+    lines: ['패러렐 시스템은 허가증을 가진 헌터만 통과시킵니다. 어느 해로 가시겠습니까?', '시간대를 건너면 그 해의 안전지역에 도착합니다. 돌아올 때도 저를 찾으세요.'],
+  },
+  {
     id: 'npc_kimhun',
     name: '김훈 소대장',
     role: 'quest',

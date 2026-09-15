@@ -152,7 +152,7 @@ export class UIScene extends Phaser.Scene {
       refreshWindows();
     });
     on('mapChanged', (m) => {
-      this.mapText.setText(`2002 · ${m.name}`);
+      this.mapText.setText(`${registry.map(m.mapId).year} · ${m.name}`);
       this.windows.closeAll(['result']);
       this.setBanner(null);
       this.setMinimap(m.minimap);
@@ -181,7 +181,7 @@ export class UIScene extends Phaser.Scene {
     this.refreshWeapon();
     this.refreshQuickslots();
     this.refreshQuests();
-    this.mapText.setText(`2002 · ${registry.map(gameState.currentMapId).name}`);
+    this.mapText.setText(`${registry.map(gameState.currentMapId).year} · ${registry.map(gameState.currentMapId).name}`);
     this.setMinimap(gameState.minimap);
     for (const m of gameState.log.slice(-LOG_MAX)) this.pushLog(m.text, m.tone);
   }
@@ -286,7 +286,8 @@ export class UIScene extends Phaser.Scene {
       for (const p of progressText(gameState.quests, def)) lines.push(`   ${p}`);
     }
     this.questTracker.setText(lines.join('\n'));
-    this.permitText.setText(gameState.flags.parallelPermit ? '2002 · 패러렐 허가증 보유' : '2002 · 패러렐 허가증 없음');
+    const yr = registry.map(gameState.currentMapId).year;
+    this.permitText.setText(gameState.flags.parallelPermit ? `${yr} · 패러렐 허가증 보유` : `${yr} · 패러렐 허가증 없음`);
     this.permitText.setColor(gameState.flags.parallelPermit ? theme.colors.good : '#6b7280');
   }
 

@@ -97,6 +97,12 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.zombie_worker]: figure('zombie_worker'),
   [TEX.ogurin]: figure('ogurin', 64),
   [TEX.ogurin_mutant]: figure('ogurin_mutant'),
+  [TEX.zombie_police]: figure('zombie_police'),
+  [TEX.zombie_firefighter]: figure('zombie_firefighter'),
+  [TEX.wito_engineer]: figure('wito_engineer'),
+  [TEX.wito_turret]: figure('wito_turret'),
+  [TEX.zombie_fire_chief]: figure('zombie_fire_chief', 64),
+  [TEX.npc_parallel]: figure('npc_parallel'),
 
   [TEX.wito_recon]: figure('wito_recon'),
   [TEX.wito_airborne]: figure('wito_airborne'),

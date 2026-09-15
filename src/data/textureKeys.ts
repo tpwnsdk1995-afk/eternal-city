@@ -33,6 +33,12 @@ export const TEX = {
   zombie_worker: 'zombie_worker',
   ogurin: 'ogurin',
   ogurin_mutant: 'ogurin_mutant',
+  zombie_police: 'zombie_police',
+  zombie_firefighter: 'zombie_firefighter',
+  wito_engineer: 'wito_engineer',
+  wito_turret: 'wito_turret',
+  zombie_fire_chief: 'zombie_fire_chief',
+  npc_parallel: 'npc_parallel',
   // street decor (drawn with bottom origin)
   deco_lamp: 'deco_lamp',
   deco_vending: 'deco_vending',

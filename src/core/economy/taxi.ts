@@ -46,11 +46,13 @@ export function register(def: MapDef, flags: Record<string, boolean | number>, w
   return { ok: true, won: won - TAXI_REGISTER_FEE };
 }
 
-export type RideResult = { ok: true; won: number; cost: number } | { ok: false; reason: 'sameMap' | 'notRegistered' | 'hereNotRegistered' | 'noMoney' | 'noStop' | 'level' };
+export type RideResult = { ok: true; won: number; cost: number } | { ok: false; reason: 'sameMap' | 'notRegistered' | 'hereNotRegistered' | 'noMoney' | 'noStop' | 'level' | 'year' };
 
 export function ride(maps: readonly MapDef[], flags: Record<string, boolean | number>, won: number, from: string, to: MapDef, level: number): RideResult {
   if (from === to.id) return { ok: false, reason: 'sameMap' };
   if (!hasTaxiStop(to)) return { ok: false, reason: 'noStop' };
+  const fromDef = maps.find((m) => m.id === from);
+  if (fromDef && fromDef.year !== to.year) return { ok: false, reason: 'year' }; // 조합 차량은 같은 해 안에서만 다닌다
   if (!isRegistered(flags, from)) return { ok: false, reason: 'hereNotRegistered' };
   if (!isRegistered(flags, to.id)) return { ok: false, reason: 'notRegistered' };
   if (to.levelRange && level < to.levelRange[0] - 3) return { ok: false, reason: 'level' };

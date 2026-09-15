@@ -25,6 +25,12 @@ export const FIGURE_STYLES = {
   ogurin: { skin: '#5f7a5a', hair: '#1a2a1a', shirt: '#3a5a3a', pants: '#2a3a2a', zombie: true, blood: 0.8, size: 1.3, glow: 'rgba(80,220,120,0.35)', eyes: '#b6ff6b' } as FigureStyle,
 
   ogurin_mutant: { skin: '#4a6a5a', hair: '#0a1a0a', shirt: '#2a4a3a', pants: '#1a2a2a', coat: '#123322', zombie: true, blood: 1, size: 1.4, glow: 'rgba(60,255,140,0.45)', eyes: '#d0ff70' } as FigureStyle,
+  zombie_police: { skin: ZOMBIE_SKIN, hair: '#1a1a1a', hairStyle: 'cap', shirt: '#2f3d5c', pants: '#1f2738', shoes: '#111', vest: '#1a2233', zombie: true, blood: 0.6 } as FigureStyle,
+  zombie_firefighter: { skin: ZOMBIE_SKIN, hair: '#2a1a10', hairStyle: 'helmet', helmetColor: '#c9a227', shirt: '#7a2e1e', pants: '#3a2a1a', shoes: '#111', coat: '#8a3a22', stripes: true, zombie: true, blood: 0.7, size: 1.08 } as FigureStyle,
+  wito_engineer: { skin: '#e3bd95', hair: '#3a3a2a', hairStyle: 'helmet', helmetColor: '#6a6a40', shirt: '#6b6b3a', pants: '#4a4a30', shoes: '#26281c', gun: 'smg', pack: true, vest: '#a08a30' } as FigureStyle,
+  wito_turret: { skin: '#3a3f47', hair: '#1a1d22', hairStyle: 'helmet', helmetColor: '#2a2f38', shirt: '#3a4048', pants: '#2a2f38', shoes: '#15181d', gun: 'rifle', pack: true, vest: '#4a5260', glow: 'rgba(255,60,60,0.28)', eyes: '#ff3030', size: 1.15 } as FigureStyle,
+  zombie_fire_chief: { skin: '#7a6a5a', hair: '#1a1a1a', hairStyle: 'helmet', helmetColor: '#e0b030', shirt: '#8a2a1a', pants: '#3a2a1a', shoes: '#111', coat: '#a03a20', stripes: true, zombie: true, blood: 0.9, size: 1.4, glow: 'rgba(255,120,40,0.35)', eyes: '#ffb03b' } as FigureStyle,
+  npc_parallel: { skin: '#f1c9a5', hair: '#d0d8f0', hairStyle: 'short', shirt: '#2a2f4a', pants: '#1a1e30', shoes: '#111', coat: '#3a4a8a', glow: 'rgba(120,180,255,0.3)' } as FigureStyle,
   wito_recon: { skin: '#e3bd95', hair: '#3a3a2a', hairStyle: 'helmet', helmetColor: '#4a5530', shirt: '#5c6b3a', pants: '#4a5530', shoes: '#26281c', gun: 'rifle' } as FigureStyle,
   wito_airborne: { skin: '#e3bd95', hair: '#2a2a2a', hairStyle: 'helmet', helmetColor: '#2f3626', shirt: '#3f4a2f', pants: '#3a4228', shoes: '#1e2016', gun: 'rifle', pack: true } as FigureStyle,
 

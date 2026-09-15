@@ -1,5 +1,6 @@
 import { balance } from '@data/balance';
 import { ASSAULTS, registry } from '@data/registry';
+import { hubForYear } from '@core/world/parallel';
 import { initialFireState } from '@core/weapons/fireController';
 import { emptyStatus } from '@core/combat/statusEffects';
 import { CURRENT_SAVE_VERSION, migrateSave, type SaveGame } from '@core/save/saveSchema';
@@ -15,7 +16,8 @@ const ASSAULT_MAP_IDS = new Set(ASSAULTS.map((a) => a.mapId));
 
 /** Where the character should reappear on load: never inside an assault instance. */
 export function saveLocation(mapId: string): { mapId: string; spawn: string } {
-  if (ASSAULT_MAP_IDS.has(mapId) || !registry.hasMap(mapId)) return { mapId: balance.death.respawnMap, spawn: balance.death.respawnPoint };
+  if (!registry.hasMap(mapId)) return { mapId: balance.death.respawnMap, spawn: balance.death.respawnPoint };
+  if (ASSAULT_MAP_IDS.has(mapId)) return { mapId: hubForYear(registry.map(mapId).year), spawn: balance.death.respawnPoint };
   return { mapId, spawn: 'default' };
 }
 

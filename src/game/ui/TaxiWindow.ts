@@ -32,7 +32,7 @@ export class TaxiWindow extends Window {
       this.button(14, 44, `이곳 정류장 등록 (₩${TAXI_REGISTER_FEE.toLocaleString('ko-KR')})`, () => actions.taxiRegister(), theme.colors.good, 13);
     }
 
-    const rows: ListRow[] = MAPS.filter((m) => hasTaxiStop(m) && m.id !== here.id).map((m) => {
+    const rows: ListRow[] = MAPS.filter((m) => hasTaxiStop(m) && m.id !== here.id && m.year === here.year).map((m) => {
       const reg = isRegistered(gameState.flags, m.id);
       const fare = fareFor(portalHops(MAPS, here.id, m.id));
       const lvl = m.levelRange ? ` · Lv.${m.levelRange[0]}~${m.levelRange[1]}` : '';

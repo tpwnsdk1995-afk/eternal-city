@@ -24,6 +24,9 @@ import { hangangPark } from './maps/hangang-park';
 import { pyeongchangDong } from './maps/pyeongchang-dong';
 import { junggokStationDefense } from './maps/junggok-station-defense';
 import { sewerDepths } from './maps/sewer-depths';
+import { jongnoShelter } from './maps/jongno-shelter';
+import { jongnoStreet } from './maps/jongno-street';
+import { YEARS } from './years';
 import { assaultA } from './assaults/assault-a';
 import { assaultB } from './assaults/assault-b';
 import { assaultC } from './assaults/assault-c';
@@ -35,7 +38,7 @@ import type { AchievementDef, CampaignDef } from './schema/progress';
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
 export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES, ...MISC];
-export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense, sewerDepths];
+export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense, sewerDepths, jongnoShelter, jongnoStreet];
 const BASE_ASSAULTS: AssaultDef[] = [assaultA, assaultB, assaultC];
 /** every mission plus its 고급 variant */
 export const ASSAULTS: AssaultDef[] = [...BASE_ASSAULTS, ...BASE_ASSAULTS.map(advancedOf)];
@@ -141,6 +144,15 @@ export function validateAll(): void {
       for (const a of ch.requires.achievements ?? []) if (!achievements.has(a)) errors.push(`${where} requires unknown achievement ${a}`);
       for (const it of ch.rewards.items ?? []) if (!items.has(it.itemId)) errors.push(`${where} rewards unknown item ${it.itemId}`);
     });
+  }
+  for (const y of YEARS) {
+    const hub = maps.get(y.hubMapId);
+    if (!hub) errors.push(`year ${y.year} hub map ${y.hubMapId} unknown`);
+    else {
+      if (!hub.safeZone) errors.push(`year ${y.year} hub ${y.hubMapId} must be a safe zone`);
+      if (hub.year !== y.year) errors.push(`year ${y.year} hub ${y.hubMapId} is a ${hub.year} map`);
+      if (!hub.spawnPoints.parallel && !hub.spawnPoints.default) errors.push(`year ${y.year} hub lacks a parallel/default spawn`);
+    }
   }
   for (const a of ACHIEVEMENTS) {
     const c = a.cond;

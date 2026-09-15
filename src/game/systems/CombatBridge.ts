@@ -24,6 +24,7 @@ import { applyXp, xpForKill } from '@core/world/xp';
 import { applyDeathPenalty } from '@core/world/death';
 import { rollLoot } from '@core/world/loot';
 import { drainAp } from '@core/skills/skillState';
+import { hubForYear } from '@core/world/parallel';
 import { gameState } from '../state/GameState';
 import { questService } from '../state/questService';
 import { progressService } from '../state/progressService';
@@ -537,7 +538,7 @@ export class CombatBridge {
     const before = gameState.character.won;
     gameState.setCharacter(applyDeathPenalty(gameState.character));
     const lost = before - gameState.character.won;
-    gameState.message(`사망했습니다. ₩${lost.toLocaleString('ko-KR')}을 잃고 ${registry.map(balance.death.respawnMap).name}에서 부활합니다.`, 'bad');
+    gameState.message(`사망했습니다. ₩${lost.toLocaleString('ko-KR')}을 잃고 ${registry.map(hubForYear(this.host.built.def.year)).name}에서 부활합니다.`, 'bad');
     gameState.status = { burningUntil: 0, burnAccumulator: 0, invulnUntil: 0 };
     this.host.player.stopMoving();
     this.host.player.setTint(0x555555);
