@@ -1,0 +1,41 @@
+import type { NpcDef } from './schema/npc';
+import { TEX } from './textureKeys';
+
+export const NPCS: NpcDef[] = [
+  {
+    id: 'npc_elia',
+    name: 'EL.IA 기술정보원',
+    role: 'skills',
+    tex: TEX.npc_elia,
+    lines: ['기술등급이 허락하는 범위 안에서 스킬을 활성화해 드립니다.', '지능이 오르면 더 많은 기술을 동시에 다룰 수 있습니다.'],
+  },
+  {
+    id: 'npc_shop',
+    name: '무기상 박상사',
+    role: 'shop',
+    tex: TEX.npc_shop,
+    lines: ['총알은 넉넉히 챙겨 가. 하수도 쪽은 요즘 심상치 않아.'],
+    stock: [
+      'glock17',
+      'm1911',
+      'mp5',
+      'uzi',
+      'ammo_9mm_normal',
+      'ammo_9mm_incendiary',
+      'ammo_45_normal',
+      'ammo_45_incendiary',
+      'armor_top_basic',
+      'armor_bottom_basic',
+      'bandage',
+      'energy_drink',
+    ],
+  },
+  {
+    id: 'npc_assault',
+    name: '어설트 접수원',
+    role: 'assault',
+    tex: TEX.npc_assault,
+    lines: ['중곡동 봉쇄선 돌파 작전에 지원하시겠습니까? 바리케이드를 부수고 전진해 두목을 처리하는 임무입니다.'],
+    assaults: ['assault-a'],
+  },
+];
