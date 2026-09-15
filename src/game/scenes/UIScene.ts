@@ -8,22 +8,33 @@ import { gameState, type AssaultHud, type GameEvents } from '../state/GameState'
 import { Gauge } from '../ui/Gauge';
 import { theme } from '../ui/theme';
 import { WindowManager } from '../ui/WindowManager';
+import { MINIMAP_MAX_H, MINIMAP_MAX_W, type MinimapInfo } from '../systems/Minimap';
 
-const BAR_H = 92;
+export const HUD_H = 108;
 const LOG_MAX = 5;
+const QUICK_SLOTS = 9;
+const SLOT = 40;
 
-/** Always-on HUD overlay. Runs alongside world scenes and re-renders from GameState events. */
+/**
+ * Always-on HUD overlay in the original's layout: portrait + gauges on the left, weapon panel
+ * and quickslots in the middle, money / map / XP on the right, minimap top-right, log top-left.
+ */
 export class UIScene extends Phaser.Scene {
   private hp!: Gauge;
   private stamina!: Gauge;
   private ap!: Gauge;
   private xp!: Gauge;
+  private nameText!: Phaser.GameObjects.Text;
+  private weaponIcon!: Phaser.GameObjects.Image;
   private weaponText!: Phaser.GameObjects.Text;
   private ammoText!: Phaser.GameObjects.Text;
+  private subFireText!: Phaser.GameObjects.Text;
   private wonText!: Phaser.GameObjects.Text;
   private levelText!: Phaser.GameObjects.Text;
   private mapText!: Phaser.GameObjects.Text;
   private fpsText!: Phaser.GameObjects.Text;
+  private quickIcons: Phaser.GameObjects.Image[] = [];
+  private quickCounts: Phaser.GameObjects.Text[] = [];
   private logLines: Phaser.GameObjects.Text[] = [];
   private unsubs: (() => void)[] = [];
   windows!: WindowManager;
@@ -33,35 +44,71 @@ export class UIScene extends Phaser.Scene {
   private bannerProgress!: Phaser.GameObjects.Text;
   private bannerTime!: Phaser.GameObjects.Text;
   private bossBar!: Gauge;
+  private minimapPanel!: Phaser.GameObjects.Container;
+  private minimapImage: Phaser.GameObjects.Image | null = null;
+  private minimapDots!: Phaser.GameObjects.Graphics;
+  private minimapInfo: MinimapInfo | null = null;
+  private minimapAt = 0;
 
   constructor() {
     super('UI');
   }
 
   create(): void {
-    const top = GAME_HEIGHT - BAR_H;
-    this.add.nineslice(0, top, TEX.ui_panel, 0, GAME_WIDTH, BAR_H, 6, 6, 6, 6).setOrigin(0, 0);
+    const top = GAME_HEIGHT - HUD_H;
+    this.add.nineslice(0, top, TEX.ui_panel, 0, GAME_WIDTH, HUD_H, 8, 8, 8, 8).setOrigin(0, 0);
 
-    this.hp = new Gauge(this, 16, top + 12, 260, 18, theme.colors.hp, '생명');
-    this.stamina = new Gauge(this, 16, top + 36, 260, 14, theme.colors.stamina, '지구력');
-    this.ap = new Gauge(this, 16, top + 56, 260, 14, theme.colors.ap, '행동력');
+    // --- left: portrait + gauges ---------------------------------------------------------------
+    this.add.nineslice(12, top + 12, TEX.ui_slot, 0, 72, 72, 3, 3, 3, 3).setOrigin(0, 0);
+    this.add.image(16, top + 16, TEX.portrait_player).setOrigin(0, 0).setDisplaySize(64, 64);
+    this.nameText = this.add.text(48, top + 88, '', theme.textStyle(12, theme.colors.brass, { fontStyle: 'bold' })).setOrigin(0.5, 0);
+    this.hp = new Gauge(this, 94, top + 14, 232, 18, theme.colors.hp, '생명');
+    this.stamina = new Gauge(this, 94, top + 38, 232, 14, theme.colors.stamina, '지구력');
+    this.ap = new Gauge(this, 94, top + 58, 232, 14, theme.colors.ap, '행동력');
+    this.levelText = this.add.text(94, top + 78, '', theme.textStyle(12, theme.colors.muted));
 
-    this.weaponText = this.add.text(300, top + 12, '', theme.textStyle(15, theme.colors.text));
-    this.ammoText = this.add.text(300, top + 36, '', theme.textStyle(13, theme.colors.muted));
-    this.levelText = this.add.text(300, top + 58, '', theme.textStyle(13, theme.colors.muted));
-    this.xp = new Gauge(this, 300, top + 76, 260, 8, theme.colors.xp, '');
+    // --- centre: weapon panel + quickslots ---------------------------------------------------
+    const cx = 350;
+    this.add.nineslice(cx, top + 12, TEX.ui_slot, 0, 52, 52, 3, 3, 3, 3).setOrigin(0, 0);
+    this.weaponIcon = this.add.image(cx + 26, top + 38, TEX.icon_pistol).setDisplaySize(40, 40);
+    this.weaponText = this.add.text(cx + 62, top + 14, '', theme.textStyle(15, theme.colors.text, { fontStyle: 'bold' }));
+    this.ammoText = this.add.text(cx + 62, top + 36, '', theme.textStyle(13, theme.colors.muted));
+    this.subFireText = this.add.text(cx + 62, top + 54, '', theme.textStyle(11, '#9be7ff'));
+    const qx = cx;
+    const qy = top + 70;
+    for (let i = 0; i < QUICK_SLOTS; i++) {
+      const x = qx + i * (SLOT + 4);
+      this.add.nineslice(x, qy, TEX.ui_slot, 0, SLOT, 32, 3, 3, 3, 3).setOrigin(0, 0);
+      this.add.text(x + 3, qy + 1, `${i + 1}`, theme.textStyle(9, theme.colors.muted));
+      const icon = this.add.image(x + SLOT / 2, qy + 16, TEX.icon_consumable).setDisplaySize(22, 22).setVisible(false);
+      const count = this.add.text(x + SLOT - 3, qy + 30, '', theme.textStyle(10, theme.colors.text, { stroke: '#000', strokeThickness: 2 })).setOrigin(1, 1);
+      this.quickIcons.push(icon);
+      this.quickCounts.push(count);
+    }
 
-    this.wonText = this.add.text(GAME_WIDTH - 16, top + 12, '', theme.textStyle(16, theme.colors.brass)).setOrigin(1, 0);
-    this.mapText = this.add.text(GAME_WIDTH - 16, top + 40, '', theme.textStyle(13, theme.colors.muted)).setOrigin(1, 0);
-    this.fpsText = this.add.text(GAME_WIDTH - 8, 6, '', theme.textStyle(11, theme.colors.muted)).setOrigin(1, 0).setVisible(gameState.settings.showFps);
+    // --- right: money / map / xp -------------------------------------------------------------
+    this.wonText = this.add.text(GAME_WIDTH - 16, top + 14, '', theme.textStyle(18, theme.colors.brass, { fontStyle: 'bold' })).setOrigin(1, 0);
+    this.mapText = this.add.text(GAME_WIDTH - 16, top + 42, '', theme.textStyle(13, theme.colors.muted)).setOrigin(1, 0);
+    this.xp = new Gauge(this, GAME_WIDTH - 16 - 260, top + 66, 260, 12, theme.colors.xp, 'EXP');
+    this.add.text(GAME_WIDTH - 16, top + 84, '2002 · 패러렐 허가증 없음', theme.textStyle(10, '#6b7280')).setOrigin(1, 0);
+    this.fpsText = this.add.text(GAME_WIDTH - 8, GAME_HEIGHT - HUD_H - 16, '', theme.textStyle(11, theme.colors.muted)).setOrigin(1, 0).setVisible(gameState.settings.showFps);
 
+    // --- top-left log --------------------------------------------------------------------------
     for (let i = 0; i < LOG_MAX; i++) {
       this.logLines.push(this.add.text(16, 12 + i * 20, '', theme.textStyle(13, theme.colors.text, { stroke: '#000', strokeThickness: 3 })));
     }
 
-    // assault banner (top centre)
+    // --- minimap (top-right) -----------------------------------------------------------------
+    this.minimapPanel = this.add.container(GAME_WIDTH - MINIMAP_MAX_W - 24, 12).setDepth(40);
+    const mmBg = this.add.nineslice(0, 0, TEX.ui_panel, 0, MINIMAP_MAX_W + 12, MINIMAP_MAX_H + 30, 8, 8, 8, 8).setOrigin(0, 0);
+    const mmTitle = this.add.text(6, 5, '지도 (Tab)', theme.textStyle(11, theme.colors.brass));
+    this.minimapDots = this.add.graphics();
+    this.minimapPanel.add([mmBg, mmTitle, this.minimapDots]);
+    this.minimapPanel.setVisible(gameState.settings.showMinimap);
+
+    // --- assault banner (top centre) ---------------------------------------------------------
     this.banner = this.add.container(GAME_WIDTH / 2, 8).setDepth(50).setVisible(false);
-    const bannerBg = this.add.nineslice(0, 0, TEX.ui_panel, 0, 520, 78, 6, 6, 6, 6).setOrigin(0.5, 0);
+    const bannerBg = this.add.nineslice(0, 0, TEX.ui_panel, 0, 520, 78, 8, 8, 8, 8).setOrigin(0.5, 0);
     this.bannerName = this.add.text(0, 8, '', theme.textStyle(12, theme.colors.muted)).setOrigin(0.5, 0);
     this.bannerPhase = this.add.text(0, 26, '', theme.textStyle(17, '#ffd166', { fontStyle: 'bold' })).setOrigin(0.5, 0);
     this.bannerProgress = this.add.text(0, 52, '', theme.textStyle(12, theme.colors.text)).setOrigin(0.5, 0);
@@ -81,6 +128,7 @@ export class UIScene extends Phaser.Scene {
     });
     on('inventory', () => {
       this.refreshWeapon();
+      this.refreshQuickslots();
       refreshWindows();
     });
     on('equipment', () => {
@@ -100,12 +148,14 @@ export class UIScene extends Phaser.Scene {
       this.mapText.setText(`2002 · ${m.name}`);
       this.windows.closeAll(['result']);
       this.setBanner(null);
+      this.setMinimap(m.minimap);
     });
     on('assault', (hud) => this.setBanner(hud));
     on('assaultResult', (r) => this.windows.showResult(r));
     on('message', (m) => this.pushLog(m.text, m.tone));
     on('settings', (s) => {
       this.fpsText.setVisible(s.showFps);
+      this.minimapPanel.setVisible(s.showMinimap);
       this.windows.refreshOpen();
     });
     on('hotkey', (k) => this.windows.handleHotkey(k));
@@ -118,13 +168,51 @@ export class UIScene extends Phaser.Scene {
     this.refreshVitals();
     this.refreshCharacter();
     this.refreshWeapon();
+    this.refreshQuickslots();
     this.mapText.setText(`2002 · ${registry.map(gameState.currentMapId).name}`);
+    this.setMinimap(gameState.minimap);
     for (const m of gameState.log.slice(-LOG_MAX)) this.pushLog(m.text, m.tone);
   }
 
-  update(): void {
+  update(time: number): void {
     if (this.fpsText.visible) this.fpsText.setText(`${Math.round(this.game.loop.actualFps)} fps`);
+    if (this.minimapPanel.visible && time - this.minimapAt > 120) {
+      this.minimapAt = time;
+      this.drawMinimapDots();
+    }
   }
+
+  // --- minimap -------------------------------------------------------------------------------
+
+  private setMinimap(info: MinimapInfo | null): void {
+    this.minimapInfo = info;
+    this.minimapImage?.destroy();
+    this.minimapImage = null;
+    if (!info) return;
+    const ox = 6 + (MINIMAP_MAX_W - info.w) / 2;
+    const oy = 22 + (MINIMAP_MAX_H - info.h) / 2;
+    this.minimapImage = this.add.image(ox, oy, info.tex).setOrigin(0, 0);
+    this.minimapPanel.addAt(this.minimapImage, 1);
+    this.minimapDots.setPosition(ox, oy);
+    this.drawMinimapDots();
+  }
+
+  private drawMinimapDots(): void {
+    const g = this.minimapDots;
+    g.clear();
+    const info = this.minimapInfo;
+    const snap = gameState.worldProvider?.();
+    if (!info || !snap) return;
+    const k = info.scale / info.tileSize;
+    const dot = (x: number, y: number, r: number, color: number, alpha = 1) => g.fillStyle(color, alpha).fillCircle(x * k, y * k, r);
+    for (const p of snap.pickups) dot(p.x, p.y, 1.2, 0xc9a227, 0.9);
+    for (const n of snap.npcs) dot(n.x, n.y, 2, 0xffd166);
+    for (const e of snap.enemies) dot(e.x, e.y, e.boss ? 3.5 : 1.8, e.boss ? 0xff3b3b : 0xe05555);
+    dot(snap.player.x, snap.player.y, 2.6, 0xffffff);
+    dot(snap.player.x, snap.player.y, 1.6, 0x3b7bc2);
+  }
+
+  // --- banner --------------------------------------------------------------------------------
 
   private setBanner(hud: AssaultHud | null): void {
     this.banner.setVisible(!!hud);
@@ -139,6 +227,8 @@ export class UIScene extends Phaser.Scene {
     if (hud.boss) this.bossBar.set(hud.boss.hp, hud.boss.max);
   }
 
+  // --- HUD refreshers -----------------------------------------------------------------------
+
   private refreshVitals(): void {
     const d = gameState.derived();
     this.hp.set(gameState.vitals.hp, d.maxHp);
@@ -148,7 +238,9 @@ export class UIScene extends Phaser.Scene {
 
   private refreshCharacter(): void {
     const c = gameState.character;
-    this.levelText.setText(`Lv.${c.level}  ${c.name}${c.unspentPoints ? `  · 미배분 ${c.unspentPoints}pt` : ''}`);
+    this.nameText.setText(c.name);
+    this.levelText.setText(`Lv.${c.level}${c.unspentPoints ? `  · 미배분 ${c.unspentPoints}pt (C)` : ''}`);
+    this.levelText.setColor(c.unspentPoints ? theme.colors.good : theme.colors.muted);
     this.xp.set(c.xp, xpToNext(c.level));
     this.wonText.setText(`₩ ${c.won.toLocaleString('ko-KR')}`);
     this.refreshVitals();
@@ -157,17 +249,35 @@ export class UIScene extends Phaser.Scene {
   private refreshWeapon(): void {
     const w = gameState.weapon();
     if (!w) {
+      this.weaponIcon.setVisible(false);
       this.weaponText.setText('무기 없음');
       this.ammoText.setText('');
+      this.subFireText.setText('');
       return;
     }
-    const sub = gameState.fire.subFire ? ' · 서브연사' : '';
-    this.weaponText.setText(`${w.def.name}  [${w.grade}등급]${sub}`);
+    this.weaponIcon.setVisible(true).setTexture(w.def.iconTex);
+    this.weaponText.setText(`${w.def.name}  [${w.grade}등급]`);
+    this.subFireText.setText(gameState.fire.subFire ? '서브연사 ON (Ctrl)' : '');
     if (w.def.class === '근접무기') this.ammoText.setText('근접');
     else {
       const rounds = totalRounds(gameState.inventory, registry.item, w.def.caliber, gameState.fire.ammoKind);
       this.ammoText.setText(`${gameState.fire.ammoKind} ${w.def.caliber} · ${rounds}발`);
       this.ammoText.setColor(rounds === 0 ? theme.colors.bad : theme.colors.muted);
+    }
+  }
+
+  /** Quickslots mirror the consumables in the inventory (1..9); digits use them. */
+  private refreshQuickslots(): void {
+    const stacks = gameState.inventory.items.filter((s) => registry.item(s.itemId).kind === 'consumable');
+    for (let i = 0; i < QUICK_SLOTS; i++) {
+      const s = stacks[i];
+      if (!s) {
+        this.quickIcons[i].setVisible(false);
+        this.quickCounts[i].setText('');
+        continue;
+      }
+      this.quickIcons[i].setVisible(true).setTexture(registry.item(s.itemId).iconTex);
+      this.quickCounts[i].setText(`${s.qty}`);
     }
   }
 

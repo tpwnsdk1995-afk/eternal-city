@@ -7,6 +7,7 @@ export const TEX = {
   tiles: 'tiles',
   // player
   player: 'player',
+  portrait_player: 'portrait_player',
   // zombies (2002 중곡동)
   zombie_casual_f: 'zombie_casual_f',
   zombie_suit_m: 'zombie_suit_m',
@@ -20,6 +21,17 @@ export const TEX = {
   npc_elia: 'npc_elia',
   npc_shop: 'npc_shop',
   npc_assault: 'npc_assault',
+  // street decor (drawn with bottom origin)
+  deco_lamp: 'deco_lamp',
+  deco_vending: 'deco_vending',
+  deco_trash: 'deco_trash',
+  deco_phone: 'deco_phone',
+  deco_sign: 'deco_sign',
+  deco_tree: 'deco_tree',
+  deco_hydrant: 'deco_hydrant',
+  deco_bench: 'deco_bench',
+  deco_busstop: 'deco_busstop',
+  deco_pillar: 'deco_pillar',
   // objects
   barricade: 'barricade',
   gate: 'gate',
@@ -51,8 +63,6 @@ export const TEX = {
 export type TexKey = (typeof TEX)[keyof typeof TEX];
 
 export const ANIM = {
-  player_walk: 'player_walk',
-  zombie_walk: 'zombie_walk',
   fire_burn: 'fire_burn',
 } as const;
 
@@ -75,6 +85,18 @@ export const TILE = {
   fence: 12,
   gateClosed: 13,
   dirt: 14,
+  // variants assigned by mapBuild's decorate pass (never placed by map data directly, except crosswalk)
+  buildingWall: 15,
+  asphaltCrack: 16,
+  manhole: 17,
+  crosswalk: 18,
+  oilStain: 19,
+  carL: 20,
+  carR: 21,
+  carT: 22,
+  carB: 23,
+  sidewalkCrack: 24,
+  roofEdge: 25,
 } as const;
 
 export type TileKey = keyof typeof TILE;

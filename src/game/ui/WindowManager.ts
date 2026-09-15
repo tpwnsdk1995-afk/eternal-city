@@ -3,6 +3,7 @@ import { registry } from '@data/registry';
 import type { NpcDef } from '@data/schema/npc';
 import { balance } from '@data/balance';
 import { gameState, type AssaultResult } from '../state/GameState';
+import { actions } from '../state/actions';
 import { ResultWindow } from './ResultWindow';
 import { MenuWindow } from './MenuWindow';
 import type { Window } from './Window';
@@ -15,7 +16,7 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 
 export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu';
 
-const HUD_H = 92;
+const HUD_H = 108;
 
 /** Owns every in-game window: creation, toggling, hotkeys, NPC dialogs and pointer blocking. */
 export class WindowManager {
@@ -108,10 +109,16 @@ export class WindowManager {
       case 'skills':
         return this.toggle('skills');
       case 'minimap':
-        return gameState.message('미니맵은 아직 준비 중입니다.', 'system');
+        return gameState.setSettings({ showMinimap: !gameState.settings.showMinimap });
       case 'menu':
         if (!this.closeTop()) this.open('menu');
         return;
+    }
+    const quick = /^quick([1-9])$/.exec(key);
+    if (quick) {
+      const stacks = gameState.inventory.items.filter((s) => registry.item(s.itemId).kind === 'consumable');
+      const s = stacks[Number(quick[1]) - 1];
+      if (s) actions.use(s.uid);
     }
   }
 

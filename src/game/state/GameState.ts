@@ -13,10 +13,12 @@ import { registry } from '@data/registry';
 import type { ControlScheme } from '@data/schema/enums';
 import type { StatMods } from '@data/schema/mods';
 import { STARTER_KIT } from '@data/starterKit';
+import type { MinimapInfo, WorldSnapshot } from '../systems/Minimap';
 
 export interface Settings {
   controlScheme: ControlScheme;
   showFps: boolean;
+  showMinimap: boolean;
 }
 
 export interface AssaultHud {
@@ -46,7 +48,7 @@ export interface GameEvents extends Record<string, unknown> {
   skills: SkillState;
   fire: FireState;
   message: { text: string; tone?: 'info' | 'good' | 'bad' | 'system' };
-  mapChanged: { mapId: string; name: string };
+  mapChanged: { mapId: string; name: string; minimap: MinimapInfo | null };
   settings: Settings;
   hotkey: string;
   npcInteract: { npcId: string };
@@ -73,7 +75,11 @@ class GameState {
   status: StatusState = emptyStatus();
   consciousness: ConsciousnessState = { lastTriggeredAt: -Infinity };
   currentMapId: string = balance.death.respawnMap;
-  settings: Settings = { controlScheme: 'classic', showFps: false };
+  settings: Settings = { controlScheme: 'classic', showFps: false, showMinimap: true };
+  /** Set by the active world scene so the HUD can draw live minimap markers. */
+  worldProvider: (() => WorldSnapshot) | null = null;
+  /** Latest minimap texture info (the UI scene may start a frame after `mapChanged`). */
+  minimap: MinimapInfo | null = null;
   flags: Record<string, boolean | number> = {};
   playtimeMs = 0;
   /** Set by the UI layer: true when a window covers this screen point (world input ignores it). */

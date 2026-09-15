@@ -11,6 +11,8 @@ import { Player } from '../entities/Player';
 import { Npc, NPC_INTERACT_RADIUS } from '../entities/Npc';
 import { Enemy } from '../entities/Enemy';
 import type { CombatBridge } from '../systems/CombatBridge';
+import { depthForY } from '../systems/facing';
+import { buildMinimapTexture } from '../systems/Minimap';
 import { gameState } from '../state/GameState';
 import { saveService } from '../state/SaveService';
 import { theme } from '../ui/theme';
@@ -75,6 +77,14 @@ export abstract class BaseWorldScene extends Phaser.Scene {
         .setDepth(8);
     }
 
+    // street furniture: base at the bottom of its tile, y-sorted with characters
+    for (const d of this.def.decor ?? []) {
+      const ts = this.def.tileSize;
+      const bx = d.at.x * ts + ts / 2;
+      const by = (d.at.y + 1) * ts - 2;
+      this.add.image(bx, by, d.tex).setOrigin(0.5, 1).setDepth(depthForY(by));
+    }
+
     const w = this.def.width * this.def.tileSize;
     const h = this.def.height * this.def.tileSize;
     this.physics.world.setBounds(0, 0, w, h);
@@ -112,7 +122,17 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     this.scene.bringToTop('UI');
 
     gameState.currentMapId = this.mapId;
-    gameState.events.emit('mapChanged', { mapId: this.mapId, name: this.def.name });
+    gameState.worldProvider = () => ({
+      player: { x: this.player.x, y: this.player.y },
+      enemies: (this.enemies.getChildren() as Enemy[]).filter((e) => e.alive).map((e) => ({ x: e.x, y: e.y, boss: !!e.def.boss })),
+      npcs: this.npcs.map((n) => ({ x: n.x, y: n.y })),
+      pickups: (this.pickups.getChildren() as Phaser.GameObjects.Sprite[]).filter((p) => p.active).map((p) => ({ x: p.x, y: p.y })),
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      if (gameState.worldProvider && this.scene.isActive() === false) gameState.worldProvider = null;
+    });
+    gameState.minimap = buildMinimapTexture(this, this.built);
+    gameState.events.emit('mapChanged', { mapId: this.mapId, name: this.def.name, minimap: gameState.minimap });
 
     this.onCreateWorld();
   }

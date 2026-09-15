@@ -31,7 +31,6 @@ export const figureDrawer = (style: FigureStyle) => (ctx: Ctx, frame: number, w:
 
 /** Portrait (front-facing head + shoulders), used by the HUD and dialogs. */
 export function drawPortrait(ctx: Ctx, style: FigureStyle, w: number, h: number): void {
-  ctx.save();
   ctx.fillStyle = '#12161c';
   ctx.fillRect(0, 0, w, h);
   const g = ctx.createRadialGradient(w / 2, h * 0.45, 4, w / 2, h * 0.45, w * 0.7);
@@ -39,10 +38,14 @@ export function drawPortrait(ctx: Ctx, style: FigureStyle, w: number, h: number)
   g.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
-  // zoom in on the upper body of the front pose
-  ctx.translate(0, h * 0.62);
-  ctx.scale(2.2, 2.2);
-  ctx.translate(0, 4 * (w / 48) - (h * 0.62) / 2.2 + 12);
-  drawFigure(ctx, 2, 0, w, h, { ...style, glow: undefined });
-  ctx.restore();
+  // render the front pose at 96px, then crop head + shoulders into the frame
+  const off = document.createElement('canvas');
+  off.width = 96;
+  off.height = 96;
+  const octx = off.getContext('2d');
+  if (!octx) return;
+  drawFigure(octx, 2, 0, 96, 96, { ...style, glow: undefined });
+  // figure spans roughly y 22..92 at this size; take the top 40px (head/torso) and the middle 44px
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(off, 26, 20, 44, 40, 0, 4, w, h - 4);
 }

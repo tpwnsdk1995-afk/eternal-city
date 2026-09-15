@@ -46,6 +46,18 @@ export const junggokBlockade: MapDef = {
   gates: [
     { id: 'gate_1', rect: { x: 31, y: 14, w: 2, h: 12 }, tile: TILE.gateClosed, opensWhen: ['barricade_1', 'barricade_2', 'barricade_3'] },
   ],
+  decor: [
+    ...[8, 20, 44, 62].flatMap((x) => [
+      { at: { x, y: 3 }, tex: TEX.deco_lamp, solid: true },
+      { at: { x, y: 36 }, tex: TEX.deco_lamp, solid: true },
+    ]),
+    { at: { x: 14, y: 3 }, tex: TEX.deco_trash, solid: true },
+    { at: { x: 38, y: 36 }, tex: TEX.deco_phone, solid: true },
+    { at: { x: 52, y: 3 }, tex: TEX.deco_sign },
+    { at: { x: 76, y: 3 }, tex: TEX.deco_tree, solid: true },
+    { at: { x: 84, y: 36 }, tex: TEX.deco_tree, solid: true },
+    { at: { x: 94, y: 4 }, tex: TEX.deco_tree, solid: true },
+  ],
   zones: {
     stage1: { x: 1, y: 1, w: 30, h: 38 },
     stage2: { x: 33, y: 1, w: 38, h: 38 },

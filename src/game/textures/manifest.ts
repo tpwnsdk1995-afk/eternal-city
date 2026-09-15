@@ -1,8 +1,7 @@
 import { ANIM, TEX, type AnimKey, type TexKey } from '@data/textureKeys';
 import { drawTilesAtlas, TILE_COUNT } from './draw/tiles';
-import { drawNpc, drawPlayer } from './draw/characters';
-import { drawZombie } from './draw/zombies';
-import { drawWitoAirborne, drawWitoRecon } from './draw/wito';
+import { FIGURE_STYLES, figureDrawer, drawPortrait, type FigureKey } from './draw/figures';
+import { WALK_FRAMES } from '../systems/facing';
 import {
   drawBarricade,
   drawBooth,
@@ -20,6 +19,7 @@ import {
   drawPickupWon,
 } from './draw/items';
 import { drawBlood, drawFire, drawJumpMarker, drawMuzzle, drawTracer } from './draw/fx';
+import { drawBench, drawBusStop, drawHydrant, drawLamp, drawPhone, drawPillar, drawSign, drawTrash, drawTree, drawVending } from './draw/decor';
 import { drawCrosshair, drawUiPanel, drawUiSlot } from './draw/ui';
 
 export type DrawFn = (ctx: CanvasRenderingContext2D, frame: number, w: number, h: number) => void;
@@ -28,16 +28,19 @@ export interface TextureSpec {
   frameW: number;
   frameH: number;
   frames: number;
+  /** frame layout; omitted = one horizontal strip */
+  grid?: { cols: number; rows: number };
   draw: DrawFn;
   anim?: { key: AnimKey; frameRate: number; repeat: number };
 }
 
-const humanoid = (draw: DrawFn, size = 32, anim?: AnimKey): TextureSpec => ({
+/** 8 directions × 4 walk frames, row per direction. */
+const figure = (key: FigureKey, size = 48): TextureSpec => ({
   frameW: size,
   frameH: size,
-  frames: 2,
-  draw,
-  anim: anim ? { key: anim, frameRate: 6, repeat: -1 } : undefined,
+  frames: 8 * WALK_FRAMES,
+  grid: { cols: WALK_FRAMES, rows: 8 },
+  draw: figureDrawer(FIGURE_STYLES[key]),
 });
 
 const single = (draw: DrawFn, w: number, h = w): TextureSpec => ({ frameW: w, frameH: h, frames: 1, draw });
@@ -49,20 +52,32 @@ const single = (draw: DrawFn, w: number, h = w): TextureSpec => ({ frameW: w, fr
 export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.tiles]: { frameW: 32 * TILE_COUNT, frameH: 32, frames: 1, draw: (ctx) => drawTilesAtlas(ctx) },
 
-  [TEX.player]: humanoid(drawPlayer, 32, ANIM.player_walk),
+  [TEX.player]: figure('player'),
+  [TEX.portrait_player]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.player, w, h), 64),
 
-  [TEX.zombie_casual_f]: humanoid(drawZombie('casual'), 32, ANIM.zombie_walk),
-  [TEX.zombie_suit_m]: humanoid(drawZombie('suit')),
-  [TEX.zombie_stripe]: humanoid(drawZombie('stripe')),
-  [TEX.zombie_banshee]: humanoid(drawZombie('banshee')),
-  [TEX.zombie_lord]: humanoid(drawZombie('lord'), 48),
+  [TEX.zombie_casual_f]: figure('zombie_casual_f'),
+  [TEX.zombie_suit_m]: figure('zombie_suit_m'),
+  [TEX.zombie_stripe]: figure('zombie_stripe'),
+  [TEX.zombie_banshee]: figure('zombie_banshee'),
+  [TEX.zombie_lord]: figure('zombie_lord', 64),
 
-  [TEX.wito_recon]: humanoid(drawWitoRecon),
-  [TEX.wito_airborne]: humanoid(drawWitoAirborne),
+  [TEX.wito_recon]: figure('wito_recon'),
+  [TEX.wito_airborne]: figure('wito_airborne'),
 
-  [TEX.npc_elia]: humanoid(drawNpc('elia')),
-  [TEX.npc_shop]: humanoid(drawNpc('shop')),
-  [TEX.npc_assault]: humanoid(drawNpc('assault')),
+  [TEX.npc_elia]: figure('npc_elia'),
+  [TEX.npc_shop]: figure('npc_shop'),
+  [TEX.npc_assault]: figure('npc_assault'),
+
+  [TEX.deco_lamp]: single(drawLamp, 32, 80),
+  [TEX.deco_vending]: single(drawVending, 32, 56),
+  [TEX.deco_trash]: single(drawTrash, 24, 32),
+  [TEX.deco_phone]: single(drawPhone, 32, 64),
+  [TEX.deco_sign]: single(drawSign, 24, 56),
+  [TEX.deco_tree]: single(drawTree, 64, 80),
+  [TEX.deco_hydrant]: single(drawHydrant, 16, 28),
+  [TEX.deco_bench]: single(drawBench, 48, 24),
+  [TEX.deco_busstop]: single(drawBusStop, 64, 72),
+  [TEX.deco_pillar]: single(drawPillar, 32, 72),
 
   [TEX.barricade]: single(drawBarricade, 64),
   [TEX.gate]: single(drawGate, 32),

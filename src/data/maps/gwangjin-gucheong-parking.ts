@@ -1,6 +1,9 @@
 import type { MapDef } from '../schema/map';
 import { TEX, TILE } from '../textureKeys';
 
+const PILLAR_X = [8, 16, 24, 32];
+const PILLAR_Y = [8, 15, 22];
+
 /** 2002년 광진구청 지하주차장 — 시작 안전지역 / 부활 지점. */
 export const gwangjinParking: MapDef = {
   id: 'gwangjin-gucheong-parking',
@@ -15,17 +18,32 @@ export const gwangjinParking: MapDef = {
     // parking stripes along two aisles (visual only)
     ...Array.from({ length: 8 }, (_, i) => ({ rect: { x: 4 + i * 4, y: 24, w: 1, h: 4 }, tile: TILE.parkingStripe })),
     ...Array.from({ length: 8 }, (_, i) => ({ rect: { x: 4 + i * 4, y: 12, w: 1, h: 3 }, tile: TILE.parkingStripe })),
+    // painted lane toward the exit ramp
+    { rect: { x: 34, y: 18, w: 4, h: 1 }, tile: TILE.parkingStripe },
   ],
   obstacles: [
     // support pillars
-    ...[8, 16, 24, 32].flatMap((x) => [8, 15, 22].map((y) => ({ rect: { x, y, w: 1, h: 1 }, tile: TILE.parkingPillar, kind: 'pillar' as const }))),
-    // a few parked cars
+    ...PILLAR_X.flatMap((x) => PILLAR_Y.map((y) => ({ rect: { x, y, w: 1, h: 1 }, tile: TILE.parkingPillar, kind: 'pillar' as const }))),
+    // parked cars between the stripes
     { rect: { x: 5, y: 25, w: 2, h: 1 }, tile: TILE.car, kind: 'car' },
+    { rect: { x: 9, y: 25, w: 2, h: 1 }, tile: TILE.car, kind: 'car' },
     { rect: { x: 13, y: 25, w: 2, h: 1 }, tile: TILE.car, kind: 'car' },
+    { rect: { x: 25, y: 25, w: 2, h: 1 }, tile: TILE.car, kind: 'car' },
     { rect: { x: 29, y: 25, w: 2, h: 1 }, tile: TILE.car, kind: 'car' },
+    { rect: { x: 5, y: 13, w: 2, h: 1 }, tile: TILE.car, kind: 'car' },
+    { rect: { x: 13, y: 13, w: 2, h: 1 }, tile: TILE.car, kind: 'car' },
+    { rect: { x: 29, y: 13, w: 2, h: 1 }, tile: TILE.car, kind: 'car' },
+    // ticket booth wall near the ramp
+    { rect: { x: 34, y: 8, w: 3, h: 1 }, tile: TILE.concreteWall, kind: 'wall' },
   ],
   decor: [
-    { at: { x: 34, y: 4 }, tex: TEX.pickup_item }, // 자판기 자리 (placeholder decor)
+    // tall pillar sprites standing on the pillar tiles (tile is already solid)
+    ...PILLAR_X.flatMap((x) => PILLAR_Y.map((y) => ({ at: { x, y }, tex: TEX.deco_pillar }))),
+    { at: { x: 34, y: 4 }, tex: TEX.deco_vending, solid: true },
+    { at: { x: 35, y: 4 }, tex: TEX.deco_vending, solid: true },
+    { at: { x: 5, y: 4 }, tex: TEX.deco_trash, solid: true },
+    { at: { x: 36, y: 12 }, tex: TEX.deco_sign },
+    { at: { x: 2, y: 20 }, tex: TEX.deco_phone, solid: true },
   ],
   portals: [
     { id: 'toField', rect: { x: 37, y: 13, w: 2, h: 4 }, toMap: 'junggok-dong', toSpawn: 'fromParking', label: '중곡동 거리로' },

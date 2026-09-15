@@ -1,4 +1,5 @@
 import type { GateDef, MapDef, ObjectiveDef, Rect } from '@data/schema/map';
+import { TILE } from '@data/textureKeys';
 import { CollisionGrid } from './collisionGrid';
 
 export interface BuiltMap {
@@ -41,6 +42,7 @@ export function buildMap(def: MapDef): BuiltMap {
   for (const obj of def.objectives ?? []) {
     forRect({ x: obj.at.x, y: obj.at.y, w: obj.size.w, h: obj.size.h }, def, (x, y) => collision.setBlocked(x, y, true));
   }
+  for (const d of def.decor ?? []) if (d.solid) collision.setBlocked(d.at.x, d.at.y, true);
   // border ring
   for (let x = 0; x < def.width; x++) {
     set(x, 0, def.borderTile, true);
@@ -51,7 +53,77 @@ export function buildMap(def: MapDef): BuiltMap {
     set(def.width - 1, y, def.borderTile, true);
   }
 
-  return { def, tiles, collision, solidTileIds: [...solid] };
+  const built: BuiltMap = { def, tiles, collision, solidTileIds: [...solid] };
+  decorateTiles(built);
+  return built;
+}
+
+/** Cheap deterministic hash in [0, 1000) for per-cell variation. */
+export function cellHash(x: number, y: number, salt = 0): number {
+  let h = (x * 73856093) ^ (y * 19349663) ^ (salt * 83492791);
+  h = (h ^ (h >>> 13)) * 1274126177;
+  return ((h ^ (h >>> 16)) >>> 0) % 1000;
+}
+
+/**
+ * Visual-only pass: swaps base tiles for variants (cracks, manholes, oil stains), turns the
+ * street-facing row of a building into a facade, and splits multi-tile cars into halves.
+ * Collision is untouched; new solid ids are appended for the tilemap layer.
+ */
+export function decorateTiles(built: BuiltMap): void {
+  const { def, tiles } = built;
+  const W = def.width;
+  const H = def.height;
+  const at = (x: number, y: number): number => (x < 0 || y < 0 || x >= W || y >= H ? -1 : tiles[y * W + x]);
+  const out = new Uint16Array(tiles);
+  const solid = new Set(built.solidTileIds);
+
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const t = tiles[y * W + x];
+      const h = cellHash(x, y);
+      switch (t) {
+        case TILE.asphalt:
+          if (h < 60) out[y * W + x] = TILE.asphaltCrack;
+          else if (h < 66) out[y * W + x] = TILE.manhole;
+          break;
+        case TILE.sidewalk:
+          if (h < 80) out[y * W + x] = TILE.sidewalkCrack;
+          break;
+        case TILE.parkingFloor:
+          if (h < 18) out[y * W + x] = TILE.oilStain;
+          break;
+        case TILE.buildingRoof: {
+          const below = at(x, y + 1);
+          const above = at(x, y - 1);
+          if (below !== TILE.buildingRoof && below !== -1) {
+            out[y * W + x] = TILE.buildingWall;
+            solid.add(TILE.buildingWall);
+          } else if (above !== TILE.buildingRoof && above !== -1) {
+            out[y * W + x] = TILE.roofEdge;
+            solid.add(TILE.roofEdge);
+          }
+          break;
+        }
+        case TILE.car: {
+          const l = at(x - 1, y) === TILE.car;
+          const r = at(x + 1, y) === TILE.car;
+          const u = at(x, y - 1) === TILE.car;
+          const d = at(x, y + 1) === TILE.car;
+          let v = TILE.car as number;
+          if (r && !l) v = TILE.carL;
+          else if (l && !r) v = TILE.carR;
+          else if (d && !u) v = TILE.carT;
+          else if (u && !d) v = TILE.carB;
+          out[y * W + x] = v;
+          solid.add(v);
+          break;
+        }
+      }
+    }
+  }
+  tiles.set(out);
+  built.solidTileIds = [...solid];
 }
 
 export function tileAt(built: BuiltMap, x: number, y: number): number {
@@ -66,6 +138,8 @@ export function openGate(built: BuiltMap, gate: GateDef): { x: number; y: number
     built.collision.setBlocked(x, y, false);
     changed.push({ x, y });
   });
+  // tyre marks where the gate stood
+  for (const c of changed) if (cellHash(c.x, c.y, 7) < 250 && built.def.groundTile === TILE.asphalt) built.tiles[c.y * built.def.width + c.x] = TILE.asphaltCrack;
   return changed;
 }
 

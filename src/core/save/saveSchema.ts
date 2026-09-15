@@ -10,6 +10,7 @@ export const CURRENT_SAVE_VERSION = 1 as const;
 export interface SaveSettings {
   controlScheme: ControlScheme;
   showFps: boolean;
+  showMinimap?: boolean;
 }
 
 export interface SaveGameV1 {
