@@ -11,11 +11,21 @@ test.describe('알파 훈련장 (tutorial)', () => {
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => window.__ec?.scene() === 'CharacterCreate');
     await page.fill('#ec-name', '신입');
-    await page.keyboard.press('t'); // 훈련장부터 시작
+    await page.keyboard.press('t'); // typed into the focused name box — must NOT toggle the training start
+    expect(await page.evaluate(() => (document.getElementById('ec-name') as HTMLInputElement).value)).toBe('신입t');
+    await page.fill('#ec-name', '신입');
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.waitForTimeout(150);
+    await page.keyboard.press('t'); // 훈련장부터 시작 (Phaser handles the key on its next step)
+    await page.waitForFunction(() => {
+      const sc = window.__ec!.game.scene.getScene('CharacterCreate') as unknown as { trainingBtn?: { text: string } };
+      return sc.trainingBtn?.text.startsWith('☑') ?? false;
+    });
     await page.screenshot({ path: 'e2e/out/charcreate-training.png' });
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => window.__ec?.scene() === 'Field');
     await page.waitForFunction(() => window.__ec!.hud().mapId === 'alpha-training');
+    expect(await page.evaluate(() => window.__ec!.state.character.name)).toBe('신입');
     await page.evaluate(() => window.__ec!.god(true));
 
     // trainer offers the tutorial quest

@@ -10,6 +10,7 @@ test.describe('감염체 캐릭터', () => {
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => window.__ec?.scene() === 'CharacterCreate');
     await page.fill('#ec-name', '감염자');
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur()); // R typed into the name box must not switch race
     await page.keyboard.press('r'); // 종족 전환 → 감염체
     await page.screenshot({ path: 'e2e/out/infected-create.png' });
     await page.keyboard.press('Enter');

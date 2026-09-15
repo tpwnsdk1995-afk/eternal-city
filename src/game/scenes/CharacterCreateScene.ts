@@ -71,7 +71,9 @@ export class CharacterCreateScene extends Phaser.Scene {
       bx += b.width + 10;
     }
     this.raceDesc = this.add.text(cx - 260, 240, '', theme.textStyle(11, theme.colors.muted, { wordWrap: { width: 520 } }));
-    this.input.keyboard?.on('keydown-R', () => this.setRace(this.race === 'human' ? 'infected' : 'human'));
+    this.input.keyboard?.on('keydown-R', (ev: KeyboardEvent) => {
+      if (!this.typingName(ev)) this.setRace(this.race === 'human' ? 'infected' : 'human');
+    });
 
     this.add.text(cx - 260, 275, `생성 포인트 배분`, theme.textStyle(16, theme.colors.brass));
     this.leftText = this.add.text(cx + 260, 277, '', theme.textStyle(14, theme.colors.good)).setOrigin(1, 0);
@@ -93,7 +95,9 @@ export class CharacterCreateScene extends Phaser.Scene {
     // 알파 훈련장 (tutorial) toggle — T key or click
     this.trainingBtn = this.add.text(cx, GAME_HEIGHT - 128, '', theme.textStyle(13, theme.colors.muted, { backgroundColor: '#1a1e24', padding: { left: 10, right: 10, top: 3, bottom: 3 } })).setOrigin(0.5).setInteractive({ useHandCursor: true });
     this.trainingBtn.on('pointerdown', () => this.setTraining(!this.training));
-    this.input.keyboard?.on('keydown-T', () => this.setTraining(!this.training));
+    this.input.keyboard?.on('keydown-T', (ev: KeyboardEvent) => {
+      if (!this.typingName(ev)) this.setTraining(!this.training);
+    });
     this.setTraining(false);
 
     const start = this.add.text(cx, GAME_HEIGHT - 90, '▶ 시작  (Enter)', theme.textStyle(24, theme.colors.brass)).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -156,6 +160,17 @@ export class CharacterCreateScene extends Phaser.Scene {
     void saveService.save();
     if (this.training) this.scene.start('Field', { mapId: 'alpha-training', spawn: 'default' } satisfies WorldSceneData);
     else this.scene.start('SafeZone', { mapId: balance.death.respawnMap, spawn: balance.death.respawnPoint } satisfies WorldSceneData);
+  }
+
+  /**
+   * Letters typed into the name box must not fire the R/T shortcuts. Phaser delivers key events on
+   * its next step, so the check uses the event's own target (fixed at dispatch) rather than the
+   * current activeElement, which may already have moved on.
+   */
+  private typingName(ev?: KeyboardEvent): boolean {
+    if (!this.nameInput) return false;
+    if (ev && ev.target) return ev.target === this.nameInput;
+    return typeof document !== 'undefined' && document.activeElement === this.nameInput;
   }
 
   private setTraining(on: boolean): void {
