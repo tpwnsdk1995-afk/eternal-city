@@ -3,6 +3,8 @@ import { registry } from '@data/registry';
 import type { ItemStack } from '@data/schema/item';
 import { stackWeightKg, totalWeightKg } from '@core/inventory/weight';
 import { gradeMult } from '@core/weapons/weaponMath';
+import { armorDefense, armorLabel, effectiveWeapon, weaponLabel } from '@core/tuning/tuning';
+import { PARTS } from '@data/tuning';
 import { gameState } from '../state/GameState';
 import { actions } from '../state/actions';
 import { Window } from './Window';
@@ -49,11 +51,13 @@ export class InventoryWindow extends Window {
     switch (def.kind) {
       case 'weapon': {
         const g = s.grade ?? def.gradeMin;
+        const eff = effectiveWeapon(def, s).def;
+        const parts = (s.parts ?? []).map((id) => PARTS[id].name).join('·');
         return {
           id: s.uid,
           icon: def.iconTex,
-          text: `${def.name}  [${g}등급]`,
-          sub: `${def.class} · ${def.caliber} · 공격 ${Math.round(def.baseDamage * gradeMult(g))} · ${def.rpm}rpm · ${kg}kg`,
+          text: weaponLabel(def, s),
+          sub: `${def.class} · ${def.caliber} · 공격 ${Math.round(eff.baseDamage * gradeMult(g))} · ${eff.rpm}rpm · ${kg}kg${parts ? ` · ${parts}` : ''}`,
           right: equipped ? '장착중' : '',
           rightColor: theme.colors.good,
           color: equipped ? '#ffffff' : undefined,
@@ -64,8 +68,8 @@ export class InventoryWindow extends Window {
         return {
           id: s.uid,
           icon: def.iconTex,
-          text: def.name,
-          sub: `${def.slot} · 방어 ${def.defense}${def.cl ? ' (CL)' : ''} · ${kg}kg`,
+          text: armorLabel(def, s),
+          sub: `${def.slot} · 방어 ${Math.round(armorDefense(def, s))}${def.cl ? ' (CL)' : ''} · ${kg}kg`,
           right: equipped ? '장착중' : '',
           rightColor: theme.colors.good,
           color: equipped ? '#ffffff' : undefined,

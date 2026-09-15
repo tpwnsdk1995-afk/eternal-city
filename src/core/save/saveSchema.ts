@@ -6,7 +6,7 @@ import type { FireState } from '../weapons/fireController';
 import type { QuestState } from '../quest/questState';
 import type { ControlScheme } from '@data/schema/enums';
 
-export const CURRENT_SAVE_VERSION = 2 as const;
+export const CURRENT_SAVE_VERSION = 3 as const;
 
 export interface SaveSettings {
   controlScheme: ControlScheme;
@@ -39,12 +39,19 @@ export interface SaveGameV2 extends SaveCommon {
   quests: QuestState;
 }
 
-export type SaveGame = SaveGameV2;
+/** M3: item stacks may carry 강화/부품/유니크/플러스업 (all optional — the shape is unchanged). */
+export interface SaveGameV3 extends SaveCommon {
+  version: 3;
+  quests: QuestState;
+}
+
+export type SaveGame = SaveGameV3;
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
 
 const MIGRATIONS: Record<number, (d: Record<string, unknown>) => Record<string, unknown>> = {
   1: (d) => ({ ...d, version: 2, quests: { active: [], completed: [] }, flags: isObj(d.flags) ? d.flags : {} }),
+  2: (d) => ({ ...d, version: 3 }),
 };
 
 /**

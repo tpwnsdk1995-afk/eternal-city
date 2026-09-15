@@ -156,7 +156,8 @@ export class CombatBridge {
     const w = gameState.weapon();
     if (!w) return this.throttled('noWeapon', '장착된 무기가 없습니다.', 'bad');
     const d = gameState.derived();
-    const attempt = tryFire(gameState.fire, now, w.def, d.attackSpeedMult, gameState.inventory, registry.item);
+    const eff = w.eff.def; // 강화/부품/유니크 folded in
+    const attempt = tryFire(gameState.fire, now, eff, d.attackSpeedMult, gameState.inventory, registry.item);
     if (!attempt.ok) {
       if (attempt.reason === 'noAmmo') this.throttled('noAmmo', `탄약이 없습니다 (${w.def.caliber} ${gameState.fire.ammoKind})`, 'bad');
       else if (attempt.reason === 'incompatibleAmmo') this.throttled('incompat', `${w.def.name}에는 ${gameState.fire.ammoKind}을 사용할 수 없습니다.`, 'bad');
@@ -170,7 +171,7 @@ export class CombatBridge {
     const baseAngle = angleTo(origin, aim);
     const tech = gameState.character.base['기술'];
     const profile = fireProfile(w.def.class);
-    const spread = spreadRadians(w.def.spreadDeg, tech) * (player.crouching ? profile.crouchSpreadMult : 1) * (player.moving ? profile.moveSpreadMult : 1);
+    const spread = spreadRadians(eff.spreadDeg, tech) * (player.crouching ? profile.crouchSpreadMult : 1) * (player.moving ? profile.moveSpreadMult : 1);
     const muzzle = { x: origin.x + Math.cos(baseAngle) * MUZZLE_OFFSET, y: origin.y + Math.sin(baseAngle) * MUZZLE_OFFSET };
     const melee = isMeleeClass(w.def.class);
 
@@ -182,28 +183,29 @@ export class CombatBridge {
     ];
     const byUid = new Map(enemies.map((e) => [e.uid, e]));
     const objById = new Map(objectives.map((o) => [OBJ_PREFIX + o.def.id, o]));
-    const mods = gameState.mods();
+    const skillMods = gameState.mods();
+    const mods = { ...skillMods, dmgPct: skillMods.dmgPct + w.eff.dmgPct, accPct: skillMods.accPct - (player.moving ? profile.moveAccPenalty : 0) };
     const ctx: AttackerCtx = {
-      baseDamage: w.def.baseDamage * (player.crouching ? profile.crouchDmgMult : 1),
+      baseDamage: eff.baseDamage * (player.crouching ? profile.crouchDmgMult : 1),
       grade: w.grade,
       subFire: gameState.fire.subFire,
-      subFireDmgMult: subFireParams(w.def).dmgMult,
+      subFireDmgMult: subFireParams(eff).dmgMult,
       pellets: attempt.pellets,
       isMelee: melee,
       ammoKind: melee ? null : gameState.fire.ammoKind,
-      baseAccuracy: w.def.baseAccuracy,
-      range: w.def.range,
+      baseAccuracy: eff.baseAccuracy,
+      range: eff.range,
       tech,
       statMult: melee ? d.meleeMult : d.rangedMult,
-      critChance: d.critChance,
+      critChance: Math.min(balance.derived.critMax, d.critChance + w.eff.critPct),
       critMult: d.critMult,
-      mods: player.moving ? { ...mods, accPct: mods.accPct - profile.moveAccPenalty } : mods,
+      mods,
       moving: player.moving,
       crouching: player.crouching,
     };
 
-    if (melee) return this.meleeSwing(w.def.range, origin, baseAngle, targets, byUid, objById, ctx, now);
-    if (w.def.projectile) return this.launchProjectile(w.def, origin, baseAngle, aim, ctx);
+    if (melee) return this.meleeSwing(eff.range, origin, baseAngle, targets, byUid, objById, ctx, now);
+    if (eff.projectile) return this.launchProjectile(eff, origin, baseAngle, aim, ctx);
 
     this.fx.muzzle(muzzle, baseAngle);
     this.fx.casing({ x: origin.x + Math.cos(baseAngle) * 6, y: origin.y + Math.sin(baseAngle) * 6 }, baseAngle);
@@ -211,7 +213,7 @@ export class CombatBridge {
 
     for (let i = 0; i < attempt.pellets; i++) {
       const dir = fromAngle(baseAngle + gameRng.range(-spread, spread));
-      const hit = castRay(this.host.built.collision, origin, dir, w.def.range, targets);
+      const hit = castRay(this.host.built.collision, origin, dir, eff.range, targets);
       this.fx.tracer(muzzle, hit.point);
       if (hit.kind === 'wall') this.fx.spark(hit.point);
       if (hit.kind !== 'target') continue;

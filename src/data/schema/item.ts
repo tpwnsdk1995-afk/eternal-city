@@ -1,4 +1,5 @@
 import type { AmmoKind, ArmorSlot, Caliber, WeaponClass } from './enums';
+import type { PartId, UniqueId } from './tuning';
 import type { TexKey } from '../textureKeys';
 
 export interface WeaponDef {
@@ -82,6 +83,13 @@ export interface ItemStack {
   itemId: string;
   qty: number;
   grade?: number;
+  /** 강화 +0..+9 (weapons) */
+  enhance?: number;
+  /** 부품 개조 installed on this weapon */
+  parts?: PartId[];
+  /** 유니크 개조 suffix (weapons, +7 이상) */
+  unique?: UniqueId;
+  /** 플러스업 +0..+5 (armor) */
   plusUp?: number;
   prefix?: '고대' | '전설';
 }

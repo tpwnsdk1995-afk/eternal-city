@@ -1,5 +1,6 @@
 import type { ArmorSlot } from '@data/schema/enums';
-import type { WeaponDef } from '@data/schema/item';
+import type { ItemStack, WeaponDef } from '@data/schema/item';
+import { armorDefense, effectiveWeapon, type EffectiveWeapon } from '../tuning/tuning';
 import { getStack, type Inventory, type ItemLookup } from './inventory';
 
 export interface Equipment {
@@ -44,13 +45,23 @@ export function pruneEquipment(eq: Equipment, inv: Inventory): Equipment {
   return { weaponUid: has(eq.weaponUid) ? eq.weaponUid : null, armor };
 }
 
-export function equippedWeapon(eq: Equipment, inv: Inventory, lookup: ItemLookup): { def: WeaponDef; grade: number; uid: string } | null {
+export interface EquippedWeapon {
+  /** base definition (names, class, caliber, requirements) */
+  def: WeaponDef;
+  grade: number;
+  uid: string;
+  stack: ItemStack;
+  /** numbers with 강화/부품/유니크 applied — combat reads these */
+  eff: EffectiveWeapon;
+}
+
+export function equippedWeapon(eq: Equipment, inv: Inventory, lookup: ItemLookup): EquippedWeapon | null {
   if (!eq.weaponUid) return null;
   const stack = getStack(inv, eq.weaponUid);
   if (!stack) return null;
   const def = lookup(stack.itemId);
   if (def.kind !== 'weapon') return null;
-  return { def, grade: stack.grade ?? def.gradeMin, uid: stack.uid };
+  return { def, grade: stack.grade ?? def.gradeMin, uid: stack.uid, stack, eff: effectiveWeapon(def, stack) };
 }
 
 export function totalDefense(eq: Equipment, inv: Inventory, lookup: ItemLookup): number {
@@ -59,7 +70,7 @@ export function totalDefense(eq: Equipment, inv: Inventory, lookup: ItemLookup):
     const stack = uid ? getStack(inv, uid) : undefined;
     if (!stack) continue;
     const def = lookup(stack.itemId);
-    if (def.kind === 'armor') total += def.defense * (def.cl ? 1.5 : 1);
+    if (def.kind === 'armor') total += armorDefense(def, stack);
   }
   return total;
 }

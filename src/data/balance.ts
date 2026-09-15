@@ -93,6 +93,25 @@ export const balance = {
     /** M1 testing gate; defs keep their real levelRange. */
     entryLevelOverride: 3 as number | null,
   },
+  tuning: {
+    /** chance (%) that +n → +n+1 succeeds, n = 0..8 */
+    enhanceSuccessPct: [50, 45, 40, 35, 30, 25, 20, 15, 10] as readonly number[],
+    maxEnhance: 9,
+    enhanceDmgPerLevel: 0.06,
+    /** cost = weapon grade price × base × (1 + level × perLevel) */
+    enhanceCostBase: 0.12,
+    enhanceCostPerLevel: 0.45,
+    /** failure drops one level (never breaks); below this level a failure costs nothing but ₩ */
+    enhanceSafeBelow: 1,
+    maxPlusUp: 5,
+    plusUpDefensePerLevel: 0.1,
+    plusUpCostBase: 0.25,
+    plusUpCostPerLevel: 0.5,
+    uniqueMinEnhance: 7,
+    uniqueSuccessPct: 30,
+    uniqueCostMult: 1.2,
+    prefixDefenseMult: { 고대: 1.2, 전설: 1.4 } as Record<'고대' | '전설', number>,
+  },
   ai: {
     stuckMs: 400,
     separationRadius: 22,

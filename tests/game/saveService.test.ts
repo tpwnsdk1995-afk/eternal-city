@@ -45,13 +45,14 @@ describe('save/load', () => {
     expect(saveLocation('junggok-dong')).toEqual({ mapId: 'junggok-dong', spawn: 'default' });
   });
 
-  it('migrates a v1 (M1) save to v2 with empty quests and keeps everything else', () => {
+  it('migrates a v1 (M1) save through v2 to the current version with empty quests and keeps everything else', () => {
     const v2 = takeSnapshot();
     const { quests: _q, ...rest } = v2;
     const v1 = { ...rest, version: 1 } as unknown;
     const migrated = migrateSave(v1);
     expect(migrated).not.toBeNull();
-    expect(migrated!.version).toBe(2);
+    expect(migrated!.version).toBe(3);
+    expect(migrateSave({ ...v2, version: 2 })!.version).toBe(3);
     expect(migrated!.quests).toEqual({ active: [], completed: [] });
     expect(migrated!.character.name).toBe('세이브테스트');
     expect(migrated!.inventory.items.length).toBe(v2.inventory.items.length);

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { weaponLabel } from '@core/tuning/tuning';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 import { TEX } from '@data/textureKeys';
 import { registry } from '@data/registry';
@@ -265,7 +266,7 @@ export class UIScene extends Phaser.Scene {
       return;
     }
     this.weaponIcon.setVisible(true).setTexture(w.def.iconTex);
-    this.weaponText.setText(`${w.def.name}  [${w.grade}등급]`);
+    this.weaponText.setText(weaponLabel(w.def, w.stack));
     this.subFireText.setText(gameState.fire.subFire ? '서브연사 ON (Ctrl)' : '');
     if (w.def.class === '근접무기') this.ammoText.setText('근접');
     else {
