@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import type { NpcDef } from '@data/schema/npc';
 import { Window } from './Window';
 import { theme } from './theme';
+import { DIR_S, figureFrame } from '../systems/facing';
 
 export interface DialogOption {
   label: string;
@@ -30,7 +31,7 @@ export class DialogBox extends Window {
   refresh(): void {
     this.clearBody();
     if (!this.npc) return;
-    this.content.add(this.scene.add.image(20, 6, this.npc.tex, 0).setOrigin(0, 0).setDisplaySize(48, 48).setRotation(0));
+    this.content.add(this.scene.add.image(20, 2, this.npc.tex, figureFrame(DIR_S, 0)).setOrigin(0, 0).setDisplaySize(64, 64));
     this.label(84, 6, this.line, theme.colors.text, 14, { wordWrap: { width: this.w - 110 } });
     let x = 84;
     for (const o of this.options) {

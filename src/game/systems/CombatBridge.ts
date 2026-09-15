@@ -138,7 +138,7 @@ export class CombatBridge {
     gameState.setFire(markFired(gameState.fire, now));
 
     const { player } = this.host;
-    const origin = player.pos;
+    const origin = { x: player.x, y: player.y - 6 }; // chest height in the oblique view
     const baseAngle = angleTo(origin, aim);
     const tech = gameState.character.base['기술'];
     const spread = spreadRadians(w.def.spreadDeg, tech) * (player.crouching ? 0.6 : 1) * (player.moving ? 1.4 : 1);

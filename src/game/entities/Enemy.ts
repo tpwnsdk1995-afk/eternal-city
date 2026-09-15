@@ -5,6 +5,7 @@ import { angleTo, type Vec2 } from '@core/math/vec';
 import { initialBrain, type BrainOutput, type BrainState } from '@core/ai/enemyBrain';
 import { emptyStatus, type StatusState } from '@core/combat/statusEffects';
 import { theme } from '../ui/theme';
+import { DIR_S, depthForY, dirFromAngle, figureFrame, type Dir } from '../systems/facing';
 
 let nextUid = 1;
 
@@ -29,9 +30,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private fireFx: Phaser.GameObjects.Sprite | null = null;
   private walkT = 0;
   private movingNow = false;
+  dir: Dir = DIR_S;
 
   constructor(scene: Phaser.Scene, x: number, y: number, def: MonsterDef, now: number, zoneIndex = -1) {
-    super(scene, x, y, def.tex, 0);
+    super(scene, x, y, def.tex, figureFrame(DIR_S, 0));
     this.def = def;
     this.maxHp = def.hp;
     this.hp = def.hp;
@@ -45,8 +47,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.setScale(s);
     const frame = this.width; // unscaled frame size
     const r = def.bodyRadius / s;
-    this.setCircle(r, frame / 2 - r, frame / 2 - r);
-    this.setDepth(9);
+    // circle around the lower body (figures stand with feet near the frame bottom)
+    this.setCircle(r, frame / 2 - r, frame * 0.6 - r);
+    this.setDepth(depthForY(y));
     this.setCollideWorldBounds(true);
     this.setImmovable(true);
 
@@ -85,8 +88,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
     this.setVelocity(vx, vy);
     this.movingNow = vx !== 0 || vy !== 0;
-    if (o.face) this.setRotation(angleTo(this.pos, o.face));
-    else if (this.movingNow) this.setRotation(Math.atan2(vy, vx));
+    if (o.face) this.dir = dirFromAngle(angleTo(this.pos, o.face));
+    else if (this.movingNow) this.dir = dirFromAngle(Math.atan2(vy, vx));
   }
 
   /** Subtracts HP and flashes. Returns true when this hit killed it (caller runs `kill`). */
@@ -112,10 +115,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   preUpdate(time: number, delta: number): void {
     super.preUpdate(time, delta);
     if (!this.alive) return;
-    if (this.movingNow) {
-      this.walkT += delta;
-      this.setFrame(Math.floor(this.walkT / 160) % 2);
-    } else this.setFrame(0);
+    if (this.movingNow) this.walkT += delta * (this.def.moveSpeed > 80 ? 1.4 : 1);
+    else this.walkT = 0;
+    const walkFrame = this.movingNow ? 1 + (Math.floor(this.walkT / 160) % 3) : 0;
+    this.setFrame(figureFrame(this.dir, walkFrame));
+    this.setDepth(depthForY(this.y));
     if (this.hp < this.maxHp) this.drawBar();
     if (this.fireFx) this.fireFx.setPosition(this.x, this.y - 8);
     if (this.label) this.label.setPosition(this.x, this.y - 30 * this.scale);
@@ -144,7 +148,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.label = null;
     this.clearTint();
     this.setDepth(4);
-    this.scene.tweens.add({ targets: this, alpha: 0, duration: 900, delay: 400, onComplete: () => this.destroy() });
+    // collapse: tip over sideways and sink, then fade
+    this.scene.tweens.add({ targets: this, angle: this.dir < 4 ? 80 : -80, y: this.y + 6, scaleY: this.scaleY * 0.85, duration: 260, ease: 'Quad.easeIn' });
+    this.scene.tweens.add({ targets: this, alpha: 0, duration: 900, delay: 700, onComplete: () => this.destroy() });
   }
 
   destroy(fromScene?: boolean): void {
