@@ -31,13 +31,13 @@ export const gwangjinParking: MapDef = {
     { id: 'toField', rect: { x: 37, y: 13, w: 2, h: 4 }, toMap: 'junggok-dong', toSpawn: 'fromParking', label: '중곡동 거리로' },
   ],
   spawnPoints: {
-    default: { x: 20, y: 20 },
+    default: { x: 20, y: 12 },
     fromField: { x: 35, y: 15 },
   },
   npcs: [
-    { id: 'npc_elia', at: { x: 10, y: 5 } },
+    { id: 'npc_elia', at: { x: 12, y: 5 } },
     { id: 'npc_shop', at: { x: 20, y: 5 } },
-    { id: 'npc_assault', at: { x: 30, y: 5 } },
+    { id: 'npc_assault', at: { x: 28, y: 5 } },
   ],
   safeZone: true,
 };

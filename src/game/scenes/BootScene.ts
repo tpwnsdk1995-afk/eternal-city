@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
+import { validateAll } from '@data/registry';
 
-/** Boots the game: later validates content data, opens the save DB, and loads settings. */
+/** Boots the game: validates content data, then hands off to texture generation. */
 export class BootScene extends Phaser.Scene {
   constructor() {
     super('Boot');
   }
 
   create(): void {
-    this.scene.start('Title');
+    validateAll();
+    this.scene.start('TextureGen');
   }
 }

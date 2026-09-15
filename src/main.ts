@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { gameConfig } from './config/gameConfig';
+import { exposeDebug } from './debug/exposeDebug';
 
 const game = new Phaser.Game(gameConfig);
 
-if (import.meta.env.DEV) {
-  import('./debug/exposeDebug').then((m) => m.exposeDebug(game));
-}
+// Always exposed: this is a personal single-player build and the e2e specs assert on it.
+exposeDebug(game);
