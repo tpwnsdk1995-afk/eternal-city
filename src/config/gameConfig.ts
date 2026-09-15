@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { BootScene } from '../game/scenes/BootScene';
 import { TextureGenScene } from '../game/scenes/TextureGenScene';
 import { TitleScene } from '../game/scenes/TitleScene';
+import { CharacterCreateScene } from '../game/scenes/CharacterCreateScene';
 import { SafeZoneScene } from '../game/scenes/SafeZoneScene';
 import { FieldScene } from '../game/scenes/FieldScene';
 import { AssaultScene } from '../game/scenes/AssaultScene';
@@ -24,5 +25,6 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   physics: { default: 'arcade', arcade: { gravity: { x: 0, y: 0 }, debug: params.has('debug') } },
   fps: { target: 60 },
-  scene: [BootScene, TextureGenScene, TitleScene, SafeZoneScene, FieldScene, AssaultScene, UIScene],
+  dom: { createContainer: true },
+  scene: [BootScene, TextureGenScene, TitleScene, CharacterCreateScene, SafeZoneScene, FieldScene, AssaultScene, UIScene],
 };

@@ -1,19 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-import type {} from '../src/debug/exposeDebug';
-
-async function start(page: Page): Promise<string[]> {
-  const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
-  page.on('console', (m) => {
-    if (m.type() === 'error') errors.push(m.text());
-  });
-  await page.goto('/');
-  await page.waitForFunction(() => window.__ec?.scene() === 'Title');
-  await page.keyboard.press('Enter');
-  await page.waitForFunction(() => window.__ec?.scene() === 'SafeZone');
-  await page.waitForTimeout(300);
-  return errors;
-}
+import { expect, test } from '@playwright/test';
+import { newGame as start } from './helpers';
 
 const phaseKind = () => window.__ec!.assault()?.phaseKind ?? null;
 

@@ -7,6 +7,7 @@ import type { UIScene } from '../game/scenes/UIScene';
 import { AssaultScene } from '../game/scenes/AssaultScene';
 import type { WindowKey } from '../game/ui/WindowManager';
 import { actions, type Actions } from '../game/state/actions';
+import { saveService } from '../game/state/SaveService';
 
 declare global {
   interface Window {
@@ -49,6 +50,8 @@ export interface EcDebug {
   /** Assault runtime snapshot, or null outside an assault. */
   assault(): ReturnType<AssaultScene['assaultSnapshot']> | null;
   destroyObjectives(): void;
+  save(): Promise<unknown>;
+  hasSave(): Promise<boolean>;
   /** Open window keys (top last). */
   windows(): string[];
   openWindow(key: WindowKey): void;
@@ -99,6 +102,8 @@ export function exposeDebug(game: Phaser.Game): void {
       const s = worldScene();
       if (s instanceof AssaultScene) s.destroyAllObjectives();
     },
+    save: () => saveService.save(),
+    hasSave: () => saveService.peek().then((r) => !!r),
     windows: () => uiScene()?.windows.openKeys() ?? [],
     openWindow: (key) => uiScene()?.windows.open(key),
     closeWindows: () => uiScene()?.windows.closeAll(),

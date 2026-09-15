@@ -22,6 +22,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   zoneIndex: number;
   /** who spawned it: a field zone, an assault wave/boss/adds, or the debug hook */
   tag: 'zone' | 'wave' | 'boss' | 'adds' | 'debug' = 'zone';
+  /** AI LOD: far-away enemies think less often (CombatBridge) */
+  nextThinkAt = 0;
   private bar: Phaser.GameObjects.Graphics;
   private label: Phaser.GameObjects.Text | null = null;
   private fireFx: Phaser.GameObjects.Sprite | null = null;

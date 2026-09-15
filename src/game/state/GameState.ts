@@ -54,6 +54,7 @@ export interface GameEvents extends Record<string, unknown> {
   assault: AssaultHud | null;
   assaultResult: AssaultResult;
   menu: undefined;
+  goTitle: undefined;
 }
 
 /**

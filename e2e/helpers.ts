@@ -1,0 +1,32 @@
+import type { Page } from '@playwright/test';
+import type {} from '../src/debug/exposeDebug';
+
+/** Collects page errors so specs can assert on a clean console. */
+export function watchErrors(page: Page): string[] {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => {
+    if (m.type() === 'error') errors.push(m.text());
+  });
+  return errors;
+}
+
+/** Boot → Title → 새 게임 → 캐릭터 생성 → SafeZone. */
+export async function newGame(page: Page, name = '테스터'): Promise<string[]> {
+  const errors = watchErrors(page);
+  await page.goto('/');
+  await page.waitForFunction(() => window.__ec?.scene() === 'Title');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => window.__ec?.scene() === 'CharacterCreate');
+  await page.fill('#ec-name', name);
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => window.__ec?.scene() === 'SafeZone');
+  await page.waitForTimeout(300);
+  return errors;
+}
+
+export async function warpToField(page: Page): Promise<void> {
+  await page.evaluate(() => window.__ec!.warp('junggok-dong', 'fromParking'));
+  await page.waitForFunction(() => window.__ec?.scene() === 'Field');
+  await page.waitForTimeout(300);
+}

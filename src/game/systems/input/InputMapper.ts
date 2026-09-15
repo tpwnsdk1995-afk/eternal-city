@@ -154,8 +154,12 @@ export class InputMapper {
   }
 
   hints(): string[] {
-    return this.scheme === 'classic'
-      ? ['좌클릭 이동', 'Shift+클릭 달리기', 'CapsLock 상시 달리기', '우클릭 공격', 'Space 웅크리기/점프', 'Ctrl 서브연사', 'I 인벤토리 · C 상태 · K 스킬']
-      : ['WASD 이동', 'Shift 달리기', '좌클릭 공격', 'C 웅크리기', 'Space 점프', 'E 상호작용', 'Ctrl 서브연사', 'I 인벤토리 · V 상태 · K 스킬'];
+    return schemeHints(this.scheme);
   }
+}
+
+export function schemeHints(scheme: ControlScheme): string[] {
+  return scheme === 'classic'
+    ? ['좌클릭 이동 (NPC 클릭 = 대화)', 'Shift+클릭 달리기 · CapsLock 상시 달리기', '우클릭 공격 (마우스 방향)', 'Space 웅크리기 → 다시 Space 점프', 'Ctrl 서브연사 토글', 'I 인벤토리 · C 상태 · K 스킬 · Esc 메뉴']
+    : ['WASD 이동 · Shift 달리기', '좌클릭 공격 (마우스 방향)', 'C 웅크리기 · Space 점프', 'E 상호작용 (NPC)', 'Ctrl 서브연사 토글', 'I 인벤토리 · V 상태 · K 스킬 · Esc 메뉴'];
 }

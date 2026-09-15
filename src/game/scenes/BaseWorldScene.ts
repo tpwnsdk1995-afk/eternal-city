@@ -12,6 +12,7 @@ import { Npc, NPC_INTERACT_RADIUS } from '../entities/Npc';
 import { Enemy } from '../entities/Enemy';
 import type { CombatBridge } from '../systems/CombatBridge';
 import { gameState } from '../state/GameState';
+import { saveService } from '../state/SaveService';
 import { theme } from '../ui/theme';
 
 /** World camera zoom: 32px tiles render at 48px, so characters read like the original's ~50px sprites. */
@@ -96,7 +97,11 @@ export abstract class BaseWorldScene extends Phaser.Scene {
 
     this.mapper = new InputMapper(this, gameState.settings.controlScheme);
     const offSettings = gameState.events.on('settings', (s) => this.mapper.setScheme(s.controlScheme));
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, offSettings);
+    const offTitle = gameState.events.on('goTitle', () => this.backToTitle());
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      offSettings();
+      offTitle();
+    });
 
     for (const n of this.def.npcs ?? []) {
       const c = tileCenter(this.def, n.at.x, n.at.y);
@@ -205,6 +210,20 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   killAllEnemies(): void {
     if (!this.combat) return;
     for (const e of this.combat.aliveEnemies()) this.combat.killEnemy(e, this.time.now);
+  }
+
+  /** Save, then leave the world for the title screen. */
+  private backToTitle(): void {
+    if (this.transitioning) return;
+    this.transitioning = true;
+    this.player.stopMoving();
+    void saveService.save().finally(() => {
+      this.cameras.main.fadeOut(250, 0, 0, 0);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.scene.stop('UI');
+        this.scene.start('Title');
+      });
+    });
   }
 
   private transitionTo(sceneKey: string, data: WorldSceneData): void {

@@ -1,6 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-// Pulls in the global `window.__ec` declaration used by the specs.
-import type {} from '../src/debug/exposeDebug';
+import { newGame } from './helpers';
 
 async function waitForScene(page: Page, key: string, timeout = 20000): Promise<void> {
   await page.waitForFunction((k) => window.__ec?.scene() === k, key, { timeout });
@@ -8,16 +7,8 @@ async function waitForScene(page: Page, key: string, timeout = 20000): Promise<v
 
 test.describe('smoke', () => {
   test('boots to title, starts a new game, renders the safe zone HUD', async ({ page }) => {
-    const errors: string[] = [];
-    page.on('pageerror', (e) => errors.push(e.message));
-    page.on('console', (m) => {
-      if (m.type() === 'error') errors.push(m.text());
-    });
-
-    await page.goto('/');
-    await waitForScene(page, 'Title');
-    await page.keyboard.press('Enter');
-    await waitForScene(page, 'SafeZone');
+    const errors = await newGame(page, '주인공');
+    await page.screenshot({ path: 'e2e/out/charcreate-done.png' });
 
     const hud = await page.evaluate(() => window.__ec!.hud());
     expect(hud.mapId).toBe('gwangjin-gucheong-parking');

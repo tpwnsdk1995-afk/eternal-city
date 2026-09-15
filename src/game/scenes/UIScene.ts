@@ -104,7 +104,10 @@ export class UIScene extends Phaser.Scene {
     on('assault', (hud) => this.setBanner(hud));
     on('assaultResult', (r) => this.windows.showResult(r));
     on('message', (m) => this.pushLog(m.text, m.tone));
-    on('settings', (s) => this.fpsText.setVisible(s.showFps));
+    on('settings', (s) => {
+      this.fpsText.setVisible(s.showFps);
+      this.windows.refreshOpen();
+    });
     on('hotkey', (k) => this.windows.handleHotkey(k));
     on('npcInteract', ({ npcId }) => this.windows.talkTo(npcId));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {

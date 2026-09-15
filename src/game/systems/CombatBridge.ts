@@ -48,6 +48,8 @@ const PLAYER_RADIUS = 10;
 const MUZZLE_OFFSET = 16;
 const MSG_THROTTLE_MS = 1500;
 const ENEMY_TRACER = 0xff8a7a;
+const AI_LOD_DISTANCE = 720; // px — beyond roughly a screen away
+const AI_LOD_INTERVAL_MS = 180;
 
 /**
  * Glue between input/entities and the pure combat rules: player hitscan fire, enemy AI ticks and
@@ -75,9 +77,12 @@ export class CombatBridge {
     }
     if (intent.fireHeld && player.canFire) this.playerFire(now, intent.aimWorld);
 
-    // enemies
+    // enemies — far ones (off-screen) think at a lower rate to keep big fields cheap
     const grid = this.host.built.collision;
     for (const e of this.aliveEnemies()) {
+      if (now < e.nextThinkAt) continue;
+      const far = dist(e.pos, player.pos) > AI_LOD_DISTANCE;
+      e.nextThinkAt = far ? now + AI_LOD_INTERVAL_MS : 0;
       const p: Perception = {
         now,
         self: e.pos,

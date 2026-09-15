@@ -1,19 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
-import type {} from '../src/debug/exposeDebug';
+import { newGame, warpToField } from './helpers';
 
 async function startInField(page: Page): Promise<string[]> {
-  const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
-  page.on('console', (m) => {
-    if (m.type() === 'error') errors.push(m.text());
-  });
-  await page.goto('/');
-  await page.waitForFunction(() => window.__ec?.scene() === 'Title');
-  await page.keyboard.press('Enter');
-  await page.waitForFunction(() => window.__ec?.scene() === 'SafeZone');
-  await page.evaluate(() => window.__ec!.warp('junggok-dong', 'fromParking'));
-  await page.waitForFunction(() => window.__ec?.scene() === 'Field');
-  await page.waitForTimeout(300);
+  const errors = await newGame(page);
+  await warpToField(page);
   return errors;
 }
 

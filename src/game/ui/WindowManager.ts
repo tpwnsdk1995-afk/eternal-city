@@ -4,6 +4,7 @@ import type { NpcDef } from '@data/schema/npc';
 import { balance } from '@data/balance';
 import { gameState, type AssaultResult } from '../state/GameState';
 import { ResultWindow } from './ResultWindow';
+import { MenuWindow } from './MenuWindow';
 import type { Window } from './Window';
 import { InventoryWindow } from './InventoryWindow';
 import { StatusWindow } from './StatusWindow';
@@ -12,7 +13,7 @@ import { ShopWindow } from './ShopWindow';
 import { DialogBox } from './DialogBox';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 
-export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result';
+export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu';
 
 const HUD_H = 92;
 
@@ -28,7 +29,8 @@ export class WindowManager {
     const shop = new ShopWindow(scene, (GAME_WIDTH - 800) / 2, 50);
     const dialog = new DialogBox(scene, (GAME_WIDTH - 760) / 2, GAME_HEIGHT - HUD_H - 160, 760);
     const result = new ResultWindow(scene, (GAME_WIDTH - 460) / 2, 140);
-    for (const w of [inv, status, skills, shop, dialog, result]) {
+    const menu = new MenuWindow(scene, (GAME_WIDTH - 440) / 2, 120);
+    for (const w of [inv, status, skills, shop, dialog, result, menu]) {
       this.windows.set(w.key as WindowKey, w);
       w.setVisible(false);
       w.on('close', () => this.close(w.key as WindowKey));
@@ -108,7 +110,7 @@ export class WindowManager {
       case 'minimap':
         return gameState.message('미니맵은 아직 준비 중입니다.', 'system');
       case 'menu':
-        if (!this.closeTop()) gameState.events.emit('menu', undefined);
+        if (!this.closeTop()) this.open('menu');
         return;
     }
   }
