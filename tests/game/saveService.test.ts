@@ -45,10 +45,36 @@ describe('save/load', () => {
     expect(saveLocation('junggok-dong')).toEqual({ mapId: 'junggok-dong', spawn: 'default' });
   });
 
+  it('migrates a v1 (M1) save to v2 with empty quests and keeps everything else', () => {
+    const v2 = takeSnapshot();
+    const { quests: _q, ...rest } = v2;
+    const v1 = { ...rest, version: 1 } as unknown;
+    const migrated = migrateSave(v1);
+    expect(migrated).not.toBeNull();
+    expect(migrated!.version).toBe(2);
+    expect(migrated!.quests).toEqual({ active: [], completed: [] });
+    expect(migrated!.character.name).toBe('세이브테스트');
+    expect(migrated!.inventory.items.length).toBe(v2.inventory.items.length);
+  });
+
+  it('round-trips quest progress and flags', async () => {
+    actions.acceptQuest('q_junggok_cleanup');
+    gameState.setFlag('taxi:junggok-dong', true);
+    gameState.setFlag('parallelPermit', true);
+    await saveService.save();
+    gameState.newGame('x');
+    expect(gameState.quests.active).toEqual([]);
+    await saveService.load();
+    expect(gameState.quests.active.map((q) => q.id)).toEqual(['q_junggok_cleanup']);
+    expect(gameState.flags.parallelPermit).toBe(true);
+    expect(gameState.flags['taxi:junggok-dong']).toBe(true);
+  });
+
   it('rejects corrupt or unknown-version rows', async () => {
     expect(migrateSave(null)).toBeNull();
     expect(migrateSave({ version: 99 })).toBeNull();
     expect(migrateSave({ version: 1, character: {} })).toBeNull();
+    expect(migrateSave({ ...takeSnapshot(), quests: { active: 'nope' } })).toBeNull();
     expect(migrateSave(takeSnapshot())).not.toBeNull();
     await db.saves.put({ slot: 1, name: 'x', level: 1, mapName: 'x', updatedAt: 0, data: { version: 1 } as never });
     expect(await saveService.peek()).toBeNull();

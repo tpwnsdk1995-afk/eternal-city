@@ -6,7 +6,9 @@ import { saveService } from '../state/SaveService';
 import type { SaveRow } from '../state/db';
 import { theme } from '../ui/theme';
 import { Rain } from '../ui/Rain';
-import type { WorldSceneData } from './BaseWorldScene';
+import { sceneKeyForMap, type WorldSceneData } from './BaseWorldScene';
+import { registry } from '@data/registry';
+import { balance } from '@data/balance';
 
 export class TitleScene extends Phaser.Scene {
   private busy = false;
@@ -81,6 +83,7 @@ export class TitleScene extends Phaser.Scene {
       return;
     }
     saveService.attach();
-    this.scene.start(save.location.mapId === 'gwangjin-gucheong-parking' ? 'SafeZone' : 'Field', { mapId: save.location.mapId, spawn: save.location.spawn } satisfies WorldSceneData);
+    const target = registry.hasMap(save.location.mapId) ? registry.map(save.location.mapId) : registry.map(balance.death.respawnMap);
+    this.scene.start(sceneKeyForMap(target), { mapId: target.id, spawn: registry.hasMap(save.location.mapId) ? save.location.spawn : balance.death.respawnPoint } satisfies WorldSceneData);
   }
 }

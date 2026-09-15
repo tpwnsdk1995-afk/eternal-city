@@ -2,7 +2,6 @@ import { balance } from '@data/balance';
 import { registry } from '@data/registry';
 import { initialFireState } from '@core/weapons/fireController';
 import { emptyStatus } from '@core/combat/statusEffects';
-import { emptyQuestState } from '@core/quest/questState';
 import { CURRENT_SAVE_VERSION, migrateSave, type SaveGame } from '@core/save/saveSchema';
 import { db, type SaveRow } from './db';
 import { gameState } from './GameState';
@@ -16,7 +15,7 @@ const ASSAULT_MAP_IDS = new Set(['junggok-blockade']);
 
 /** Where the character should reappear on load: never inside an assault instance. */
 export function saveLocation(mapId: string): { mapId: string; spawn: string } {
-  if (ASSAULT_MAP_IDS.has(mapId) || !registry.map(mapId)) return { mapId: balance.death.respawnMap, spawn: balance.death.respawnPoint };
+  if (ASSAULT_MAP_IDS.has(mapId) || !registry.hasMap(mapId)) return { mapId: balance.death.respawnMap, spawn: balance.death.respawnPoint };
   return { mapId, spawn: 'default' };
 }
 
@@ -45,7 +44,7 @@ export function applySnapshot(save: SaveGame): void {
   gameState.equipment = save.equipment;
   gameState.skills = save.skills;
   gameState.fire = { ...initialFireState(), ...save.fire, lastFireAt: -Infinity };
-  gameState.quests = save.quests ?? emptyQuestState();
+  gameState.quests = save.quests;
   gameState.status = emptyStatus();
   gameState.consciousness = { lastTriggeredAt: -Infinity };
   gameState.flags = { ...save.flags };

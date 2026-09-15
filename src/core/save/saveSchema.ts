@@ -6,7 +6,7 @@ import type { FireState } from '../weapons/fireController';
 import type { QuestState } from '../quest/questState';
 import type { ControlScheme } from '@data/schema/enums';
 
-export const CURRENT_SAVE_VERSION = 1 as const;
+export const CURRENT_SAVE_VERSION = 2 as const;
 
 export interface SaveSettings {
   controlScheme: ControlScheme;
@@ -14,8 +14,7 @@ export interface SaveSettings {
   showMinimap?: boolean;
 }
 
-export interface SaveGameV1 {
-  version: 1;
+interface SaveCommon {
   savedAt: number;
   character: CharacterCore;
   vitals: Vitals;
@@ -23,17 +22,30 @@ export interface SaveGameV1 {
   equipment: Equipment;
   skills: SkillState;
   fire: FireState;
-  /** added mid-M2; absent in early v1 rows (treated as empty) */
-  quests?: QuestState;
   location: { mapId: string; spawn: string };
   flags: Record<string, boolean | number>;
   settings: SaveSettings;
   playtimeMs: number;
 }
 
-export type SaveGame = SaveGameV1;
+/** M1 format (no quests). */
+export interface SaveGameV1 extends SaveCommon {
+  version: 1;
+}
+
+/** M2: quest progress + flags (패러렐 허가증, 택시 등록). */
+export interface SaveGameV2 extends SaveCommon {
+  version: 2;
+  quests: QuestState;
+}
+
+export type SaveGame = SaveGameV2;
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
+
+const MIGRATIONS: Record<number, (d: Record<string, unknown>) => Record<string, unknown>> = {
+  1: (d) => ({ ...d, version: 2, quests: { active: [], completed: [] }, flags: isObj(d.flags) ? d.flags : {} }),
+};
 
 /**
  * Validates + migrates a raw stored object to the current schema. Returns null for anything
@@ -42,11 +54,17 @@ const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object
 export function migrateSave(raw: unknown): SaveGame | null {
   if (!isObj(raw) || typeof raw.version !== 'number') return null;
   let data: Record<string, unknown> = raw;
-  // future: while (data.version < CURRENT_SAVE_VERSION) data = MIGRATIONS[data.version](data)
+  while (typeof data.version === 'number' && data.version < CURRENT_SAVE_VERSION) {
+    const step = MIGRATIONS[data.version];
+    if (!step) return null;
+    data = step(data);
+  }
   if (data.version !== CURRENT_SAVE_VERSION) return null;
-  const required = ['character', 'vitals', 'inventory', 'equipment', 'skills', 'fire', 'location', 'settings'];
+  const required = ['character', 'vitals', 'inventory', 'equipment', 'skills', 'fire', 'location', 'settings', 'quests'];
   for (const k of required) if (!isObj(data[k])) return null;
   const c = data.character as Record<string, unknown>;
   if (typeof c.name !== 'string' || typeof c.level !== 'number' || !isObj(c.base)) return null;
+  const q = data.quests as Record<string, unknown>;
+  if (!Array.isArray(q.active) || !Array.isArray(q.completed)) return null;
   return data as unknown as SaveGame;
 }
