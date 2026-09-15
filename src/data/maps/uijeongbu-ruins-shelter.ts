@@ -1,0 +1,66 @@
+import type { MapDef } from '../schema/map';
+import { TEX, TILE } from '../textureKeys';
+
+/** 2005년 의정부 폐허 대피소 — 무너진 읍사무소 지하를 막아 만든 마지막 안전지역. */
+export const uijeongbuRuinsShelter: MapDef = {
+  id: 'uijeongbu-ruins-shelter',
+  name: '의정부 폐허 대피소',
+  year: 2005,
+  width: 46,
+  height: 28,
+  tileSize: 32,
+  groundTile: TILE.parkingFloor,
+  borderTile: TILE.sewerWall,
+  fills: [
+    { rect: { x: 1, y: 12, w: 44, h: 4 }, tile: TILE.sidewalk },
+    { rect: { x: 21, y: 1, w: 4, h: 26 }, tile: TILE.sidewalk },
+    { rect: { x: 1, y: 1, w: 44, h: 3 }, tile: TILE.dirt },
+  ],
+  obstacles: [
+    { rect: { x: 4, y: 5, w: 6, h: 3 }, tile: TILE.concreteWall, kind: 'wall' },
+    { rect: { x: 13, y: 5, w: 5, h: 3 }, tile: TILE.concreteWall, kind: 'wall' },
+    { rect: { x: 28, y: 5, w: 5, h: 3 }, tile: TILE.concreteWall, kind: 'wall' },
+    { rect: { x: 36, y: 5, w: 6, h: 3 }, tile: TILE.concreteWall, kind: 'wall' },
+    { rect: { x: 4, y: 20, w: 6, h: 3 }, tile: TILE.concreteWall, kind: 'wall' },
+    { rect: { x: 36, y: 20, w: 6, h: 3 }, tile: TILE.concreteWall, kind: 'wall' },
+    ...[10, 35].flatMap((x) => [9, 18].map((y) => ({ rect: { x, y, w: 1, h: 1 }, tile: TILE.parkingPillar, kind: 'pillar' as const }))),
+    { rect: { x: 12, y: 18, w: 4, h: 4 }, tile: TILE.car, kind: 'car' },
+    { rect: { x: 30, y: 18, w: 4, h: 4 }, tile: TILE.car, kind: 'car' },
+  ],
+  decor: [
+    ...[10, 35].flatMap((x) => [9, 18].map((y) => ({ at: { x, y }, tex: TEX.deco_pillar }))),
+    { at: { x: 19, y: 8 }, tex: TEX.deco_vending, solid: true, interact: 'vending' },
+    { at: { x: 26, y: 8 }, tex: TEX.deco_vending, solid: true, interact: 'vending' },
+    { at: { x: 5, y: 10 }, tex: TEX.deco_trash, solid: true },
+    { at: { x: 40, y: 10 }, tex: TEX.deco_phone, solid: true },
+    { at: { x: 22, y: 18 }, tex: TEX.deco_sign },
+    { at: { x: 16, y: 25 }, tex: TEX.deco_bench, solid: true },
+    { at: { x: 28, y: 25 }, tex: TEX.deco_bench, solid: true },
+    { at: { x: 6, y: 25 }, tex: TEX.deco_lamp, solid: true },
+    { at: { x: 40, y: 25 }, tex: TEX.deco_lamp, solid: true },
+  ],
+  portals: [
+    { id: 'toRuins', rect: { x: 43, y: 12, w: 2, h: 4 }, toMap: 'uijeongbu-ruins', toSpawn: 'fromShelter', label: '의정부 폐허 (동쪽 출구)' },
+    { id: 'toJongnoRuins', rect: { x: 1, y: 12, w: 2, h: 4 }, toMap: 'jongno-ruins', toSpawn: 'fromShelter', label: '종로 폐허행 수송차 (서쪽)' },
+    { id: 'toIlsan', rect: { x: 21, y: 1, w: 4, h: 2 }, toMap: 'ilsan-waterway', toSpawn: 'fromShelter', label: '일산 지하수로 (북쪽 갱도)' },
+  ],
+  spawnPoints: {
+    default: { x: 23, y: 13 },
+    parallel: { x: 23, y: 13 },
+    fromRuins: { x: 41, y: 13 },
+    fromJongnoRuins: { x: 4, y: 13 },
+    fromIlsan: { x: 23, y: 5 },
+    taxi: { x: 23, y: 23 },
+  },
+  npcs: [
+    { id: 'npc_parallel', at: { x: 23, y: 9 } },
+    { id: 'npc_shop', at: { x: 11, y: 13 } },
+    { id: 'npc_tech', at: { x: 15, y: 13 } },
+    { id: 'npc_elia', at: { x: 31, y: 13 } },
+    { id: 'npc_assault', at: { x: 35, y: 13 } },
+    { id: 'npc_mainstream', at: { x: 27, y: 13 } },
+    { id: 'npc_taxi', at: { x: 25, y: 23 } },
+    { id: 'npc_cybershop', at: { x: 40, y: 13 } },
+  ],
+  safeZone: true,
+};

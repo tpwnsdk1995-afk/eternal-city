@@ -26,5 +26,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'ach_won_1m', name: '백만장자', desc: '누적 ₩1,000,000을 벌어들인다.', cond: { kind: 'wonEarned', amount: 1_000_000 }, reward: { won: 10_000, xp: 500, title: '백만장자' } },
   { id: 'ach_deaths_10', name: '질긴 목숨', desc: '10번 사망하고도 살아 있다.', cond: { kind: 'deaths', count: 10 }, reward: { won: 1_000, xp: 100, title: '질긴 목숨' }, hidden: true },
   { id: 'ach_rebirth_1', name: '다시 태어난 자', desc: '처음으로 환생한다.', cond: { kind: 'rebirth', count: 1 }, reward: { won: 50_000, xp: 0, title: '환생자' } },
+  { id: 'ach_campaign_2004', name: '강변의 겨울', desc: '2004 캠페인을 완주한다.', cond: { kind: 'flag', flag: 'campaign:2004:complete' }, reward: { won: 60_000, xp: 6_000, title: '북부 개척자' } },
+  { id: 'ach_campaign_2005', name: '침묵을 깨다', desc: '2005 캠페인을 완주한다.', cond: { kind: 'flag', flag: 'campaign:2005:complete' }, reward: { won: 200_000, xp: 20_000, title: '서울의 수호자' } },
   { id: 'ach_campaign_2002', name: '2002년의 봄', desc: '2002 캠페인을 완주한다.', cond: { kind: 'flag', flag: 'campaign:2002:complete' }, reward: { won: 30_000, xp: 3_000, title: '중곡동의 영웅' } },
 ];

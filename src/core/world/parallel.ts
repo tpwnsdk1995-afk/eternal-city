@@ -36,7 +36,7 @@ export function unlockText(def: YearDef): string {
   if (def.unlock.permit) parts.push('패러렐 시스템 허가증');
   const alt: string[] = [];
   if (def.unlock.level !== undefined) alt.push(`Lv.${def.unlock.level}`);
-  if (def.unlock.orFlag) alt.push('2002 캠페인 완주');
+  if (def.unlock.orFlag) alt.push(`${def.unlock.orFlag.split(':')[1]} 캠페인 완주`);
   if (alt.length) parts.push(alt.join(' 또는 '));
   return parts.length ? `해금 조건: ${parts.join(' + ')}` : '항상 이용 가능';
 }

@@ -53,4 +53,29 @@ export const CAMPAIGNS: CampaignDef[] = [
       },
     ],
   },
+  {
+    id: '2004',
+    name: '2004 · 강변의 겨울',
+    year: 2004,
+    desc: '한강 북단과 북쪽 외곽을 되찾고, 땅속의 데스웜을 잡아 2005년으로 향하는 길을 연다.',
+    finalFlag: 'campaign:2004:complete',
+    chapters: [
+      { id: 'ch1', title: '1장 · 강변도로', desc: '테크노마트~올림픽대교의 좀비 군인을 밀어낸다.', requires: { kills: [{ monsterId: 'zombie_soldier', count: 20 }] }, rewards: { won: 12_000, xp: 1_500, items: [{ itemId: 'ammo_556_ap', qty: 60 }] } },
+      { id: 'ch2', title: '2장 · 엘리트 병력', desc: '위토 엘리트 병사 10명을 처치한다.', requires: { kills: [{ monsterId: 'wito_elite_trooper', count: 10 }] }, rewards: { won: 18_000, xp: 2_200, items: [{ itemId: 'armor_hat_tactical', qty: 1 }] } },
+      { id: 'ch3', title: '3장 · 땅속의 것', desc: '의정부 외곽의 몽골리안 데스웜을 처치한다.', requires: { kills: [{ monsterId: 'mongolian_deathworm', count: 1 }] }, rewards: { won: 40_000, xp: 4_000, items: [{ itemId: 'armor_coat_kevlar_cl', qty: 1 }] } },
+      { id: 'ch4', title: '4장 · 심층 정복', desc: '하수도 심층 어설트를 성공하고 Lv.40에 도달한다.', requires: { assaultClears: [{ assaultId: 'assault-c', count: 1 }], level: 40 }, rewards: { won: 50_000, xp: 5_000, items: [{ itemId: 'premium_coupon', qty: 1 }] } },
+    ],
+  },
+  {
+    id: '2005',
+    name: '2005 · 침묵의 폐허',
+    year: 2005,
+    desc: '함락된 서울에서 GUEST를 몰아내고 패러사이트의 뿌리를 끊는다.',
+    finalFlag: 'campaign:2005:complete',
+    chapters: [
+      { id: 'ch1', title: '1장 · 척후 사냥', desc: 'GUEST 척후 15명을 처치한다.', requires: { kills: [{ monsterId: 'guest_scout', count: 15 }] }, rewards: { won: 25_000, xp: 3_000, items: [{ itemId: 'ammo_50_ap', qty: 40 }] } },
+      { id: 'ch2', title: '2장 · 전사와 마주하다', desc: 'GUEST 전사 10명을 처치한다.', requires: { kills: [{ monsterId: 'guest_warrior', count: 10 }] }, rewards: { won: 35_000, xp: 4_000, items: [{ itemId: 'ammo_rocket', qty: 6 }] } },
+      { id: 'ch3', title: '3장 · 근절', desc: '패러사이트 근절 어설트를 성공한다.', requires: { assaultClears: [{ assaultId: 'assault-d', count: 1 }] }, rewards: { won: 100_000, xp: 12_000, items: [{ itemId: 'armor_top_tactical_cl', qty: 1 }, { itemId: 'armor_coat_kevlar_cl', qty: 1 }] } },
+    ],
+  },
 ];

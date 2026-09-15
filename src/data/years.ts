@@ -3,7 +3,7 @@
  * 2002 is always open; later years need the 패러렐 시스템 허가증 and a milestone.
  */
 export interface YearDef {
-  year: 2002 | 2003 | 2004;
+  year: 2002 | 2003 | 2004 | 2005;
   name: string;
   desc: string;
   hubMapId: string;
@@ -31,5 +31,12 @@ export const YEARS: YearDef[] = [
     desc: '한강 북단 강변도로와 북쪽 외곽. 좀비 군인, 라바 군집, 그리고 땅속의 레이드 보스 몽골리안 데스웜.',
     hubMapId: 'technomart-shelter',
     unlock: { permit: true, level: 25, orFlag: 'campaign:2002:complete' },
+  },
+  {
+    year: 2005,
+    name: '2005년 · 폐허의 서울',
+    desc: '함락 이후. 의정부·종로는 폐허가 되었고 일산 지하수로까지 GUEST와 패러사이트가 뿌리내렸다.',
+    hubMapId: 'uijeongbu-ruins-shelter',
+    unlock: { permit: true, level: 40, orFlag: 'campaign:2004:complete' },
   },
 ];

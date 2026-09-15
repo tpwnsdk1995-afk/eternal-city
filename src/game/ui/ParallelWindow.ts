@@ -10,7 +10,7 @@ import { theme } from './theme';
 /** 패러렐 시스템 — pick a year; you arrive at that year's safe-zone hub. */
 export class ParallelWindow extends Window {
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, 'parallel', x, y, 560, 380, '패러렐 시스템 — 연도 이동');
+    super(scene, 'parallel', x, y, 560, 470, '패러렐 시스템 — 연도 이동');
     this.refresh();
   }
 

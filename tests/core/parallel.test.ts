@@ -30,7 +30,10 @@ describe('패러렐 시스템', () => {
     }
     expect(hubForYear(2003)).toBe('jongno-shelter');
     expect(hubForYear(2017)).toBe('gwangjin-gucheong-parking'); // unknown years fall back to the start
-    expect(YEARS.map((y) => y.year)).toEqual([2002, 2003, 2004]);
+    expect(YEARS.map((y) => y.year)).toEqual([2002, 2003, 2004, 2005]);
+    expect(canTravel(2005, { flags: { parallelPermit: true }, level: 39, currentYear: 2002 })).toEqual({ ok: false, reason: 'milestone' });
+    expect(canTravel(2005, { flags: { parallelPermit: true, 'campaign:2004:complete': true }, level: 1, currentYear: 2002 })).toEqual({ ok: true });
+    expect(hubForYear(2005)).toBe('uijeongbu-ruins-shelter');
     expect(unlockText(YEARS[1])).toContain('허가증');
   });
 

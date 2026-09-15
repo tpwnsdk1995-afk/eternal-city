@@ -58,6 +58,7 @@ export const technomartShelter: MapDef = {
     { id: 'npc_assault', at: { x: 35, y: 13 } },
     { id: 'npc_taxi', at: { x: 25, y: 23 } },
     { id: 'npc_cybershop', at: { x: 40, y: 13 } },
+    { id: 'npc_mainstream', at: { x: 27, y: 13 } },
   ],
   safeZone: true,
 };

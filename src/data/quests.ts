@@ -66,4 +66,39 @@ export const QUESTS: QuestDef[] = [
     ],
     rewards: { won: 20_000, xp: 1_400, items: [{ itemId: 'ammo_556_ap', qty: 40 }], itemChances: [{ itemId: 'armor_top_tactical_cl', qty: 1, chance: 0.1 }, { itemId: 'armor_coat_kevlar_cl', qty: 1, chance: 0.05 }] },
   },
+  {
+    id: 'ms_2005_normal',
+    name: '메인스트림 2005 · 폐허 순찰',
+    giver: 'npc_mainstream',
+    daily: true,
+    prereq: { level: 40 },
+    text: {
+      offer: '2005년 폐허 순찰입니다. GUEST 15, 좀비 30을 정리해 주세요. 위험 수당이 붙습니다.',
+      progress: '폐허는 밤에 더 위험합니다. 서둘러 주세요.',
+      complete: '살아 돌아오셨군요. 위험 수당입니다.',
+    },
+    steps: [
+      { kind: 'kill', faction: 'GUEST', count: 15, label: 'GUEST 처치' },
+      { kind: 'kill', faction: 'zombie', count: 30, label: '좀비 처치' },
+    ],
+    rewards: { won: 30_000, xp: 3_000, items: [{ itemId: 'hp_pack', qty: 2 }] },
+  },
+  {
+    id: 'ms_2005_cl',
+    name: '메인스트림 2005 (CL) · 뿌리를 끊다',
+    giver: 'npc_mainstream',
+    daily: true,
+    cl: true,
+    prereq: { level: 45, flags: ['parallelPermit'] },
+    text: {
+      offer: 'CL 등급. GUEST 40명과 패러사이트 루트. 오늘 안에 해내면 CL 장비를 걸겠습니다.',
+      progress: '패러사이트 루트는 어설트 접수처를 통해 둥지로 들어가야 합니다.',
+      complete: '……정말 해내셨군요. CL 등급 보수입니다.',
+    },
+    steps: [
+      { kind: 'kill', faction: 'GUEST', count: 40, label: 'GUEST 처치' },
+      { kind: 'kill', monsterId: 'parasite_root', count: 1, label: '패러사이트 루트 제거' },
+    ],
+    rewards: { won: 90_000, xp: 9_000, items: [{ itemId: 'ammo_50_ap', qty: 40 }], itemChances: [{ itemId: 'armor_top_tactical_cl', qty: 1, chance: 0.25 }, { itemId: 'armor_coat_kevlar_cl', qty: 1, chance: 0.15 }] },
+  },
 ];
