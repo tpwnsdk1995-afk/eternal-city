@@ -28,5 +28,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'ach_rebirth_1', name: '다시 태어난 자', desc: '처음으로 환생한다.', cond: { kind: 'rebirth', count: 1 }, reward: { won: 50_000, xp: 0, title: '환생자' } },
   { id: 'ach_campaign_2004', name: '강변의 겨울', desc: '2004 캠페인을 완주한다.', cond: { kind: 'flag', flag: 'campaign:2004:complete' }, reward: { won: 60_000, xp: 6_000, title: '북부 개척자' } },
   { id: 'ach_campaign_2005', name: '침묵을 깨다', desc: '2005 캠페인을 완주한다.', cond: { kind: 'flag', flag: 'campaign:2005:complete' }, reward: { won: 200_000, xp: 20_000, title: '서울의 수호자' } },
+  { id: 'ach_campaign_2006', name: '유리의 숲을 넘어', desc: '2006 캠페인을 완주한다.', cond: { kind: 'flag', flag: 'campaign:2006:complete' }, reward: { won: 300_000, xp: 40_000, title: '강남의 해방자' } },
+  { id: 'ach_campaign_2008', name: '의사당의 끝', desc: '2008 캠페인을 완주한다.', cond: { kind: 'flag', flag: 'campaign:2008:complete' }, reward: { won: 500_000, xp: 80_000, title: '위토 사령관을 꺾은 자' } },
+  { id: 'ach_campaign_2017', name: '현재를 되찾다', desc: '2017 캠페인을 완주한다.', cond: { kind: 'flag', flag: 'campaign:2017:complete' }, reward: { won: 3_000_000, xp: 500_000, title: '이터널 헌터' } },
+  { id: 'ach_wise_one', name: '현자 사냥꾼', desc: '남산 정상의 the Wise One을 처치한다.', cond: { kind: 'killMonster', monsterId: 'the_wise_one', count: 1 }, reward: { won: 1_000_000, xp: 200_000, title: '현자를 쓰러뜨린 자' } },
   { id: 'ach_campaign_2002', name: '2002년의 봄', desc: '2002 캠페인을 완주한다.', cond: { kind: 'flag', flag: 'campaign:2002:complete' }, reward: { won: 30_000, xp: 3_000, title: '중곡동의 영웅' } },
 ];

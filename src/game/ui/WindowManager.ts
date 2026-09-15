@@ -45,7 +45,7 @@ export class WindowManager {
     const taxiW = new TaxiWindow(scene, (GAME_WIDTH - 520) / 2, 60);
     const tuning = new TuningWindow(scene, (GAME_WIDTH - 820) / 2, 44);
     const assault = new AssaultWindow(scene, (GAME_WIDTH - 760) / 2, 50);
-    const parallel = new ParallelWindow(scene, (GAME_WIDTH - 560) / 2, 60);
+    const parallel = new ParallelWindow(scene, (GAME_WIDTH - 560) / 2, 30);
     const guild = new GuildWindow(scene, (GAME_WIDTH - 620) / 2, 60);
     for (const w of [inv, status, skills, shop, dialog, result, menu, quest, taxiW, tuning, assault, parallel, guild]) {
       this.windows.set(w.key as WindowKey, w);

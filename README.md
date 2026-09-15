@@ -108,6 +108,15 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 - 저장 자체는 계속 자동(맵 이동·레벨 업·장비/스킬 변경·60초마다·탭 닫을 때, 브라우저 IndexedDB)
 - **사운드(합성)**: 오디오 파일 없이 WebAudio로 전부 합성. 무기 분류별 총성(권총/기관단총/돌격소총/산탄총/저격/기관총, 서브연사는 가볍게), 근접 휘두름, 변이무기 할퀴기, 유탄/로켓 발사·폭발, 피격(살/벽/치명), 적 사망·사격(거리 감쇠), 플레이어 피격·사망·의식 회복, 레벨 업, ₩/아이템 획득, 창 열기/닫기, 퀘스트 완료, 어설트 성공/실패, 점프, 탄약 없음, 회복, 강화 성공/실패, 택시. 환경음: 타이틀 비, 안전지역 전기 웅웅, 필드 바람, 지하 물방울. 첫 클릭/터치에서 활성화(모바일 자동재생 규칙), 탭이 숨겨지면 일시정지. Esc 메뉴에서 효과음/환경음/볼륨 조절(저장)
 
+### M8-3 — 길드 · 방어구 조합 · 2006/2008/2017
+
+- **길드**(광진구청 과장 오민석 → 길드 사무실): 창설 ₩50,000, 기여금으로 5단계 성장(누적 ₩15만/50만/150만/400만). 레벨당 경험치 +2%·₩ +2%·소지 무게 +2kg·최대 생명 +1%, 레벨마다 이름 있는 생존자 2명이 명단에 합류. 저장 스키마 v7
+- **방어구 조합**(기술상): 같은 방어구 하나를 재료로 소모해 접두 없음→고대(60%)→전설(35%). 실패해도 재료는 소모되며 둘 중 높은 플러스업이 남습니다
+- **2006 강남**(Lv.50 또는 2005 캠페인 완주): 강남역 지하상가 대피소 → 테헤란로(사무직 좀비·위토 중화기병·GUEST 사냥꾼·네임드 회장 좀비), 코엑스 지하몰(어둠)
+- **2008 여의도**(Lv.65 또는 2006 완주): 국회 지하 벙커 → 여의도 공원(진압경찰 좀비·패러사이트 새끼), 국회의사당 잔해(위토 정찰 드론·네임드 위토 사령관)
+- **2017 현재의 서울**(Lv.80 또는 2008 완주): 서울역 지하 대피소 → 광화문 광장(GUEST 정예·고대 좀비), 남산 서울타워 부지(패러사이트 호러, **레이드 보스 the Wise One** — HP 40만, 땅속 잠복·출현 충격파·GUEST 정예 소환, 15분 리스폰)
+- 캠페인 2006/2008/2017(각 3챕터), 메인스트림 2006/2008/2017 + 2017 CL(현자 사냥), 업적 5종(캠페인 3 + 현자 사냥꾼), 패러렐 창 7개 연도
+
 ## 다음 단계
 
 원작 로드맵의 큰 줄기(2002~2005, 어설트·캠페인·튠·패러렐·환생)는 모두 들어갔습니다. 이후는 콘텐츠 확장(2006~2008·2017, 길드, 방어구 조합, 사운드, 실제 아트 교체)과 밸런스 튜닝입니다.
@@ -118,7 +127,7 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 src/core/   순수 TS 게임 규칙 (Phaser 금지, 전부 유닛 테스트)  stats · combat · weapons · tuning · inventory · skills · ai · assault · progress · map · quest · economy · save
 src/data/   콘텐츠 데이터 + 스키마 + balance.ts (부팅 시 validateAll로 참조 검증)
 src/game/   Phaser 어댑터: scenes · entities · systems(InputMapper, CombatBridge, SpawnSystem) · ui(창들) · textures(코드 드로잉) · state
-e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch · save-transfer · cloud-save · audio)
+e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch · save-transfer · cloud-save · audio · guild · late-years)
 ```
 
 `window.__ec` 디버그 훅으로 상태 조회/스폰/텔레포트/어설트 진행을 제어할 수 있습니다(e2e에서 사용).

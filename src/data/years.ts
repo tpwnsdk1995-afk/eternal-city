@@ -3,7 +3,7 @@
  * 2002 is always open; later years need the 패러렐 시스템 허가증 and a milestone.
  */
 export interface YearDef {
-  year: 2002 | 2003 | 2004 | 2005;
+  year: 2002 | 2003 | 2004 | 2005 | 2006 | 2008 | 2017;
   name: string;
   desc: string;
   hubMapId: string;
@@ -38,5 +38,26 @@ export const YEARS: YearDef[] = [
     desc: '함락 이후. 의정부·종로는 폐허가 되었고 일산 지하수로까지 GUEST와 패러사이트가 뿌리내렸다.',
     hubMapId: 'uijeongbu-ruins-shelter',
     unlock: { permit: true, level: 40, orFlag: 'campaign:2004:complete' },
+  },
+  {
+    year: 2006,
+    name: '2006년 · 강남',
+    desc: '유리 빌딩이 그대로 선 강남. 사무직 좀비와 위토 중화기병, 빌딩 사이를 뛰어다니는 GUEST 사냥꾼.',
+    hubMapId: 'gangnam-shelter',
+    unlock: { permit: true, level: 50, orFlag: 'campaign:2005:complete' },
+  },
+  {
+    year: 2008,
+    name: '2008년 · 여의도',
+    desc: '국회를 마지막 거점으로 삼은 위토군. 진압경찰 좀비, 정찰 드론, 강을 타고 올라온 패러사이트 새끼.',
+    hubMapId: 'yeouido-shelter',
+    unlock: { permit: true, level: 65, orFlag: 'campaign:2006:complete' },
+  },
+  {
+    year: 2017,
+    name: '2017년 · 현재의 서울',
+    desc: '모든 시간선이 모이는 현재. 광화문의 GUEST 정예와 남산 정상의 the Wise One.',
+    hubMapId: 'seoul-station-shelter',
+    unlock: { permit: true, level: 80, orFlag: 'campaign:2008:complete' },
   },
 ];

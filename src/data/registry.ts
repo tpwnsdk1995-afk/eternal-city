@@ -32,6 +32,7 @@ import { uijeongbu } from './maps/uijeongbu';
 import { parasiteNest } from './maps/parasite-nest';
 import { uijeongbuRuinsShelter } from './maps/uijeongbu-ruins-shelter';
 import { ilsanWaterway, jongnoRuins, uijeongbuRuins } from './maps/ruins-2005';
+import { LATE_YEAR_MAPS } from './maps/late-years';
 import { YEARS } from './years';
 import { assaultA } from './assaults/assault-a';
 import { assaultB } from './assaults/assault-b';
@@ -48,7 +49,7 @@ import { isMeleeClass } from './schema/enums';
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
 export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES, ...MISC];
-export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense, sewerDepths, jongnoShelter, jongnoStreet, technomartShelter, technomartBridge, uijeongbu, parasiteNest, uijeongbuRuinsShelter, uijeongbuRuins, jongnoRuins, ilsanWaterway];
+export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense, sewerDepths, jongnoShelter, jongnoStreet, technomartShelter, technomartBridge, uijeongbu, parasiteNest, uijeongbuRuinsShelter, uijeongbuRuins, jongnoRuins, ilsanWaterway, ...LATE_YEAR_MAPS];
 const BASE_ASSAULTS: AssaultDef[] = [assaultA, assaultB, assaultC, assaultD];
 /** every mission plus its 고급 variant */
 export const ASSAULTS: AssaultDef[] = [...BASE_ASSAULTS, ...BASE_ASSAULTS.map(advancedOf)];

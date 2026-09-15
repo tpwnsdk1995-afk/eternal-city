@@ -78,4 +78,40 @@ export const CAMPAIGNS: CampaignDef[] = [
       { id: 'ch3', title: '3장 · 근절', desc: '패러사이트 근절 어설트를 성공한다.', requires: { assaultClears: [{ assaultId: 'assault-d', count: 1 }] }, rewards: { won: 100_000, xp: 12_000, items: [{ itemId: 'armor_top_tactical_cl', qty: 1 }, { itemId: 'armor_coat_kevlar_cl', qty: 1 }] } },
     ],
   },
+  {
+    id: '2006',
+    name: '2006 · 유리의 숲',
+    year: 2006,
+    desc: '강남의 빌딩 숲을 되찾고 테헤란로의 회장 좀비를 끌어내린다.',
+    finalFlag: 'campaign:2006:complete',
+    chapters: [
+      { id: 'ch1', title: '1장 · 출근길', desc: '테헤란 사무직 좀비 30명을 처치한다.', requires: { kills: [{ monsterId: 'zombie_office', count: 30 }] }, rewards: { won: 60_000, xp: 8_000, items: [{ itemId: 'ammo_762_ap', qty: 60 }] } },
+      { id: 'ch2', title: '2장 · 중화기 진지', desc: '위토 중화기병 15명과 GUEST 사냥꾼 15명을 처치한다.', requires: { kills: [{ monsterId: 'wito_heavy_gunner', count: 15 }, { monsterId: 'guest_hunter', count: 15 }] }, rewards: { won: 90_000, xp: 12_000, items: [{ itemId: 'hp_pack', qty: 3 }] } },
+      { id: 'ch3', title: '3장 · 회장실', desc: '네임드 회장 좀비를 처치한다.', requires: { kills: [{ monsterId: 'zombie_ceo', count: 1 }], level: 60 }, rewards: { won: 200_000, xp: 25_000, items: [{ itemId: 'armor_top_tactical_cl', qty: 1 }] } },
+    ],
+  },
+  {
+    id: '2008',
+    name: '2008 · 마지막 의사당',
+    year: 2008,
+    desc: '여의도를 요새화한 위토군의 사령관을 무너뜨린다.',
+    finalFlag: 'campaign:2008:complete',
+    chapters: [
+      { id: 'ch1', title: '1장 · 공원 소탕', desc: '진압경찰 좀비 30명과 패러사이트 새끼 30마리를 처치한다.', requires: { kills: [{ monsterId: 'zombie_riot_police', count: 30 }, { monsterId: 'parasite_spawn', count: 30 }] }, rewards: { won: 120_000, xp: 16_000, items: [{ itemId: 'ammo_50_ap', qty: 60 }] } },
+      { id: 'ch2', title: '2장 · 드론 격추', desc: '위토 정찰 드론 20기를 격추한다.', requires: { kills: [{ monsterId: 'wito_drone', count: 20 }] }, rewards: { won: 160_000, xp: 20_000, items: [{ itemId: 'ammo_rocket', qty: 10 }] } },
+      { id: 'ch3', title: '3장 · 사령관', desc: '네임드 위토 사령관을 처치한다.', requires: { kills: [{ monsterId: 'wito_commander', count: 1 }], level: 75 }, rewards: { won: 400_000, xp: 50_000, items: [{ itemId: 'armor_coat_kevlar_cl', qty: 1 }, { itemId: 'premium_coupon', qty: 1 }] } },
+    ],
+  },
+  {
+    id: '2017',
+    name: '2017 · 현재',
+    year: 2017,
+    desc: '모든 시간선의 끝. 남산 정상의 the Wise One을 쓰러뜨리고 서울을 되찾는다.',
+    finalFlag: 'campaign:2017:complete',
+    chapters: [
+      { id: 'ch1', title: '1장 · 광화문', desc: 'GUEST 정예 25명과 고대 좀비 25명을 처치한다.', requires: { kills: [{ monsterId: 'guest_elite', count: 25 }, { monsterId: 'zombie_ancient', count: 25 }] }, rewards: { won: 250_000, xp: 40_000, items: [{ itemId: 'ammo_50_ap', qty: 100 }] } },
+      { id: 'ch2', title: '2장 · 남산 등반', desc: '패러사이트 호러 10마리를 처치한다.', requires: { kills: [{ monsterId: 'parasite_horror', count: 10 }] }, rewards: { won: 350_000, xp: 60_000, items: [{ itemId: 'premium_coupon', qty: 1 }] } },
+      { id: 'ch3', title: '3장 · the Wise One', desc: '남산 정상의 the Wise One을 처치한다.', requires: { kills: [{ monsterId: 'the_wise_one', count: 1 }], level: 90 }, rewards: { won: 2_000_000, xp: 300_000, items: [{ itemId: 'armor_top_tactical_cl', qty: 1 }, { itemId: 'armor_coat_kevlar_cl', qty: 1 }, { itemId: 'premium_coupon', qty: 3 }] } },
+    ],
+  },
 ];
