@@ -342,7 +342,7 @@ export const MONSTERS: MonsterDef[] = [
     attack: { dmg: 34, reach: 30, windupMs: 380, cooldownMs: 1200 },
     aggroRange: 320,
     leashRange: 620,
-    xp: 210,
+    xp: 330,
     drops: [
       { itemId: 'ammo_9mm_ap', chance: 0.18, qtyMin: 20, qtyMax: 40 },
       { itemId: 'ammo_556_normal', chance: 0.15, qtyMin: 20, qtyMax: 40 },
@@ -369,7 +369,7 @@ export const MONSTERS: MonsterDef[] = [
     attack: { dmg: 44, reach: 34, windupMs: 500, cooldownMs: 1500 },
     aggroRange: 300,
     leashRange: 600,
-    xp: 280,
+    xp: 440,
     drops: [
       { itemId: 'ammo_762_normal', chance: 0.15, qtyMin: 20, qtyMax: 40 },
       { itemId: 'ammo_12ga_slug', chance: 0.12, qtyMin: 6, qtyMax: 12 },
@@ -398,7 +398,7 @@ export const MONSTERS: MonsterDef[] = [
     aggroRange: 460,
     leashRange: 800,
     fleeBelowHp: 0.2,
-    xp: 240,
+    xp: 380,
     drops: [
       { itemId: 'ammo_556_ap', chance: 0.2, qtyMin: 20, qtyMax: 40 },
       { itemId: 'ammo_grenade', chance: 0.08, qtyMin: 3, qtyMax: 6 },
@@ -423,7 +423,7 @@ export const MONSTERS: MonsterDef[] = [
     ranged: { dmg: 22, range: 420, burst: 6, burstIntervalMs: 90, cooldownMs: 1800, accuracy: 0.7, preferredRange: 300 },
     aggroRange: 460,
     leashRange: 2000,
-    xp: 520,
+    xp: 700,
     drops: [
       { itemId: 'ammo_50_ap', chance: 0.3, qtyMin: 10, qtyMax: 20 },
       { itemId: 'ammo_762_ap', chance: 0.4, qtyMin: 20, qtyMax: 40 },
@@ -477,7 +477,7 @@ export const MONSTERS: MonsterDef[] = [
     attack: { dmg: 52, reach: 32, windupMs: 400, cooldownMs: 1200 },
     aggroRange: 340,
     leashRange: 640,
-    xp: 420,
+    xp: 650,
     drops: [
       { itemId: 'ammo_556_ap', chance: 0.2, qtyMin: 20, qtyMax: 40 },
       { itemId: 'ammo_762_ap', chance: 0.15, qtyMin: 20, qtyMax: 40 },
@@ -525,7 +525,7 @@ export const MONSTERS: MonsterDef[] = [
     ranged: { dmg: 26, range: 360, burst: 5, burstIntervalMs: 100, cooldownMs: 1500, accuracy: 0.7, preferredRange: 210 },
     aggroRange: 500,
     leashRange: 900,
-    xp: 480,
+    xp: 720,
     drops: [
       { itemId: 'ammo_556_ap', chance: 0.3, qtyMin: 30, qtyMax: 50 },
       { itemId: 'ammo_50_ap', chance: 0.12, qtyMin: 10, qtyMax: 20 },
@@ -583,7 +583,7 @@ export const MONSTERS: MonsterDef[] = [
     jump: { minRange: 120, maxRange: 380, airMs: 220, aoeRadius: 40, dmgMult: 1.3, cooldownMs: 3500 },
     aggroRange: 460,
     leashRange: 900,
-    xp: 620,
+    xp: 950,
     drops: [
       { itemId: 'ammo_556_ap', chance: 0.2, qtyMin: 20, qtyMax: 40 },
       { itemId: 'painkiller', chance: 0.15, qtyMin: 1, qtyMax: 2 },
@@ -608,7 +608,7 @@ export const MONSTERS: MonsterDef[] = [
     ranged: { dmg: 34, range: 380, burst: 2, burstIntervalMs: 220, cooldownMs: 1400, accuracy: 0.74, preferredRange: 240 },
     aggroRange: 520,
     leashRange: 1000,
-    xp: 900,
+    xp: 1_300,
     drops: [
       { itemId: 'ammo_50_ap', chance: 0.25, qtyMin: 10, qtyMax: 20 },
       { itemId: 'ammo_rocket', chance: 0.1, qtyMin: 2, qtyMax: 4 },
@@ -688,7 +688,7 @@ export const MONSTERS: MonsterDef[] = [
     attack: { dmg: 62, reach: 30, windupMs: 380, cooldownMs: 1000 },
     aggroRange: 380,
     leashRange: 900,
-    xp: 1_300,
+    xp: 1_900,
     drops: [
       { itemId: 'ammo_556_ap', chance: 0.3, qtyMin: 20, qtyMax: 40 },
       { itemId: 'ammo_762_ap', chance: 0.2, qtyMin: 20, qtyMax: 30 },
@@ -714,7 +714,7 @@ export const MONSTERS: MonsterDef[] = [
     ranged: { dmg: 30, range: 420, burst: 6, burstIntervalMs: 110, cooldownMs: 2200, accuracy: 0.66, preferredRange: 300 },
     aggroRange: 560,
     leashRange: 1100,
-    xp: 1_900,
+    xp: 2_500,
     drops: [
       { itemId: 'ammo_762_ap', chance: 0.5, qtyMin: 30, qtyMax: 60 },
       { itemId: 'ammo_50_ap', chance: 0.2, qtyMin: 10, qtyMax: 20 },
@@ -741,7 +741,7 @@ export const MONSTERS: MonsterDef[] = [
     jump: { minRange: 140, maxRange: 420, airMs: 200, aoeRadius: 48, dmgMult: 1.4, cooldownMs: 3000 },
     aggroRange: 520,
     leashRange: 1000,
-    xp: 1_700,
+    xp: 2_200,
     drops: [
       { itemId: 'ammo_50_ap', chance: 0.25, qtyMin: 10, qtyMax: 20 },
       { itemId: 'hp_pack', chance: 0.15, qtyMin: 1, qtyMax: 1 },
@@ -792,7 +792,7 @@ export const MONSTERS: MonsterDef[] = [
     attack: { dmg: 88, reach: 34, windupMs: 420, cooldownMs: 1100 },
     aggroRange: 380,
     leashRange: 900,
-    xp: 2_600,
+    xp: 3_400,
     drops: [
       { itemId: 'ammo_762_ap', chance: 0.35, qtyMin: 30, qtyMax: 50 },
       { itemId: 'ammo_12ga_slug', chance: 0.25, qtyMin: 12, qtyMax: 24 },
@@ -819,7 +819,7 @@ export const MONSTERS: MonsterDef[] = [
     aggroRange: 640,
     leashRange: 1200,
     fleeBelowHp: 0.25,
-    xp: 2_800,
+    xp: 3_600,
     drops: [
       { itemId: 'ammo_50_ap', chance: 0.4, qtyMin: 15, qtyMax: 30 },
       { itemId: 'ammo_rocket', chance: 0.12, qtyMin: 2, qtyMax: 4 },
@@ -844,7 +844,7 @@ export const MONSTERS: MonsterDef[] = [
     attack: { dmg: 76, reach: 28, windupMs: 220, cooldownMs: 800 },
     aggroRange: 460,
     leashRange: 900,
-    xp: 1_500,
+    xp: 2_200,
     drops: [
       { itemId: 'bandage', chance: 0.4, qtyMin: 1, qtyMax: 3 },
       { itemId: 'hp_pack', chance: 0.1, qtyMin: 1, qtyMax: 1 },
@@ -967,7 +967,7 @@ export const MONSTERS: MonsterDef[] = [
     faction: 'boss',
     skin: '중장갑',
     level: 100,
-    hp: 400_000,
+    hp: 300_000,
     defense: 160,
     moveSpeed: 52,
     ai: 'burrower',

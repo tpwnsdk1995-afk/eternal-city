@@ -53,7 +53,7 @@ test.describe('2006 · 2008 · 2017', () => {
     expect(uid).not.toBeNull();
     await page.waitForFunction((u) => window.__ec!.enemies().some((e) => e.uid === u), uid, { timeout: 5000 });
     const boss = await page.evaluate((u) => window.__ec!.enemies().find((e) => e.uid === u)!, uid);
-    expect(boss.hp).toBe(400_000);
+    expect(boss.hp).toBe(300_000);
     await page.waitForTimeout(500);
     await page.screenshot({ path: 'e2e/out/namsan-wise-one.png' });
 
