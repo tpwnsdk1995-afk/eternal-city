@@ -15,7 +15,7 @@ import type { ActionResult } from './actions';
  */
 export const progressService = {
   ctx(): ProgressCtx {
-    return { stats: gameState.stats, level: gameState.character.level, flags: gameState.flags };
+    return { stats: gameState.stats, level: gameState.character.level, flags: gameState.flags, rebirth: gameState.character.rebirth };
   },
 
   campaignCtx(): CampaignCtx {

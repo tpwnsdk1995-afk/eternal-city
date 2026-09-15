@@ -13,7 +13,8 @@ export type AchievementCond =
   | { kind: 'enhance'; level: number }
   | { kind: 'wonEarned'; amount: number }
   | { kind: 'deaths'; count: number }
-  | { kind: 'flag'; flag: string };
+  | { kind: 'flag'; flag: string }
+  | { kind: 'rebirth'; count: number };
 
 export interface AchievementDef {
   id: string;

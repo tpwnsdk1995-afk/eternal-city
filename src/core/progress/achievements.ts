@@ -13,6 +13,7 @@ export interface ProgressCtx {
   stats: PlayerStats;
   level: number;
   flags: Record<string, boolean | number>;
+  rebirth?: number;
 }
 
 /** Current value vs target for a condition (target 1 for flags). */
@@ -41,6 +42,8 @@ export function condProgress(c: AchievementCond, ctx: ProgressCtx): { cur: numbe
       return { cur: s.deaths, target: c.count };
     case 'flag':
       return { cur: ctx.flags[c.flag] ? 1 : 0, target: 1 };
+    case 'rebirth':
+      return { cur: ctx.rebirth ?? 0, target: c.count };
   }
 }
 

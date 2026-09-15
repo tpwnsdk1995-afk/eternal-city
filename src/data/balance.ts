@@ -10,6 +10,9 @@ export const balance = {
     maxRebirth: 10,
     absoluteCap: 600,
     startingLevelForCapUnlock: 100,
+    /** 환생 gate and the extra starting points each rebirth grants */
+    rebirthLevel: 50,
+    rebirthBonusPoints: 10,
   },
   derived: {
     hpBase: 100,

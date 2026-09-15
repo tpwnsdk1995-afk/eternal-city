@@ -24,5 +24,6 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'ach_enhance_9', name: '장인의 총', desc: '무기를 +9까지 강화한다.', cond: { kind: 'enhance', level: 9 }, reward: { won: 50_000, xp: 3_000, title: '장인' } },
   { id: 'ach_won_1m', name: '백만장자', desc: '누적 ₩1,000,000을 벌어들인다.', cond: { kind: 'wonEarned', amount: 1_000_000 }, reward: { won: 10_000, xp: 500, title: '백만장자' } },
   { id: 'ach_deaths_10', name: '질긴 목숨', desc: '10번 사망하고도 살아 있다.', cond: { kind: 'deaths', count: 10 }, reward: { won: 1_000, xp: 100, title: '질긴 목숨' }, hidden: true },
+  { id: 'ach_rebirth_1', name: '다시 태어난 자', desc: '처음으로 환생한다.', cond: { kind: 'rebirth', count: 1 }, reward: { won: 50_000, xp: 0, title: '환생자' } },
   { id: 'ach_campaign_2002', name: '2002년의 봄', desc: '2002 캠페인을 완주한다.', cond: { kind: 'flag', flag: 'campaign:2002:complete' }, reward: { won: 30_000, xp: 3_000, title: '중곡동의 영웅' } },
 ];

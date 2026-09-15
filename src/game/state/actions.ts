@@ -17,6 +17,8 @@ import { gameState } from './GameState';
 import { questService } from './questService';
 import { progressService } from './progressService';
 import { canTravel, yearDef } from '@core/world/parallel';
+import { canRebirth, rebirth } from '@core/stats/rebirth';
+import { balance } from '@data/balance';
 import { applyBuff, formatRemaining } from '@core/combat/buffs';
 
 export interface ActionResult {
@@ -254,6 +256,20 @@ export const actions = {
   /** 캠페인 챕터 보상 수령 */
   claimCampaign(campaignId: string, chapterId: string): ActionResult {
     return progressService.claimCampaign(campaignId, chapterId);
+  },
+
+  /** 환생: level 1 again with a higher stat cap and bonus points; gear, skills and ₩ stay. */
+  rebirth(): ActionResult {
+    const c = gameState.character;
+    const r = canRebirth(c);
+    if (!r.ok) return fail(r.reason === 'max' ? `환생은 최대 ${balance.stats.maxRebirth}회까지입니다.` : `환생은 레벨 ${balance.stats.rebirthLevel} 이상에서 할 수 있습니다.`);
+    const next = rebirth(c);
+    gameState.setCharacter(next);
+    const d = gameState.derived();
+    gameState.setVitals({ hp: d.maxHp, stamina: d.maxStamina, ap: d.maxAp });
+    gameState.message(`환생 ${next.rebirth}회차 — 레벨 1로 돌아왔습니다. 스탯 상한 ${statCap(next.rebirth)}, 배분 가능 ${next.unspentPoints}pt.`, 'good');
+    progressService.check();
+    return { ok: true };
   },
 
   /** 패러렐 시스템: jump to another year's safe-zone hub. */

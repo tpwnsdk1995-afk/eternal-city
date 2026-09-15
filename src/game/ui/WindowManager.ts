@@ -2,6 +2,9 @@ import type Phaser from 'phaser';
 import { registry } from '@data/registry';
 import type { NpcDef } from '@data/schema/npc';
 import { gameState, type AssaultResult } from '../state/GameState';
+import { balance } from '@data/balance';
+import { canRebirth } from '@core/stats/rebirth';
+import { statCap } from '@core/stats/levelCurve';
 import { actions } from '../state/actions';
 import { ResultWindow } from './ResultWindow';
 import { MenuWindow } from './MenuWindow';
@@ -94,6 +97,35 @@ export class WindowManager {
 
   closeAll(except: WindowKey[] = []): void {
     for (const k of [...this.order]) if (!except.includes(k)) this.close(k);
+  }
+
+  /** 환생 confirmation: the price is the level, the prize is the cap. */
+  private confirmRebirth(npc: NpcDef): void {
+    const c = gameState.character;
+    const rb = canRebirth(c);
+    const dialog = this.windows.get('dialog') as DialogBox;
+    const closeOpt = { label: '취소', onPick: () => this.close('dialog'), color: '#9aa0a6' };
+    if (!rb.ok) {
+      dialog.show(npc, rb.reason === 'max' ? '이미 환생을 최대 횟수까지 마쳤습니다.' : `환생은 레벨 ${balance.stats.rebirthLevel}에 도달한 헌터만 받을 수 있습니다. 지금은 Lv.${c.level}이군요.`, [closeOpt]);
+      this.open('dialog');
+      return;
+    }
+    dialog.show(
+      npc,
+      `환생하면 레벨 1로 돌아가고 스탯이 초기화됩니다. 대신 스탯 상한이 ${statCap(c.rebirth)} → ${statCap(c.rebirth + 1)}으로 오르고, 시작 포인트를 ${balance.stats.creationPoints + (c.rebirth + 1) * balance.stats.rebirthBonusPoints}pt 받습니다. 장비·스킬·₩은 그대로입니다. 진행할까요?`,
+      [
+        {
+          label: '환생한다',
+          color: '#ff6b6b',
+          onPick: () => {
+            actions.rebirth();
+            this.close('dialog');
+          },
+        },
+        closeOpt,
+      ],
+    );
+    this.open('dialog');
   }
 
   /** Switch the quest window to a tab and open it. */
@@ -213,7 +245,8 @@ export class WindowManager {
             },
             closeOpt,
           ];
-        case 'skills':
+        case 'skills': {
+          const rb = canRebirth(gameState.character);
           return [
             {
               label: '스킬 습득 / 활성화',
@@ -223,8 +256,14 @@ export class WindowManager {
                 (this.windows.get('skills') as SkillWindow).setElia(true);
               },
             },
+            {
+              label: `환생 상담 (Lv.${balance.stats.rebirthLevel}+ · ${gameState.character.rebirth}/${balance.stats.maxRebirth}회)`,
+              color: rb.ok ? '#e0a0ff' : '#6b7280',
+              onPick: () => this.confirmRebirth(npc),
+            },
             closeOpt,
           ];
+        }
         case 'assault':
           return [
             {
