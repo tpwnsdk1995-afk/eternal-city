@@ -19,6 +19,25 @@ export interface Settings {
   showFps: boolean;
 }
 
+export interface AssaultHud {
+  name: string;
+  phaseLabel: string;
+  progress: string;
+  elapsedSec: number;
+  boss: { name: string; hp: number; max: number } | null;
+}
+
+export interface AssaultResult {
+  name: string;
+  success: boolean;
+  reason?: 'death' | 'timeout';
+  won: number; // negative on failure penalty
+  xp: number;
+  items: { name: string; qty: number }[];
+  kills: number;
+  timeSec: number;
+}
+
 export interface GameEvents extends Record<string, unknown> {
   vitals: Vitals;
   character: CharacterCore;
@@ -32,6 +51,8 @@ export interface GameEvents extends Record<string, unknown> {
   hotkey: string;
   npcInteract: { npcId: string };
   startAssault: { assaultId: string };
+  assault: AssaultHud | null;
+  assaultResult: AssaultResult;
   menu: undefined;
 }
 

@@ -2,7 +2,8 @@ import type Phaser from 'phaser';
 import { registry } from '@data/registry';
 import type { NpcDef } from '@data/schema/npc';
 import { balance } from '@data/balance';
-import { gameState } from '../state/GameState';
+import { gameState, type AssaultResult } from '../state/GameState';
+import { ResultWindow } from './ResultWindow';
 import type { Window } from './Window';
 import { InventoryWindow } from './InventoryWindow';
 import { StatusWindow } from './StatusWindow';
@@ -11,7 +12,7 @@ import { ShopWindow } from './ShopWindow';
 import { DialogBox } from './DialogBox';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 
-export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog';
+export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result';
 
 const HUD_H = 92;
 
@@ -26,7 +27,8 @@ export class WindowManager {
     const skills = new SkillWindow(scene, (GAME_WIDTH - 560) / 2, 80);
     const shop = new ShopWindow(scene, (GAME_WIDTH - 800) / 2, 50);
     const dialog = new DialogBox(scene, (GAME_WIDTH - 760) / 2, GAME_HEIGHT - HUD_H - 160, 760);
-    for (const w of [inv, status, skills, shop, dialog]) {
+    const result = new ResultWindow(scene, (GAME_WIDTH - 460) / 2, 140);
+    for (const w of [inv, status, skills, shop, dialog, result]) {
       this.windows.set(w.key as WindowKey, w);
       w.setVisible(false);
       w.on('close', () => this.close(w.key as WindowKey));
@@ -77,8 +79,13 @@ export class WindowManager {
     return true;
   }
 
-  closeAll(): void {
-    for (const k of [...this.order]) this.close(k);
+  closeAll(except: WindowKey[] = []): void {
+    for (const k of [...this.order]) if (!except.includes(k)) this.close(k);
+  }
+
+  showResult(r: AssaultResult): void {
+    (this.windows.get('result') as ResultWindow).show(r);
+    this.open('result');
   }
 
   refreshOpen(): void {

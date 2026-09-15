@@ -33,6 +33,6 @@ export class Gauge extends Phaser.GameObjects.Container {
     this.max = max;
     const ratio = max > 0 ? Phaser.Math.Clamp(value / max, 0, 1) : 0;
     this.fill.width = Math.max(0, (this.barW - 2) * ratio);
-    this.label.setText(`${this.caption} ${Math.round(value)} / ${Math.round(max)}`);
+    this.label.setText(`${this.caption ? `${this.caption} ` : ''}${Math.round(value)} / ${Math.round(max)}`);
   }
 }

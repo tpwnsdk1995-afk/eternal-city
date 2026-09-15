@@ -4,7 +4,7 @@ import { TEX } from '@data/textureKeys';
 import { registry } from '@data/registry';
 import { totalRounds } from '@core/inventory/inventory';
 import { xpToNext } from '@core/stats/levelCurve';
-import { gameState, type GameEvents } from '../state/GameState';
+import { gameState, type AssaultHud, type GameEvents } from '../state/GameState';
 import { Gauge } from '../ui/Gauge';
 import { theme } from '../ui/theme';
 import { WindowManager } from '../ui/WindowManager';
@@ -27,6 +27,12 @@ export class UIScene extends Phaser.Scene {
   private logLines: Phaser.GameObjects.Text[] = [];
   private unsubs: (() => void)[] = [];
   windows!: WindowManager;
+  private banner!: Phaser.GameObjects.Container;
+  private bannerName!: Phaser.GameObjects.Text;
+  private bannerPhase!: Phaser.GameObjects.Text;
+  private bannerProgress!: Phaser.GameObjects.Text;
+  private bannerTime!: Phaser.GameObjects.Text;
+  private bossBar!: Gauge;
 
   constructor() {
     super('UI');
@@ -52,6 +58,17 @@ export class UIScene extends Phaser.Scene {
     for (let i = 0; i < LOG_MAX; i++) {
       this.logLines.push(this.add.text(16, 12 + i * 20, '', theme.textStyle(13, theme.colors.text, { stroke: '#000', strokeThickness: 3 })));
     }
+
+    // assault banner (top centre)
+    this.banner = this.add.container(GAME_WIDTH / 2, 8).setDepth(50).setVisible(false);
+    const bannerBg = this.add.nineslice(0, 0, TEX.ui_panel, 0, 520, 78, 6, 6, 6, 6).setOrigin(0.5, 0);
+    this.bannerName = this.add.text(0, 8, '', theme.textStyle(12, theme.colors.muted)).setOrigin(0.5, 0);
+    this.bannerPhase = this.add.text(0, 26, '', theme.textStyle(17, '#ffd166', { fontStyle: 'bold' })).setOrigin(0.5, 0);
+    this.bannerProgress = this.add.text(0, 52, '', theme.textStyle(12, theme.colors.text)).setOrigin(0.5, 0);
+    this.bannerTime = this.add.text(248, 8, '', theme.textStyle(12, theme.colors.muted)).setOrigin(1, 0);
+    this.bossBar = new Gauge(this, -200, 82, 400, 14, 0xa32626, '');
+    this.bossBar.setVisible(false);
+    this.banner.add([bannerBg, this.bannerName, this.bannerPhase, this.bannerProgress, this.bannerTime, this.bossBar]);
 
     this.windows = new WindowManager(this);
 
@@ -81,8 +98,11 @@ export class UIScene extends Phaser.Scene {
     });
     on('mapChanged', (m) => {
       this.mapText.setText(`2002 · ${m.name}`);
-      this.windows.closeAll();
+      this.windows.closeAll(['result']);
+      this.setBanner(null);
     });
+    on('assault', (hud) => this.setBanner(hud));
+    on('assaultResult', (r) => this.windows.showResult(r));
     on('message', (m) => this.pushLog(m.text, m.tone));
     on('settings', (s) => this.fpsText.setVisible(s.showFps));
     on('hotkey', (k) => this.windows.handleHotkey(k));
@@ -101,6 +121,19 @@ export class UIScene extends Phaser.Scene {
 
   update(): void {
     if (this.fpsText.visible) this.fpsText.setText(`${Math.round(this.game.loop.actualFps)} fps`);
+  }
+
+  private setBanner(hud: AssaultHud | null): void {
+    this.banner.setVisible(!!hud);
+    if (!hud) return;
+    this.bannerName.setText(`어설트 · ${hud.name}`);
+    this.bannerPhase.setText(hud.phaseLabel);
+    this.bannerProgress.setText(hud.progress);
+    const m = Math.floor(hud.elapsedSec / 60);
+    const s = hud.elapsedSec % 60;
+    this.bannerTime.setText(`${m}:${s.toString().padStart(2, '0')}`);
+    this.bossBar.setVisible(!!hud.boss);
+    if (hud.boss) this.bossBar.set(hud.boss.hp, hud.boss.max);
   }
 
   private refreshVitals(): void {

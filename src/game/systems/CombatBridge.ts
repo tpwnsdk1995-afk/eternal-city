@@ -23,6 +23,7 @@ import { rollLoot } from '@core/world/loot';
 import { gameState } from '../state/GameState';
 import { Enemy } from '../entities/Enemy';
 import { Pickup } from '../entities/Pickup';
+import type { Objective } from '../entities/Objective';
 import type { Player } from '../entities/Player';
 import type { InputIntent } from './input/InputMapper';
 import { CombatFx } from './CombatFx';
@@ -36,7 +37,12 @@ export interface CombatHost {
   built: BuiltMap;
   onPlayerDeath(): void;
   onEnemyKilled(e: Enemy): void;
+  /** Destructible structures that also stop bullets (assault maps). */
+  objectives?(): Objective[];
+  onObjectiveDestroyed?(id: string): void;
 }
+
+const OBJ_PREFIX = 'obj:';
 
 const PLAYER_RADIUS = 10;
 const MUZZLE_OFFSET = 16;
@@ -135,8 +141,13 @@ export class CombatBridge {
     this.fx.muzzle(muzzle, baseAngle);
 
     const enemies = this.aliveEnemies();
-    const targets: RayTarget[] = enemies.map((e) => ({ id: e.uid, x: e.x, y: e.y, r: e.radius }));
+    const objectives = this.host.objectives?.() ?? [];
+    const targets: RayTarget[] = [
+      ...enemies.map((e) => ({ id: e.uid, x: e.x, y: e.y, r: e.radius })),
+      ...objectives.map((o) => ({ id: OBJ_PREFIX + o.def.id, x: o.x, y: o.y, r: o.radius })),
+    ];
     const byUid = new Map(enemies.map((e) => [e.uid, e]));
+    const objById = new Map(objectives.map((o) => [OBJ_PREFIX + o.def.id, o]));
     const melee = isMeleeClass(w.def.class);
     const ctx: AttackerCtx = {
       baseDamage: w.def.baseDamage,
@@ -163,6 +174,15 @@ export class CombatBridge {
       this.fx.tracer(muzzle, hit.point);
       if (hit.kind === 'wall') this.fx.spark(hit.point);
       if (hit.kind !== 'target') continue;
+      const obj = objById.get(hit.id);
+      if (obj) {
+        const res = computeHit(ctx, { skin: '강성', defense: 0, maxHp: obj.maxHp, burning: false }, hit.dist, gameRng);
+        if (!res.hit) continue;
+        this.fx.spark(hit.point);
+        this.floating.spawn(obj.x, obj.y - 20, `${res.damage}`, '#ffd166', 12);
+        if (obj.damage(res.damage)) this.host.onObjectiveDestroyed?.(obj.def.id);
+        continue;
+      }
       const e = byUid.get(hit.id);
       if (!e || !e.alive) continue;
       const res = computeHit(ctx, { skin: e.def.skin, defense: e.def.defense, maxHp: e.maxHp, burning: isBurning(e.status, now) }, hit.dist, gameRng);

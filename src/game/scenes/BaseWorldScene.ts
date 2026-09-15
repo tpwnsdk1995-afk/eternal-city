@@ -20,6 +20,8 @@ export const WORLD_ZOOM = 1.5;
 export interface WorldSceneData {
   mapId?: string;
   spawn?: string;
+  /** Assault scene only */
+  assaultId?: string;
 }
 
 export function sceneKeyForMap(def: MapDef): string {
@@ -183,14 +185,34 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   }
 
   goToMap(mapId: string, spawn: string): void {
+    const target = registry.map(mapId);
+    this.transitionTo(sceneKeyForMap(target), { mapId, spawn });
+  }
+
+  /** Enter an assault instance on its dedicated map. */
+  startAssault(assaultId: string): void {
+    const a = registry.assault(assaultId);
+    this.transitionTo('Assault', { mapId: a.mapId, spawn: a.entrySpawn, assaultId });
+  }
+
+  /** Debug: move the player instantly. */
+  teleport(x: number, y: number): void {
+    this.player.stopMoving();
+    this.player.setPosition(x, y);
+  }
+
+  /** Debug: kill every living enemy (with normal kill credit). */
+  killAllEnemies(): void {
+    if (!this.combat) return;
+    for (const e of this.combat.aliveEnemies()) this.combat.killEnemy(e, this.time.now);
+  }
+
+  private transitionTo(sceneKey: string, data: WorldSceneData): void {
     if (this.transitioning) return;
     this.transitioning = true;
     this.player.stopMoving();
-    const target = registry.map(mapId);
     this.cameras.main.fadeOut(180, 0, 0, 0);
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start(sceneKeyForMap(target), { mapId, spawn } satisfies WorldSceneData);
-    });
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => this.scene.start(sceneKey, data));
   }
 
   protected abstract onCreateWorld(): void;

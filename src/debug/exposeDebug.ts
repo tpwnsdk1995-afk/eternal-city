@@ -4,6 +4,7 @@ import { totalRounds } from '@core/inventory/inventory';
 import { gameState } from '../game/state/GameState';
 import { BaseWorldScene } from '../game/scenes/BaseWorldScene';
 import type { UIScene } from '../game/scenes/UIScene';
+import { AssaultScene } from '../game/scenes/AssaultScene';
 import type { WindowKey } from '../game/ui/WindowManager';
 import { actions, type Actions } from '../game/state/actions';
 
@@ -42,6 +43,12 @@ export interface EcDebug {
   spawn(monsterId: string, dx?: number, dy?: number): string | null;
   enemies(): { uid: string; id: string; hp: number; x: number; y: number; mode: string }[];
   god(on: boolean): void;
+  teleport(x: number, y: number): void;
+  killAll(): void;
+  startAssault(assaultId: string): void;
+  /** Assault runtime snapshot, or null outside an assault. */
+  assault(): ReturnType<AssaultScene['assaultSnapshot']> | null;
+  destroyObjectives(): void;
   /** Open window keys (top last). */
   windows(): string[];
   openWindow(key: WindowKey): void;
@@ -80,6 +87,17 @@ export function exposeDebug(game: Phaser.Game): void {
     enemies: () => worldScene()?.enemiesSnapshot() ?? [],
     god: (on) => {
       gameState.flags.god = on;
+    },
+    teleport: (x, y) => worldScene()?.teleport(x, y),
+    killAll: () => worldScene()?.killAllEnemies(),
+    startAssault: (id) => worldScene()?.startAssault(id),
+    assault: () => {
+      const s = worldScene();
+      return s instanceof AssaultScene ? s.assaultSnapshot() : null;
+    },
+    destroyObjectives: () => {
+      const s = worldScene();
+      if (s instanceof AssaultScene) s.destroyAllObjectives();
     },
     windows: () => uiScene()?.windows.openKeys() ?? [],
     openWindow: (key) => uiScene()?.windows.open(key),
