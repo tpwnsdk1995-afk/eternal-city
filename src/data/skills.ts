@@ -10,6 +10,7 @@ const mastery = (id: string, name: string, weaponClass: WeaponClass, reqTechGrad
   price,
   maxRank: 5,
   weaponClass,
+  race: weaponClass === '변이무기' ? 'infected' : 'human',
   modsPerRank: { dmgPct: dmg, ...extra },
   desc: `${weaponClass} 장착 시 공격력 ${Math.round(dmg * 100)}%${extraDesc}가 랭크당 증가한다.`,
   iconTex: TEX.icon_skill_mastery,
@@ -72,4 +73,18 @@ export const SKILLS: SkillDef[] = [
   mastery('skill_sniper_mastery', '저격소총 마스터리', '저격소총', 3, 24_000, 0.05, { critPct: 0.02 }, ', 치명타 2%'),
   mastery('skill_mg_mastery', '기관총 마스터리', '기관총', 3, 24_000, 0.05, { accPct: 0.02 }, ', 명중률 2%'),
   mastery('skill_melee_mastery', '근접무기 마스터리', '근접무기', 1, 8_000, 0.07, { attackSpeedPct: 0.03 }, ', 공격속도 3%'),
+  mastery('skill_mutation_mastery', '변이 마스터리', '변이무기', 1, 8_000, 0.06, { attackSpeedPct: 0.03 }, ', 공격속도 3%'),
+  // ---------------------------------------------------------------- 감염체 전용 패시브
+  {
+    id: 'skill_infected_regen',
+    name: '감염 재생',
+    category: '퍼스널패시브',
+    reqTechGrade: 1,
+    price: 6_000,
+    maxRank: 5,
+    race: 'infected',
+    modsPerRank: { maxHpPct: 0.03, defensePct: 0.02 },
+    desc: '감염체 전용. 최대 생명력 3%, 방어력 2%가 랭크당 증가한다.',
+    iconTex: TEX.icon_skill_passive,
+  },
 ];

@@ -43,13 +43,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.stuck = newStuckTracker({ x, y });
     this.refreshWeaponLook();
     const off = gameState.events.on('equipment', () => this.refreshWeaponLook());
-    this.once(Phaser.GameObjects.Events.DESTROY, off);
+    const off2 = gameState.events.on('character', () => this.refreshWeaponLook());
+    this.once(Phaser.GameObjects.Events.DESTROY, () => {
+      off();
+      off2();
+    });
   }
 
   /** Swap the figure sheet so the held weapon matches the equipped class. */
   refreshWeaponLook(): void {
     const cls = gameState.weapon()?.def.class;
-    const tex =
+    const tex = gameState.character.race === 'infected' ? TEX.player_infected :
       cls === '근접무기' ? TEX.player_melee
       : cls === '기관단총' ? TEX.player_smg
       : cls === '돌격소총' || cls === '저격소총' || cls === '기관총' || cls === '산탄총' || cls === '투척중화기' ? TEX.player_rifle
@@ -123,6 +127,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       if (this.idleSince >= balance.stamina.regenDelayMs && vit.stamina < derived.maxStamina) {
         gameState.setVitals({ stamina: vit.stamina + balance.stamina.regenPerSec * (dtMs / 1000) });
       }
+    }
+    // 감염체 natural regeneration (pauses after being hit — CombatBridge stamps lastHurtAt)
+    if (gameState.character.race === 'infected' && vit.hp < derived.maxHp && Date.now() - gameState.lastHurtAt > balance.infected.regenDelayMs) {
+      gameState.setVitals({ hp: gameState.vitals.hp + derived.maxHp * balance.infected.regenPctPerSec * (dtMs / 1000) });
     }
     // AP regen
     if (vit.ap < derived.maxAp) gameState.setVitals({ ap: gameState.vitals.ap + balance.ap.regenPerSec * (dtMs / 1000) });

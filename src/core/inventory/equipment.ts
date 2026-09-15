@@ -1,4 +1,4 @@
-import type { ArmorSlot } from '@data/schema/enums';
+import type { ArmorSlot, Race } from '@data/schema/enums';
 import type { ItemStack, WeaponDef } from '@data/schema/item';
 import { armorDefense, effectiveWeapon, type EffectiveWeapon } from '../tuning/tuning';
 import { getStack, type Inventory, type ItemLookup } from './inventory';
@@ -10,14 +10,18 @@ export interface Equipment {
 
 export const emptyEquipment = (): Equipment => ({ weaponUid: null, armor: {} });
 
-export type EquipResult = { ok: true; equipment: Equipment } | { ok: false; reason: 'notFound' | 'notEquippable' | 'levelTooLow' | 'techGradeTooLow' };
+export type EquipResult = { ok: true; equipment: Equipment } | { ok: false; reason: 'notFound' | 'notEquippable' | 'levelTooLow' | 'techGradeTooLow' | 'race' };
 
-export function equipStack(eq: Equipment, inv: Inventory, lookup: ItemLookup, uid: string, char: { level: number; techGrade: number }): EquipResult {
+/** guns are human-only, 변이무기 infected-only */
+export const weaponUsableBy = (def: WeaponDef, race: Race): boolean => (def.race ?? 'human') === race;
+
+export function equipStack(eq: Equipment, inv: Inventory, lookup: ItemLookup, uid: string, char: { level: number; techGrade: number; race?: Race }): EquipResult {
   const stack = getStack(inv, uid);
   if (!stack) return { ok: false, reason: 'notFound' };
   const def = lookup(stack.itemId);
 
   if (def.kind === 'weapon') {
+    if (!weaponUsableBy(def, char.race ?? 'human')) return { ok: false, reason: 'race' };
     if (char.level < def.reqLevel) return { ok: false, reason: 'levelTooLow' };
     if (def.reqTechGrade && char.techGrade < def.reqTechGrade) return { ok: false, reason: 'techGradeTooLow' };
     return { ok: true, equipment: { ...eq, weaponUid: uid } };

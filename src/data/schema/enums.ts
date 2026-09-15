@@ -5,7 +5,7 @@ export type Stats = Record<StatKey, number>;
 export const SKINS = ['일반', '연성', '변이', '강성', '장갑', '중장갑'] as const;
 export type Skin = (typeof SKINS)[number];
 
-export const WEAPON_CLASSES = ['권총', '기관단총', '돌격소총', '산탄총', '저격소총', '기관총', '근접무기', '투척중화기'] as const;
+export const WEAPON_CLASSES = ['권총', '기관단총', '돌격소총', '산탄총', '저격소총', '기관총', '근접무기', '투척중화기', '변이무기'] as const;
 export type WeaponClass = (typeof WEAPON_CLASSES)[number];
 
 export const AMMO_KINDS = ['일반탄', '소이탄', '철갑탄', 'Slug', '대전차탄'] as const;
@@ -24,5 +24,11 @@ export type Faction = 'zombie' | 'WITO' | 'GUEST' | 'boss';
 
 export type ControlScheme = 'classic' | 'modern';
 
-export const MELEE_CLASSES: readonly WeaponClass[] = ['근접무기'];
+/** 인간 / 감염체 — the two playable races of the original */
+export const RACES = ['human', 'infected'] as const;
+export type Race = (typeof RACES)[number];
+export const RACE_NAME: Record<Race, string> = { human: '인간', infected: '감염체' };
+
+/** classes that swing instead of shooting (no ammo): 근접무기 and the 감염체's 변이무기 */
+export const MELEE_CLASSES: readonly WeaponClass[] = ['근접무기', '변이무기'];
 export const isMeleeClass = (c: WeaponClass): boolean => MELEE_CLASSES.includes(c);

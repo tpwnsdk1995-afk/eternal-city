@@ -600,3 +600,68 @@ export function drawIconCoupon(ctx: Ctx, _f: number, w: number, h: number): void
   ctx.closePath();
   ctx.fill();
 }
+
+// ---------------------------------------------------------------- 변이무기 (감염체)
+
+export function drawIconClaws(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.fillStyle = '#a7b89a';
+  ctx.beginPath();
+  ctx.ellipse(16, 22, 8, 6, 0, 0, Math.PI * 2); // hand
+  ctx.fill();
+  ctx.strokeStyle = '#e8e2c8';
+  ctx.lineWidth = 2.2;
+  for (const [x0, x1] of [[10, 5], [14, 12], [18, 19], [22, 26]]) {
+    ctx.beginPath();
+    ctx.moveTo(x0, 19);
+    ctx.lineTo(x1, 5);
+    ctx.stroke();
+  }
+}
+
+export function drawIconTentacle(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.strokeStyle = '#7a5a8a';
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(6, 27);
+  ctx.bezierCurveTo(4, 14, 18, 20, 20, 12);
+  ctx.bezierCurveTo(22, 6, 27, 6, 27, 4);
+  ctx.stroke();
+  ctx.strokeStyle = '#b48ac0';
+  ctx.lineWidth = 1.5;
+  for (const [x, y] of [[8, 22], [12, 18], [18, 15], [22, 10]]) {
+    ctx.beginPath();
+    ctx.arc(x, y, 1.6, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+export function drawIconAcid(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.fillStyle = '#7bd83f';
+  ctx.beginPath();
+  ctx.moveTo(16, 4);
+  ctx.bezierCurveTo(6, 16, 8, 27, 16, 27);
+  ctx.bezierCurveTo(24, 27, 26, 16, 16, 4);
+  ctx.fill();
+  fill(ctx, 12, 12, 3, 8, 'rgba(255,255,255,0.35)');
+  for (const [x, y, r] of [[6, 9, 2], [26, 12, 1.5], [24, 24, 2]]) {
+    ctx.fillStyle = '#a8f060';
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+export function drawIconBone(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  ctx.save();
+  ctx.translate(16, 16);
+  ctx.rotate(-Math.PI / 4);
+  poly(ctx, [[-12, -2], [10, -3], [14, 0], [10, 3], [-12, 2]], '#e8e2c8'); // blade
+  fill(ctx, -12, -1, 22, 1, 'rgba(255,255,255,0.4)');
+  fill(ctx, -15, -3, 4, 6, '#7a6a5a'); // knuckle grip
+  ctx.restore();
+}

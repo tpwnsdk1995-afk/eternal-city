@@ -1,6 +1,6 @@
 import { MAPS, registry } from '@data/registry';
 import * as taxi from '@core/economy/taxi';
-import type { StatKey } from '@data/schema/enums';
+import { RACE_NAME, type StatKey } from '@data/schema/enums';
 import { allocateStat } from '@core/stats/allocation';
 import { statCap } from '@core/stats/levelCurve';
 import { getStack, removeQty, replaceStack, totalRounds } from '@core/inventory/inventory';
@@ -54,9 +54,9 @@ export const actions = {
       return done(`${def.name} 장착 해제`);
     }
     const d = gameState.derived();
-    const r = equipStack(gameState.equipment, gameState.inventory, registry.item, uid, { level: gameState.character.level, techGrade: d.techGrade });
+    const r = equipStack(gameState.equipment, gameState.inventory, registry.item, uid, { level: gameState.character.level, techGrade: d.techGrade, race: gameState.character.race });
     if (!r.ok) {
-      const why = { notFound: '아이템을 찾을 수 없습니다.', notEquippable: '장착할 수 없는 아이템입니다.', levelTooLow: '레벨이 부족합니다.', techGradeTooLow: '기술등급이 부족합니다.' }[r.reason];
+      const why = { notFound: '아이템을 찾을 수 없습니다.', notEquippable: '장착할 수 없는 아이템입니다.', levelTooLow: '레벨이 부족합니다.', techGradeTooLow: '기술등급이 부족합니다.', race: gameState.character.race === 'infected' ? '감염체는 총기를 다룰 수 없습니다. 변이무기만 장착할 수 있습니다.' : '인간은 변이무기를 쓸 수 없습니다.' }[r.reason];
       return fail(why);
     }
     gameState.setEquipment(r.equipment);
@@ -148,6 +148,7 @@ export const actions = {
 
   learnSkill(id: string): ActionResult {
     const def = registry.skill(id);
+    if (def.race && def.race !== gameState.character.race) return fail(`${RACE_NAME[def.race]} 전용 스킬입니다.`);
     const r = learnOrRankUp(gameState.skills, def, { techGrade: gameState.derived().techGrade, won: gameState.character.won });
     if (!r.ok) {
       const why = { techGradeTooLow: `기술등급 ${def.reqTechGrade} 이상이 필요합니다.`, maxRank: '이미 최대 랭크입니다.', noMoney: '₩이 부족합니다.' }[r.reason];

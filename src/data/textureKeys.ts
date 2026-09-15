@@ -7,7 +7,9 @@ export const TEX = {
   tiles: 'tiles',
   // player
   player: 'player',
+  player_infected: 'player_infected',
   portrait_player: 'portrait_player',
+  portrait_infected: 'portrait_infected',
   // zombies (2002 중곡동)
   zombie_casual_f: 'zombie_casual_f',
   zombie_suit_m: 'zombie_suit_m',
@@ -101,6 +103,10 @@ export const TEX = {
   icon_ammo_slug: 'icon_ammo_slug',
   icon_ammo_grenade: 'icon_ammo_grenade',
   icon_ammo_rocket: 'icon_ammo_rocket',
+  icon_claws: 'icon_claws',
+  icon_tentacle: 'icon_tentacle',
+  icon_acid: 'icon_acid',
+  icon_bone: 'icon_bone',
   player_smg: 'player_smg',
   player_rifle: 'player_rifle',
   player_melee: 'player_melee',

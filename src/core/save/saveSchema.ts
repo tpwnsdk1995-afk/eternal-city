@@ -9,7 +9,7 @@ import type { AchievementState } from '../progress/achievements';
 import type { BuffState } from '../combat/buffs';
 import type { ControlScheme } from '@data/schema/enums';
 
-export const CURRENT_SAVE_VERSION = 5 as const;
+export const CURRENT_SAVE_VERSION = 6 as const;
 
 export interface SaveSettings {
   controlScheme: ControlScheme;
@@ -65,7 +65,16 @@ export interface SaveGameV5 extends SaveCommon {
   buffs: BuffState;
 }
 
-export type SaveGame = SaveGameV5;
+/** M6: character.race (인간/감염체); older saves are human. */
+export interface SaveGameV6 extends SaveCommon {
+  version: 6;
+  quests: QuestState;
+  stats: PlayerStats;
+  achievements: AchievementState;
+  buffs: BuffState;
+}
+
+export type SaveGame = SaveGameV6;
 
 const EMPTY_STATS: PlayerStats = { kills: 0, bossKills: 0, killsByMonster: {}, killsByFaction: {}, assaultClears: {}, assaultFails: 0, questsCompleted: 0, deaths: 0, wonEarned: 0, maxEnhance: 0 };
 
@@ -76,6 +85,7 @@ const MIGRATIONS: Record<number, (d: Record<string, unknown>) => Record<string, 
   2: (d) => ({ ...d, version: 3 }),
   3: (d) => ({ ...d, version: 4, stats: { ...EMPTY_STATS }, achievements: { unlocked: [], title: null } }),
   4: (d) => ({ ...d, version: 5, buffs: { active: [] } }),
+  5: (d) => ({ ...d, version: 6, character: { race: 'human', ...(isObj(d.character) ? d.character : {}) } }),
 };
 
 /**

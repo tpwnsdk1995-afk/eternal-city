@@ -36,7 +36,7 @@ export class SkillWindow extends Window {
     for (const cat of SKILL_CATEGORIES) {
       this.label(14, y, cat, theme.colors.brass, 12, { fontStyle: 'bold' });
       y += 18;
-      for (const def of SKILLS.filter((k) => k.category === cat)) {
+      for (const def of SKILLS.filter((k) => k.category === cat && (!k.race || k.race === gameState.character.race))) {
         const rank = learnedRank(s, def.id);
         const active = s.active[def.category] === def.id;
         const dormant = active && def.weaponClass && def.weaponClass !== equippedClass;

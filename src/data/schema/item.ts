@@ -1,4 +1,4 @@
-import type { AmmoKind, ArmorSlot, Caliber, WeaponClass } from './enums';
+import type { AmmoKind, ArmorSlot, Caliber, Race, WeaponClass } from './enums';
 import type { PartId, UniqueId } from './tuning';
 import type { TexKey } from '../textureKeys';
 
@@ -16,7 +16,9 @@ export interface WeaponDef {
   pellets?: number; // shotguns
   subFire?: { rpm: number; dmgMult: number }; // Ctrl toggle
   /** launchers: slow projectile that explodes with area damage instead of hitscan */
-  projectile?: { speed: number; aoeRadius: number; arc: boolean };
+  projectile?: { speed: number; aoeRadius: number; arc: boolean; selfDamage?: boolean };
+  /** 변이무기 are infected-only; guns (no race) are human-only */
+  race?: Race;
   gradeMin: number;
   gradeMax: number;
   weightKg: number;

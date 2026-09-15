@@ -243,11 +243,11 @@ export class CombatBridge {
       crouching: player.crouching,
     };
 
+    if (eff.projectile) return this.launchProjectile(eff, origin, baseAngle, aim, ctx); // 산성 토사 is a 변이무기 that lobs
     if (melee) return this.meleeSwing(eff.range, origin, baseAngle, targets, byUid, objById, ctx, now);
-    if (eff.projectile) return this.launchProjectile(eff, origin, baseAngle, aim, ctx);
 
     this.fx.muzzle(muzzle, baseAngle);
-    this.fx.casing({ x: origin.x + Math.cos(baseAngle) * 6, y: origin.y + Math.sin(baseAngle) * 6 }, baseAngle);
+    if (w.def.caliber !== 'none') this.fx.casing({ x: origin.x + Math.cos(baseAngle) * 6, y: origin.y + Math.sin(baseAngle) * 6 }, baseAngle);
     this.host.scene.cameras.main.shake(40, w.def.class === '기관총' || w.def.class === '산탄총' ? 0.003 : 0.0012);
 
     for (let i = 0; i < attempt.pellets; i++) {
@@ -332,13 +332,13 @@ export class CombatBridge {
     ];
     for (const p of this.projectiles) {
       const at = p.step(dtMs, this.host.built.collision, targets);
-      if (at) this.explode(at, p.state.aoeRadius, p.ctx, now);
+      if (at) this.explode(at, p.state.aoeRadius, p.ctx, now, p.def.projectile?.selfDamage !== false);
     }
     this.projectiles = this.projectiles.filter((p) => !p.done);
   }
 
   /** Blast damage: every enemy/objective in the radius takes falloff-scaled damage; the shooter too. */
-  private explode(at: Vec2, radius: number, ctx: AttackerCtx, now: number): void {
+  private explode(at: Vec2, radius: number, ctx: AttackerCtx, now: number, selfDamage = true): void {
     this.fx.explosion(at, radius);
     this.host.scene.cameras.main.shake(180, 0.008);
     const enemies = this.targetableEnemies();
@@ -373,7 +373,7 @@ export class CombatBridge {
     }
     // self-damage: standing inside your own blast hurts (halved, armour applies)
     const { player } = this.host;
-    const selfMult = aoeFalloff(dist(at, player.pos), radius, PLAYER_RADIUS);
+    const selfMult = selfDamage ? aoeFalloff(dist(at, player.pos), radius, PLAYER_RADIUS) : 0;
     if (selfMult > 0) {
       const base = ctx.baseDamage * gradeMult(ctx.grade) * selfMult * SELF_BLAST_MULT;
       this.hurtPlayer(base, now);
@@ -556,6 +556,7 @@ export class CombatBridge {
 
   private hurtPlayerFinal(dmg: number, now: number): void {
     if (this.playerDead) return;
+    gameState.lastHurtAt = Date.now();
     const { player } = this.host;
     let hp = gameState.vitals.hp - dmg;
     this.fx.hitFlash(player);

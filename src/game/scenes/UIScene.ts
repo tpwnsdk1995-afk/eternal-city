@@ -55,6 +55,7 @@ export class UIScene extends Phaser.Scene {
   private questTracker!: Phaser.GameObjects.Text;
   private permitText!: Phaser.GameObjects.Text;
   private buffText!: Phaser.GameObjects.Text;
+  private portrait!: Phaser.GameObjects.Image;
 
   constructor() {
     super('UI');
@@ -66,7 +67,7 @@ export class UIScene extends Phaser.Scene {
 
     // --- left: portrait + gauges ---------------------------------------------------------------
     this.add.nineslice(12, top + 12, TEX.ui_slot, 0, 72, 72, 3, 3, 3, 3).setOrigin(0, 0);
-    this.add.image(16, top + 16, TEX.portrait_player).setOrigin(0, 0).setDisplaySize(64, 64);
+    this.portrait = this.add.image(16, top + 16, TEX.portrait_player).setOrigin(0, 0).setDisplaySize(64, 64);
     this.nameText = this.add.text(48, top + 88, '', theme.textStyle(12, theme.colors.brass, { fontStyle: 'bold' })).setOrigin(0.5, 0);
     this.hp = new Gauge(this, 94, top + 14, 232, 18, theme.colors.hp, '생명');
     this.stamina = new Gauge(this, 94, top + 38, 232, 14, theme.colors.stamina, '지구력');
@@ -275,6 +276,7 @@ export class UIScene extends Phaser.Scene {
 
   private refreshCharacter(): void {
     const c = gameState.character;
+    this.portrait.setTexture(c.race === 'infected' ? TEX.portrait_infected : TEX.portrait_player);
     this.nameText.setText(c.name);
     this.levelText.setText(`Lv.${c.level}${c.unspentPoints ? `  · 미배분 ${c.unspentPoints}pt (C)` : ''}`);
     this.levelText.setColor(c.unspentPoints ? theme.colors.good : theme.colors.muted);

@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 import { balance } from '@data/balance';
 import { TEX } from '@data/textureKeys';
-import { STAT_KEYS, type StatKey, type Stats } from '@data/schema/enums';
+import { RACE_NAME, RACES, STAT_KEYS, type Race, type StatKey, type Stats } from '@data/schema/enums';
 import { emptyStats } from '@core/stats/character';
 import { derivedStats } from '@core/stats/derived';
 import { gameState } from '../state/GameState';
@@ -29,6 +29,9 @@ export class CharacterCreateScene extends Phaser.Scene {
   private previewText!: Phaser.GameObjects.Text;
   private nameInput: HTMLInputElement | null = null;
   private started = false;
+  private race: Race = 'human';
+  private raceButtons = new Map<Race, Phaser.GameObjects.Text>();
+  private raceDesc!: Phaser.GameObjects.Text;
 
   constructor() {
     super('CharacterCreate');
@@ -39,6 +42,8 @@ export class CharacterCreateScene extends Phaser.Scene {
     this.left = balance.stats.creationPoints;
     this.valueTexts.clear();
     this.started = false;
+    this.race = 'human';
+    this.raceButtons.clear();
     this.cameras.main.setBackgroundColor('#05070a');
     this.add.image(0, 0, TEX.title_bg).setOrigin(0, 0).setAlpha(0.55);
 
@@ -54,10 +59,22 @@ export class CharacterCreateScene extends Phaser.Scene {
     this.nameInput = dom.getChildByID('ec-name') as HTMLInputElement | null;
     this.nameInput?.focus();
 
-    this.add.text(cx - 260, 215, `생성 포인트 배분`, theme.textStyle(16, theme.colors.brass));
-    this.leftText = this.add.text(cx + 260, 217, '', theme.textStyle(14, theme.colors.good)).setOrigin(1, 0);
+    // 종족: 인간 / 감염체 (R 키로 전환)
+    this.add.text(cx - 260, 210, '종족  (R)', theme.textStyle(16, theme.colors.brass));
+    let bx = cx - 150;
+    for (const r of RACES) {
+      const b = this.add.text(bx, 208, RACE_NAME[r], theme.textStyle(15, '#ffffff', { backgroundColor: '#1a1e24', padding: { left: 12, right: 12, top: 3, bottom: 3 } })).setInteractive({ useHandCursor: true });
+      b.on('pointerdown', () => this.setRace(r));
+      this.raceButtons.set(r, b);
+      bx += b.width + 10;
+    }
+    this.raceDesc = this.add.text(cx - 260, 240, '', theme.textStyle(11, theme.colors.muted, { wordWrap: { width: 520 } }));
+    this.input.keyboard?.on('keydown-R', () => this.setRace(this.race === 'human' ? 'infected' : 'human'));
 
-    let y = 250;
+    this.add.text(cx - 260, 275, `생성 포인트 배분`, theme.textStyle(16, theme.colors.brass));
+    this.leftText = this.add.text(cx + 260, 277, '', theme.textStyle(14, theme.colors.good)).setOrigin(1, 0);
+
+    let y = 306;
     for (const k of STAT_KEYS) {
       this.add.text(cx - 260, y, k, theme.textStyle(16, '#ffffff', { fontStyle: 'bold' }));
       this.add.text(cx - 190, y + 3, STAT_DESC[k], theme.textStyle(11, theme.colors.muted));
@@ -67,7 +84,7 @@ export class CharacterCreateScene extends Phaser.Scene {
       this.valueTexts.set(k, val);
       void minus;
       void plus;
-      y += 36;
+      y += 32;
     }
     this.previewText = this.add.text(cx, y + 10, '', theme.textStyle(12, theme.colors.muted, { align: 'center' })).setOrigin(0.5, 0);
 
@@ -90,6 +107,11 @@ export class CharacterCreateScene extends Phaser.Scene {
     return t;
   }
 
+  private setRace(r: Race): void {
+    this.race = r;
+    this.refresh();
+  }
+
   private adjust(k: StatKey, d: number): void {
     if (d > 0 && this.left <= 0) return;
     if (d < 0 && this.alloc[k] <= 0) return;
@@ -99,6 +121,12 @@ export class CharacterCreateScene extends Phaser.Scene {
   }
 
   private refresh(): void {
+    for (const [r, b] of this.raceButtons) b.setStyle({ backgroundColor: r === this.race ? '#3a4048' : '#1a1e24', color: r === this.race ? (r === 'infected' ? '#a8f060' : '#ffd166') : '#9aa0a6' });
+    this.raceDesc.setText(
+      this.race === 'human'
+        ? '인간 — 총기 8분류와 탄약을 다루는 헌터. 상점·기술상·강화 전부 이용. Glock 17로 시작.'
+        : '감염체 — 총기를 쓰지 못하고 발톱·촉수·산성 토사·골검 같은 변이무기로 싸운다. 최대 생명력 +15%, 이동속도 +10%, 피해를 입지 않으면 체력이 자연 재생.',
+    );
     for (const k of STAT_KEYS) this.valueTexts.get(k)!.setText(`${this.alloc[k]}`);
     this.leftText.setText(`남은 포인트 ${this.left}`);
     const d = derivedStats(this.alloc, 1);
@@ -111,7 +139,7 @@ export class CharacterCreateScene extends Phaser.Scene {
     if (this.started) return;
     this.started = true;
     const name = (this.nameInput?.value ?? '').trim().slice(0, 10) || DEFAULT_NAME;
-    gameState.newGame(name);
+    gameState.newGame(name, this.race);
     gameState.setCharacter({ ...gameState.character, base: { ...this.alloc }, unspentPoints: this.left });
     const d = gameState.derived();
     gameState.setVitals({ hp: d.maxHp, stamina: d.maxStamina, ap: d.maxAp });

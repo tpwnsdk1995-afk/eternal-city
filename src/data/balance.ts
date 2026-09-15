@@ -98,6 +98,13 @@ export const balance = {
     /** 고급 어설트 scaling */
     advanced: { levelOffset: 10, rewardMult: 2, hpMult: 1.7, defenseBonus: 8, dmgMult: 1.4, xpMult: 1.6, wonMult: 1.5 },
   },
+  infected: {
+    /** 감염체 racial bonuses: tougher and quicker, regenerates instead of using medkits well */
+    mods: { maxHpPct: 0.15, moveSpeedPct: 0.1 },
+    regenPctPerSec: 0.012,
+    /** regen pauses this long after taking damage */
+    regenDelayMs: 3000,
+  },
   loot: {
     /** chance an armor drop rolls a 접두 (checked in order: 전설 first) */
     prefixChance: { 전설: 0.03, 고대: 0.1 } as Record<'고대' | '전설', number>,

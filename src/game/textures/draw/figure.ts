@@ -2,7 +2,7 @@ import type { Dir } from '../../systems/facing';
 
 type Ctx = CanvasRenderingContext2D;
 
-export type GunKind = 'pistol' | 'smg' | 'rifle' | 'melee';
+export type GunKind = 'pistol' | 'smg' | 'rifle' | 'melee' | 'claws';
 
 export interface FigureStyle {
   skin: string;
@@ -58,8 +58,21 @@ function circle(ctx: Ctx, x: number, y: number, r: number, color: string): void 
   ctx.fill();
 }
 
-const GUN_LEN: Record<GunKind, number> = { pistol: 7, smg: 11, rifle: 16, melee: 12 };
-const GUN_COLOR: Record<GunKind, string> = { pistol: '#15171a', smg: '#15171a', rifle: '#15171a', melee: '#4a4e54' };
+const GUN_LEN: Record<GunKind, number> = { pistol: 7, smg: 11, rifle: 16, melee: 12, claws: 6 };
+const GUN_COLOR: Record<GunKind, string> = { pistol: '#15171a', smg: '#15171a', rifle: '#15171a', melee: '#4a4e54', claws: '#e8e2c8' };
+
+/** three bone talons fanning out from the hand */
+function claws(ctx: Ctx, x: number, y: number, dir: 1 | -1 | 0, len: number): void {
+  ctx.strokeStyle = GUN_COLOR.claws;
+  ctx.lineWidth = 1.4;
+  for (const off of [-2.2, 0, 2.2]) {
+    ctx.beginPath();
+    ctx.moveTo(x, y + off * 0.6);
+    if (dir === 0) ctx.lineTo(x + off, y + len);
+    else ctx.lineTo(x + dir * len, y + off);
+    ctx.stroke();
+  }
+}
 
 /**
  * Oblique (3/4 top-down) figure, ~34px tall at size 1 inside a 48px frame, feet near the bottom.
@@ -198,6 +211,7 @@ export function drawFigure(ctx: Ctx, dir: Dir, frame: number, w: number, h: numb
       const len = GUN_LEN[s.gun];
       ctx.fillStyle = GUN_COLOR[s.gun];
       if (s.gun === 'melee') ctx.fillRect(9, torsoTop + 3.6, len, 2); // baton held forward
+      else if (s.gun === 'claws') claws(ctx, 11.5, torsoTop + 4.8, 1, len);
       else ctx.fillRect(9, torsoTop + 3.6, len, 2.4);
       if (s.gun === 'smg' || s.gun === 'rifle') ctx.fillRect(12, torsoTop + 5.5, 2, 4); // magazine
       if (s.gun === 'rifle') ctx.fillRect(3, torsoTop + 5, 6, 2.2); // stock
@@ -215,12 +229,15 @@ export function drawFigure(ctx: Ctx, dir: Dir, frame: number, w: number, h: numb
       ctx.fillStyle = GUN_COLOR[s.gun];
       const gx = diagonal ? 9.5 : 8.7;
       if (s.gun === 'melee') ctx.fillRect(gx - 1, torsoTop + 4, 2, 10); // held upright
-      else ctx.fillRect(gx - 1.4, torsoTop + 12.5, 2.8, 5 + (s.gun === 'rifle' ? 3 : s.gun === 'smg' ? 1.5 : 0));
+      else if (s.gun === 'claws') {
+        claws(ctx, -8.7, torsoTop + 14, 0, 5);
+        claws(ctx, 8.7, torsoTop + 14, 0, 5);
+      } else ctx.fillRect(gx - 1.4, torsoTop + 12.5, 2.8, 5 + (s.gun === 'rifle' ? 3 : s.gun === 'smg' ? 1.5 : 0));
     }
   } else {
     rr(ctx, -10.5, torsoTop + 1.5, armW, 10 - armSwing * 0.4, 1.5, shade(shirt, 0.85));
     rr(ctx, 6.9, torsoTop + 1.5, armW, 10 + armSwing * 0.4, 1.5, shade(shirt, 0.85));
-    if (s.gun) {
+    if (s.gun && s.gun !== 'claws') {
       ctx.fillStyle = GUN_COLOR[s.gun];
       const len = Math.min(8, GUN_LEN[s.gun]);
       ctx.fillRect(diagonal ? 7 : 6, torsoTop - len + 4, 2.4, len); // barrel peeking over the shoulder

@@ -37,4 +37,9 @@ export const WEAPONS: WeaponDef[] = [
   // ---------------------------------------------------------------- 불법무기 (암거래상)
   W({ id: 'tec9', name: 'TEC-9 (개조)', class: '기관단총', caliber: '9mm', baseDamage: 11, rpm: 900, range: 300, spreadDeg: 11, baseAccuracy: 0.55, weightKg: 1.6, reqLevel: 6, illegal: true, price: 40_000, tex: TEX.icon_uzi, iconTex: TEX.icon_uzi }),
   W({ id: 'sawed_off', name: '단축 산탄총', class: '산탄총', caliber: '12ga', baseDamage: 88, pellets: 8, rpm: 70, range: 150, spreadDeg: 16, baseAccuracy: 0.75, weightKg: 2.4, reqLevel: 9, illegal: true, price: 45_000, tex: TEX.icon_shotgun, iconTex: TEX.icon_shotgun }),
+  // ---------------------------------------------------------------- 변이무기 (감염체 전용)
+  W({ id: 'claws', name: '발톱', class: '변이무기', caliber: 'none', baseDamage: 16, rpm: 150, range: 42, spreadDeg: 0, baseAccuracy: 0.92, weightKg: 0, reqLevel: 1, race: 'infected', price: 2_500, tex: TEX.icon_claws, iconTex: TEX.icon_claws }),
+  W({ id: 'tentacle', name: '촉수', class: '변이무기', caliber: 'none', baseDamage: 44, rpm: 60, range: 96, spreadDeg: 0, baseAccuracy: 0.9, weightKg: 0, reqLevel: 8, race: 'infected', price: 18_000, tex: TEX.icon_tentacle, iconTex: TEX.icon_tentacle }),
+  W({ id: 'acid_spit', name: '산성 토사', class: '변이무기', caliber: 'none', baseDamage: 58, rpm: 40, range: 320, spreadDeg: 2, baseAccuracy: 0.88, weightKg: 0, reqLevel: 15, race: 'infected', price: 45_000, projectile: { speed: 380, aoeRadius: 52, arc: true, selfDamage: false }, tex: TEX.icon_acid, iconTex: TEX.icon_acid }),
+  W({ id: 'bone_blade', name: '골검', class: '변이무기', caliber: 'none', baseDamage: 92, rpm: 80, range: 58, spreadDeg: 0, baseAccuracy: 0.9, weightKg: 0, reqLevel: 25, race: 'infected', price: 120_000, tex: TEX.icon_bone, iconTex: TEX.icon_bone }),
 ];

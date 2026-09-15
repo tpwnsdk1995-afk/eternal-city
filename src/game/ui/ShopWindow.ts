@@ -5,6 +5,7 @@ import { WEAPONS } from '@data/weapons';
 import type { NpcDef } from '@data/schema/npc';
 import { buyPrice, buyQty, sellPrice } from '@core/economy/shop';
 import { gradeMult } from '@core/weapons/weaponMath';
+import { weaponUsableBy } from '@core/inventory/equipment';
 import { formatRemaining } from '@core/combat/buffs';
 import { gameState } from '../state/GameState';
 import { actions } from '../state/actions';
@@ -61,6 +62,7 @@ export class ShopWindow extends Window {
     for (const id of npc?.stock ?? []) {
       const def = registry.item(id);
       if (def.kind === 'weapon') {
+        if (!weaponUsableBy(def, gameState.character.race)) continue; // 총기는 인간, 변이무기는 감염체
         if (def.reqLevel > level + 6) continue; // far-off weapons are not displayed yet
         const hi = Math.min(def.gradeMax, gradeCap);
         const lo = Math.max(def.gradeMin, hi - 2);

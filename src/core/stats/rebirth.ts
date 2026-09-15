@@ -21,6 +21,6 @@ export const rebirthBonusPoints = (rebirth: number): number => rebirth * S.rebir
  */
 export function rebirth(c: CharacterCore): CharacterCore {
   const next = c.rebirth + 1;
-  const fresh = createCharacter(c.name, S.creationPoints + rebirthBonusPoints(next));
+  const fresh = createCharacter(c.name, S.creationPoints + rebirthBonusPoints(next), c.race);
   return { ...fresh, rebirth: next, won: c.won };
 }

@@ -17,7 +17,8 @@ import { balance } from '@data/balance';
 import { registry } from '@data/registry';
 import type { ControlScheme } from '@data/schema/enums';
 import type { StatMods } from '@data/schema/mods';
-import { STARTER_KIT } from '@data/starterKit';
+import { STARTER_KITS } from '@data/starterKit';
+import type { Race } from '@data/schema/enums';
 import type { MinimapInfo, WorldSnapshot } from '../systems/Minimap';
 
 export interface Settings {
@@ -98,17 +99,20 @@ class GameState {
   minimap: MinimapInfo | null = null;
   flags: Record<string, boolean | number> = {};
   playtimeMs = 0;
+  /** epoch ms of the last hit taken (감염체 regen delay) */
+  lastHurtAt = 0;
   /** Set by the UI layer: true when a window covers this screen point (world input ignores it). */
   uiHit: ((sx: number, sy: number) => boolean) | null = null;
 
-  newGame(name: string): void {
-    this.character = { ...createCharacter(name, balance.stats.creationPoints), won: STARTER_KIT.won };
+  newGame(name: string, race: Race = 'human'): void {
+    const kit = STARTER_KITS[race];
+    this.character = { ...createCharacter(name, balance.stats.creationPoints, race), won: kit.won };
     this.inventory = createInventory();
-    for (const it of STARTER_KIT.items) this.inventory = addItem(this.inventory, registry.item(it.itemId), it.qty, { grade: 'grade' in it ? it.grade : undefined });
+    for (const it of kit.items) this.inventory = addItem(this.inventory, registry.item(it.itemId), it.qty, { grade: it.grade });
     this.equipment = emptyEquipment();
-    const weaponStack = this.inventory.items.find((s) => s.itemId === STARTER_KIT.equipWeaponItemId);
+    const weaponStack = this.inventory.items.find((s) => s.itemId === kit.equipWeaponItemId);
     if (weaponStack) {
-      const r = equipStack(this.equipment, this.inventory, registry.item, weaponStack.uid, { level: 1, techGrade: 1 });
+      const r = equipStack(this.equipment, this.inventory, registry.item, weaponStack.uid, { level: 1, techGrade: 1, race });
       if (r.ok) this.equipment = r.equipment;
     }
     this.skills = emptySkillState();
@@ -130,7 +134,8 @@ class GameState {
   mods(): StatMods {
     const weapon = equippedWeapon(this.equipment, this.inventory, registry.item);
     const skill = aggregateMods(this.skills, registry.skill, weapon?.def.class ?? null);
-    return addMods(skill, aggregateBuffMods(this.buffs, registry.buff, Date.now()));
+    const withBuffs = addMods(skill, aggregateBuffMods(this.buffs, registry.buff, Date.now()));
+    return this.character.race === 'infected' ? addMods(withBuffs, balance.infected.mods) : withBuffs;
   }
 
   derived(): DerivedStats {

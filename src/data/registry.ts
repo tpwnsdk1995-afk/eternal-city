@@ -39,6 +39,7 @@ import { ACHIEVEMENTS } from './achievements';
 import { BUFFS } from './buffs';
 import type { BuffDef } from '@core/combat/buffs';
 import type { AchievementDef, CampaignDef } from './schema/progress';
+import { isMeleeClass } from './schema/enums';
 
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
@@ -173,11 +174,13 @@ export function validateAll(): void {
 
   for (const w of WEAPONS) {
     if (w.gradeMin < 1 || w.gradeMax < w.gradeMin) errors.push(`weapon ${w.id} bad grade range`);
-    const melee = w.class === '근접무기';
+    const melee = isMeleeClass(w.class);
     if (melee !== (w.caliber === 'none')) errors.push(`weapon ${w.id}: melee weapons and only melee weapons use caliber 'none'`);
+    if ((w.class === '변이무기') !== (w.race === 'infected')) errors.push(`weapon ${w.id}: 변이무기 and only 변이무기 are infected-only`);
     if (!melee && !AMMO.some((a) => a.caliber === w.caliber)) errors.push(`weapon ${w.id} has no ammo for caliber ${w.caliber}`);
     if (w.class === '산탄총' && !w.pellets) errors.push(`shotgun ${w.id} needs pellets`);
-    if ((w.class === '투척중화기') !== !!w.projectile) errors.push(`weapon ${w.id}: launchers and only launchers define projectile`);
+    if (w.class === '투척중화기' && !w.projectile) errors.push(`weapon ${w.id}: launchers define projectile`);
+    if (w.projectile && w.class !== '투척중화기' && w.class !== '변이무기') errors.push(`weapon ${w.id}: only launchers and 변이무기 define projectile`);
   }
 
   for (const m of MAPS) {
