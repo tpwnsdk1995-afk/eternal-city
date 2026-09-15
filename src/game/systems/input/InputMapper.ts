@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { Vec2 } from '@core/math/vec';
 import type { ControlScheme } from '@data/schema/enums';
+import { gameState } from '../../state/GameState';
 
 export type Hotkey = 'inventory' | 'status' | 'skills' | 'minimap' | 'menu' | `quick${number}`;
 
@@ -35,6 +36,7 @@ export class InputMapper {
   private keys: Record<string, Phaser.Input.Keyboard.Key>;
   private capsLatch = false;
   private pendingClick: { x: number; y: number; shift: boolean } | null = null;
+  private pendingHotkey: Hotkey | null = null;
   private crouched = false;
 
   constructor(
@@ -46,16 +48,19 @@ export class InputMapper {
     this.keys = kb.addKeys({
       W: KC.W, A: KC.A, S: KC.S, D: KC.D,
       SHIFT: KC.SHIFT, CTRL: KC.CTRL, SPACE: KC.SPACE,
-      C: KC.C, V: KC.V, E: KC.E, I: KC.I, K: KC.K, TAB: KC.TAB, ESC: KC.ESC,
-      ONE: KC.ONE, TWO: KC.TWO, THREE: KC.THREE, FOUR: KC.FOUR, FIVE: KC.FIVE,
-      SIX: KC.SIX, SEVEN: KC.SEVEN, EIGHT: KC.EIGHT, NINE: KC.NINE,
+      C: KC.C, E: KC.E,
     }) as Record<string, Phaser.Input.Keyboard.Key>;
 
     scene.input.mouse?.disableContextMenu();
+    // Hotkeys are edge-triggered off the DOM event so even a sub-frame tap registers.
     kb.on('keydown', (ev: KeyboardEvent) => {
       if (typeof ev.getModifierState === 'function') this.capsLatch = ev.getModifierState('CapsLock');
+      if (ev.repeat) return;
+      const hk = this.hotkeyFor(ev.code);
+      if (hk) this.pendingHotkey = hk;
     });
     scene.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
+      if (gameState.uiHit?.(p.x, p.y)) return; // click landed on a window
       if (p.leftButtonDown()) this.pendingClick = { x: p.worldX, y: p.worldY, shift: p.event.shiftKey };
     });
     // Tab would move browser focus; keep it in-game.
@@ -107,18 +112,11 @@ export class InputMapper {
       }
     }
 
-    const fireHeld = this.scheme === 'classic' ? pointer.rightButtonDown() : pointer.leftButtonDown();
+    const overUi = gameState.uiHit?.(pointer.x, pointer.y) ?? false;
+    const fireHeld = !overUi && (this.scheme === 'classic' ? pointer.rightButtonDown() : pointer.leftButtonDown());
 
-    let hotkey: Hotkey | null = null;
-    if (jd(k.I)) hotkey = 'inventory';
-    else if (jd(k.K)) hotkey = 'skills';
-    else if (jd(k.TAB)) hotkey = 'minimap';
-    else if (jd(k.ESC)) hotkey = 'menu';
-    else if (this.scheme === 'classic' ? jd(k.C) : jd(k.V)) hotkey = 'status';
-    else {
-      const digits = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'];
-      for (let i = 0; i < digits.length; i++) if (jd(k[digits[i]])) hotkey = `quick${i + 1}`;
-    }
+    const hotkey = this.pendingHotkey;
+    this.pendingHotkey = null;
 
     return {
       clickedWorld: this.scheme === 'classic' && click ? { x: click.x, y: click.y } : null,
@@ -134,6 +132,25 @@ export class InputMapper {
       interactPressed: jd(k.E),
       hotkey,
     };
+  }
+
+  private hotkeyFor(code: string): Hotkey | null {
+    switch (code) {
+      case 'KeyI':
+        return 'inventory';
+      case 'KeyK':
+        return 'skills';
+      case 'Tab':
+        return 'minimap';
+      case 'Escape':
+        return 'menu';
+      case 'KeyC':
+        return this.scheme === 'classic' ? 'status' : null;
+      case 'KeyV':
+        return this.scheme === 'modern' ? 'status' : null;
+    }
+    const m = /^Digit([1-9])$/.exec(code);
+    return m ? (`quick${Number(m[1])}` as Hotkey) : null;
   }
 
   hints(): string[] {

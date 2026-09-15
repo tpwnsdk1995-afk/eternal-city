@@ -1,0 +1,72 @@
+import type Phaser from 'phaser';
+import { STAT_KEYS, type StatKey } from '@data/schema/enums';
+import { registry } from '@data/registry';
+import { statCap, xpToNext } from '@core/stats/levelCurve';
+import { totalWeightKg } from '@core/inventory/weight';
+import { gameState } from '../state/GameState';
+import { actions } from '../state/actions';
+import { Window } from './Window';
+import { theme } from './theme';
+
+const STAT_DESC: Record<StatKey, string> = {
+  생명력: '의식회복 확률',
+  체력: '최대 생명력 · 근접 공격력',
+  지구력: '달리기/점프 게이지 · 무게',
+  기술: '원거리 공격력 · 명중 · 치명타',
+  지능: '기술등급 · 행동력',
+  속도: '이동속도 · 공격속도',
+};
+
+export class StatusWindow extends Window {
+  constructor(scene: Phaser.Scene, x: number, y: number) {
+    super(scene, 'status', x, y, 380, 560, '상태 (C)');
+    this.refresh();
+  }
+
+  refresh(): void {
+    this.clearBody();
+    const c = gameState.character;
+    const d = gameState.derived();
+    const v = gameState.vitals;
+
+    this.label(14, 2, `${c.name}`, '#ffffff', 16, { fontStyle: 'bold' });
+    this.label(this.w - 14, 4, `Lv.${c.level}${c.rebirth ? `  환생 ${c.rebirth}` : ''}`, theme.colors.brass, 14).setOrigin(1, 0);
+    this.label(14, 24, `경험치 ${c.xp.toLocaleString('ko-KR')} / ${xpToNext(c.level).toLocaleString('ko-KR')}`, theme.colors.muted, 12);
+    this.label(14, 44, `미배분 스탯 포인트: ${c.unspentPoints}`, c.unspentPoints > 0 ? theme.colors.good : theme.colors.muted, 13, { fontStyle: c.unspentPoints ? 'bold' : 'normal' });
+    this.label(this.w - 14, 44, `상한 ${statCap(c.rebirth)}`, theme.colors.muted, 11).setOrigin(1, 0);
+
+    let y = 72;
+    for (const k of STAT_KEYS) {
+      this.label(14, y, k, '#ffffff', 14, { fontStyle: 'bold' });
+      this.label(74, y + 2, STAT_DESC[k], theme.colors.muted, 10);
+      this.label(268, y, `${c.base[k]}`, theme.colors.brass, 14).setOrigin(1, 0);
+      if (c.unspentPoints > 0) {
+        this.button(282, y - 1, '+1', () => actions.allocate(k, 1));
+        this.button(318, y - 1, '+5', () => actions.allocate(k, Math.min(5, gameState.character.unspentPoints)));
+      }
+      y += 30;
+    }
+
+    y += 8;
+    this.content.add(this.scene.add.rectangle(10, y, this.w - 20, 1, 0x3a3f47).setOrigin(0, 0));
+    y += 10;
+    const rows: [string, string][] = [
+      ['생명력', `${Math.round(v.hp)} / ${d.maxHp}`],
+      ['지구력', `${Math.round(v.stamina)} / ${d.maxStamina}`],
+      ['행동력', `${Math.round(v.ap)} / ${d.maxAp}`],
+      ['기술등급', `${d.techGrade}`],
+      ['이동속도', `${d.moveSpeed.toFixed(0)} px/s`],
+      ['공격속도', `×${d.attackSpeedMult.toFixed(3)}`],
+      ['원거리/근접 배율', `×${d.rangedMult.toFixed(3)} / ×${d.meleeMult.toFixed(3)}`],
+      ['치명타', `${(d.critChance * 100).toFixed(1)}% · ×${d.critMult.toFixed(2)}`],
+      ['의식회복 확률', `${(d.consciousnessChance * 100).toFixed(1)}%`],
+      ['방어력', `${gameState.defense().toFixed(0)}`],
+      ['무게', `${totalWeightKg(gameState.inventory, registry.item).toFixed(1)} / ${d.maxWeightKg.toFixed(1)} kg`],
+    ];
+    for (const [k, val] of rows) {
+      this.label(14, y, k, theme.colors.muted, 12);
+      this.label(this.w - 14, y, val, theme.colors.text, 12).setOrigin(1, 0);
+      y += 20;
+    }
+  }
+}

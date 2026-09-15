@@ -31,6 +31,8 @@ export interface GameEvents extends Record<string, unknown> {
   settings: Settings;
   hotkey: string;
   npcInteract: { npcId: string };
+  startAssault: { assaultId: string };
+  menu: undefined;
 }
 
 /**
@@ -52,6 +54,8 @@ class GameState {
   settings: Settings = { controlScheme: 'classic', showFps: false };
   flags: Record<string, boolean | number> = {};
   playtimeMs = 0;
+  /** Set by the UI layer: true when a window covers this screen point (world input ignores it). */
+  uiHit: ((sx: number, sy: number) => boolean) | null = null;
 
   newGame(name: string): void {
     this.character = { ...createCharacter(name, balance.stats.creationPoints), won: STARTER_KIT.won };

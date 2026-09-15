@@ -7,6 +7,7 @@ import { xpToNext } from '@core/stats/levelCurve';
 import { gameState, type GameEvents } from '../state/GameState';
 import { Gauge } from '../ui/Gauge';
 import { theme } from '../ui/theme';
+import { WindowManager } from '../ui/WindowManager';
 
 const BAR_H = 92;
 const LOG_MAX = 5;
@@ -25,6 +26,7 @@ export class UIScene extends Phaser.Scene {
   private fpsText!: Phaser.GameObjects.Text;
   private logLines: Phaser.GameObjects.Text[] = [];
   private unsubs: (() => void)[] = [];
+  windows!: WindowManager;
 
   constructor() {
     super('UI');
@@ -51,20 +53,44 @@ export class UIScene extends Phaser.Scene {
       this.logLines.push(this.add.text(16, 12 + i * 20, '', theme.textStyle(13, theme.colors.text, { stroke: '#000', strokeThickness: 3 })));
     }
 
+    this.windows = new WindowManager(this);
+
     const on = <K extends keyof GameEvents>(k: K, fn: (p: GameEvents[K]) => void) => this.unsubs.push(gameState.events.on(k, fn));
+    const refreshWindows = () => this.windows.refreshOpen();
     on('vitals', () => this.refreshVitals());
-    on('character', () => this.refreshCharacter());
-    on('inventory', () => this.refreshWeapon());
-    on('equipment', () => this.refreshWeapon());
-    on('fire', () => this.refreshWeapon());
+    on('character', () => {
+      this.refreshCharacter();
+      refreshWindows();
+    });
+    on('inventory', () => {
+      this.refreshWeapon();
+      refreshWindows();
+    });
+    on('equipment', () => {
+      this.refreshWeapon();
+      refreshWindows();
+    });
+    on('fire', () => {
+      this.refreshWeapon();
+      refreshWindows();
+    });
     on('skills', () => {
       this.refreshVitals();
       this.refreshWeapon();
+      refreshWindows();
     });
-    on('mapChanged', (m) => this.mapText.setText(`2002 · ${m.name}`));
+    on('mapChanged', (m) => {
+      this.mapText.setText(`2002 · ${m.name}`);
+      this.windows.closeAll();
+    });
     on('message', (m) => this.pushLog(m.text, m.tone));
     on('settings', (s) => this.fpsText.setVisible(s.showFps));
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.unsubs.forEach((u) => u()));
+    on('hotkey', (k) => this.windows.handleHotkey(k));
+    on('npcInteract', ({ npcId }) => this.windows.talkTo(npcId));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.unsubs.forEach((u) => u());
+      this.windows.destroy();
+    });
 
     this.refreshVitals();
     this.refreshCharacter();

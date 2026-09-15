@@ -3,6 +3,9 @@ import { registry } from '@data/registry';
 import { totalRounds } from '@core/inventory/inventory';
 import { gameState } from '../game/state/GameState';
 import { BaseWorldScene } from '../game/scenes/BaseWorldScene';
+import type { UIScene } from '../game/scenes/UIScene';
+import type { WindowKey } from '../game/ui/WindowManager';
+import { actions, type Actions } from '../game/state/actions';
 
 declare global {
   interface Window {
@@ -39,6 +42,12 @@ export interface EcDebug {
   spawn(monsterId: string, dx?: number, dy?: number): string | null;
   enemies(): { uid: string; id: string; hp: number; x: number; y: number; mode: string }[];
   god(on: boolean): void;
+  /** Open window keys (top last). */
+  windows(): string[];
+  openWindow(key: WindowKey): void;
+  closeWindows(): void;
+  /** Same validated player actions the windows use (equip/use/allocate/buy/sell/skills). */
+  actions: Actions;
   state: typeof gameState;
 }
 
@@ -47,6 +56,10 @@ export function exposeDebug(game: Phaser.Game): void {
   const worldScene = (): BaseWorldScene | null => {
     const s = game.scene.getScenes(true).find((sc) => sc instanceof BaseWorldScene);
     return (s as BaseWorldScene | undefined) ?? null;
+  };
+  const uiScene = (): UIScene | null => {
+    const s = game.scene.getScene('UI') as UIScene | null;
+    return s && s.scene.isActive() ? s : null;
   };
   window.__ec = {
     game,
@@ -68,6 +81,10 @@ export function exposeDebug(game: Phaser.Game): void {
     god: (on) => {
       gameState.flags.god = on;
     },
+    windows: () => uiScene()?.windows.openKeys() ?? [],
+    openWindow: (key) => uiScene()?.windows.open(key),
+    closeWindows: () => uiScene()?.windows.closeAll(),
+    actions,
     fps: () => game.loop.actualFps,
     hud: () => {
       const d = gameState.derived();
