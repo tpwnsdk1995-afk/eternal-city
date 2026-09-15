@@ -11,6 +11,7 @@ import { emptyStatus, type StatusState } from '@core/combat/statusEffects';
 import { emptyStats, type PlayerStats } from '@core/world/stats';
 import { emptyAchievements, type AchievementState } from '@core/progress/achievements';
 import { aggregateBuffMods, emptyBuffs, extraWeightKg, pruneExpired, xpMultiplier, wonMultiplier, type BuffState } from '@core/combat/buffs';
+import { emptyGuild, guildPerks, type GuildState } from '@core/guild/guild';
 import { addMods } from '@data/schema/mods';
 import type { ConsciousnessState } from '@core/combat/consciousness';
 import { balance } from '@data/balance';
@@ -63,6 +64,7 @@ export interface GameEvents extends Record<string, unknown> {
   stats: PlayerStats;
   achievements: AchievementState;
   buffs: BuffState;
+  guild: GuildState;
   flags: Record<string, boolean | number>;
   message: { text: string; tone?: 'info' | 'good' | 'bad' | 'system' };
   mapChanged: { mapId: string; name: string; minimap: MinimapInfo | null };
@@ -95,6 +97,7 @@ class GameState {
   stats: PlayerStats = emptyStats();
   achievements: AchievementState = emptyAchievements();
   buffs: BuffState = emptyBuffs();
+  guild: GuildState = emptyGuild();
   status: StatusState = emptyStatus();
   consciousness: ConsciousnessState = { lastTriggeredAt: -Infinity };
   currentMapId: string = balance.death.respawnMap;
@@ -127,6 +130,7 @@ class GameState {
     this.stats = emptyStats();
     this.achievements = emptyAchievements();
     this.buffs = emptyBuffs();
+    this.guild = emptyGuild();
     this.status = emptyStatus();
     this.consciousness = { lastTriggeredAt: -Infinity };
     this.currentMapId = balance.death.respawnMap;
@@ -141,27 +145,35 @@ class GameState {
     const weapon = equippedWeapon(this.equipment, this.inventory, registry.item);
     const skill = aggregateMods(this.skills, registry.skill, weapon?.def.class ?? null);
     const withBuffs = addMods(skill, aggregateBuffMods(this.buffs, registry.buff, Date.now()));
-    return this.character.race === 'infected' ? addMods(withBuffs, balance.infected.mods) : withBuffs;
+    const perks = guildPerks(this.guild);
+    const withGuild = perks.maxHpPct ? addMods(withBuffs, { maxHpPct: perks.maxHpPct }) : withBuffs;
+    return this.character.race === 'infected' ? addMods(withGuild, balance.infected.mods) : withGuild;
   }
 
   derived(): DerivedStats {
     const d = derivedStats(this.character.base, this.character.level, this.mods());
-    const extra = extraWeightKg(this.buffs, registry.buff, Date.now());
+    const extra = extraWeightKg(this.buffs, registry.buff, Date.now()) + guildPerks(this.guild).weightKg;
     return extra ? { ...d, maxWeightKg: d.maxWeightKg + extra } : d;
   }
 
-  /** experience multiplier from buffs (앰플·프리미엄) */
+  /** experience multiplier from buffs (앰플·프리미엄) and the guild level */
   xpMult(): number {
-    return xpMultiplier(this.buffs, registry.buff, Date.now());
+    return xpMultiplier(this.buffs, registry.buff, Date.now()) * (1 + guildPerks(this.guild).xpPct);
   }
 
   wonMult(): number {
-    return wonMultiplier(this.buffs, registry.buff, Date.now());
+    return wonMultiplier(this.buffs, registry.buff, Date.now()) * (1 + guildPerks(this.guild).wonPct);
   }
 
   setBuffs(b: BuffState): void {
     this.buffs = b;
     this.events.emit('buffs', b);
+  }
+
+  setGuild(g: GuildState): void {
+    this.guild = g;
+    this.events.emit('guild', g);
+    this.setVitals({}); // max HP perk may have changed
   }
 
   /** Drops expired buffs; returns the names that just ran out. */

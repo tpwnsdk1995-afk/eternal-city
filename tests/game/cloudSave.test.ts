@@ -4,6 +4,7 @@ import { saveService, takeSnapshot } from '../../src/game/state/SaveService';
 import { cloudSave, type CloudDb } from '../../src/game/state/CloudSave';
 import { db } from '../../src/game/state/db';
 import { reconcile } from '@core/save/cloudSync';
+import { CURRENT_SAVE_VERSION } from '@core/save/saveSchema';
 
 /** In-memory stand-in for the play page's `db` capability. */
 function fakeStore(): CloudDb & { docs: Map<string, Record<string, unknown>>; writes: number } {
@@ -49,7 +50,7 @@ describe('cloud save (account-bound copy)', () => {
     cloudSave.useStore(store);
     await saveService.save();
     await cloudSave.push(takeSnapshot()); // wait for the coalesced writer to drain
-    expect(store.docs.get('saves/slot1')?.version).toBe(6);
+    expect(store.docs.get('saves/slot1')?.version).toBe(CURRENT_SAVE_VERSION);
     expect((store.docs.get('saves/slot1')?.character as { name: string }).name).toBe('클라우드');
     expect(cloudSave.state).toBe('synced');
   });

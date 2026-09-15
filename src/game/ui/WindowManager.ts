@@ -13,6 +13,7 @@ import { TaxiWindow } from './TaxiWindow';
 import { TuningWindow } from './TuningWindow';
 import { AssaultWindow } from './AssaultWindow';
 import { ParallelWindow } from './ParallelWindow';
+import { GuildWindow } from './GuildWindow';
 import { questService } from '../state/questService';
 import type { Window } from './Window';
 import { InventoryWindow } from './InventoryWindow';
@@ -23,7 +24,7 @@ import { DialogBox } from './DialogBox';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 import { audio } from '../audio/AudioManager';
 
-export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu' | 'quest' | 'taxi' | 'tuning' | 'assault' | 'parallel';
+export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu' | 'quest' | 'taxi' | 'tuning' | 'assault' | 'parallel' | 'guild';
 
 const HUD_H = 108;
 
@@ -45,7 +46,8 @@ export class WindowManager {
     const tuning = new TuningWindow(scene, (GAME_WIDTH - 820) / 2, 44);
     const assault = new AssaultWindow(scene, (GAME_WIDTH - 760) / 2, 50);
     const parallel = new ParallelWindow(scene, (GAME_WIDTH - 560) / 2, 60);
-    for (const w of [inv, status, skills, shop, dialog, result, menu, quest, taxiW, tuning, assault, parallel]) {
+    const guild = new GuildWindow(scene, (GAME_WIDTH - 620) / 2, 60);
+    for (const w of [inv, status, skills, shop, dialog, result, menu, quest, taxiW, tuning, assault, parallel, guild]) {
       this.windows.set(w.key as WindowKey, w);
       w.setVisible(false);
       w.on('close', () => this.close(w.key as WindowKey));
@@ -213,6 +215,20 @@ export class WindowManager {
     const opts = (() => {
       switch (npc.role) {
         case 'quest':
+          if (npcId === 'npc_mainstream') {
+            return [
+              ...questOpts,
+              {
+                label: gameState.guild.name ? `길드 사무실 [${gameState.guild.name}]` : '길드 사무실 (창설)',
+                color: '#9be7ff',
+                onPick: () => {
+                  this.close('dialog');
+                  this.open('guild');
+                },
+              },
+              closeOpt,
+            ];
+          }
           return [...questOpts, closeOpt];
         case 'taxi':
           return [

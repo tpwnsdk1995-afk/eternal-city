@@ -5,7 +5,7 @@ import { UNIQUES } from '@data/tuning';
 import { balance } from '@data/balance';
 import type { ItemStack } from '@data/schema/item';
 import { gradeMult } from '@core/weapons/weaponMath';
-import { armorDefense, armorLabel, effectiveWeapon, enhanceChancePct, enhanceCost, enhanceLevel, hasPart, partCost, partsAllowed, plusUpCost, plusUpLevel, uniqueCost, weaponLabel } from '@core/tuning/tuning';
+import { armorDefense, armorLabel, combineChancePct, combineCost, effectiveWeapon, enhanceChancePct, enhanceCost, enhanceLevel, hasPart, partCost, partsAllowed, plusUpCost, plusUpLevel, uniqueCost, weaponLabel } from '@core/tuning/tuning';
 import { gameState } from '../state/GameState';
 import { actions } from '../state/actions';
 import { Window } from './Window';
@@ -150,7 +150,28 @@ export class TuningWindow extends Window {
       const b = this.button(0, y - 2, `플러스업 ${won(plusUpCost(def, s))}`, () => actions.plusUp(s.uid), '#9be7ff');
       b.setX(this.w - 16 - b.width);
     } else this.label(this.w - 16, y, '최대', theme.colors.good, 12).setOrigin(1, 0);
-    this.label(X, y + 40, '방어구 조합 · 고대/전설 접두 부여는 필드 드랍으로만 얻을 수 있습니다.', '#6b7280', 11);
+    // 방어구 조합
+    let cy = y + 50;
+    this.content.add(this.scene.add.rectangle(X, cy, this.w - X - 12, 1, 0xc9a227, 0.25).setOrigin(0, 0));
+    cy += 10;
+    this.label(X, cy, '방어구 조합', theme.colors.brass, 14, { fontStyle: 'bold' });
+    const chance = combineChancePct(s);
+    this.label(X + 110, cy + 1, chance === null ? '전설 접두 (최대)' : `${s.prefix ?? '접두 없음'} → ${s.prefix === '고대' ? '전설' : '고대'}  ·  성공 ${chance}%  ·  비용 ${won(combineCost(def, s))}`, theme.colors.text, 12);
+    cy += 20;
+    this.label(X, cy, '같은 방어구 하나를 재료로 소모합니다(성공/실패 무관). 둘 중 높은 플러스업이 남습니다.', '#6b7280', 11);
+    cy += 22;
+    if (chance !== null) {
+      const eq = gameState.equipment;
+      const mats = gameState.inventory.items.filter((m) => m.uid !== s.uid && m.itemId === s.itemId && !Object.values(eq.armor).includes(m.uid));
+      if (mats.length === 0) this.label(X, cy, `재료 없음 — 같은 ${def.name}이(가) 하나 더 필요합니다.`, theme.colors.muted, 12);
+      for (const m of mats.slice(0, 4)) {
+        this.label(X, cy + 2, `재료: ${armorLabel(def, m)}`, theme.colors.text, 12);
+        const b = this.button(0, cy - 2, `조합 ${won(combineCost(def, s))}`, () => actions.combineArmor(s.uid, m.uid), '#e0a0ff');
+        b.setX(this.w - 16 - b.width);
+        cy += 26;
+      }
+    }
+    this.label(X, this.h - 84, '고대/전설 접두는 필드 드랍 또는 조합으로 얻습니다. CL 방어구는 방어 ×1.5.', '#6b7280', 11);
   }
 
   /** width of the most recently created button (buttons are appended last to `content`) */

@@ -7,9 +7,10 @@ import type { QuestState } from '../quest/questState';
 import type { PlayerStats } from '../world/stats';
 import type { AchievementState } from '../progress/achievements';
 import type { BuffState } from '../combat/buffs';
+import type { GuildState } from '../guild/guild';
 import type { ControlScheme } from '@data/schema/enums';
 
-export const CURRENT_SAVE_VERSION = 6 as const;
+export const CURRENT_SAVE_VERSION = 7 as const;
 
 export interface SaveSettings {
   controlScheme: ControlScheme;
@@ -78,7 +79,17 @@ export interface SaveGameV6 extends SaveCommon {
   buffs: BuffState;
 }
 
-export type SaveGame = SaveGameV6;
+/** M8: 길드 (name, contributions). */
+export interface SaveGameV7 extends SaveCommon {
+  version: 7;
+  quests: QuestState;
+  stats: PlayerStats;
+  achievements: AchievementState;
+  buffs: BuffState;
+  guild: GuildState;
+}
+
+export type SaveGame = SaveGameV7;
 
 const EMPTY_STATS: PlayerStats = { kills: 0, bossKills: 0, killsByMonster: {}, killsByFaction: {}, assaultClears: {}, assaultFails: 0, questsCompleted: 0, deaths: 0, wonEarned: 0, maxEnhance: 0 };
 
@@ -90,6 +101,7 @@ const MIGRATIONS: Record<number, (d: Record<string, unknown>) => Record<string, 
   3: (d) => ({ ...d, version: 4, stats: { ...EMPTY_STATS }, achievements: { unlocked: [], title: null } }),
   4: (d) => ({ ...d, version: 5, buffs: { active: [] } }),
   5: (d) => ({ ...d, version: 6, character: { race: 'human', ...(isObj(d.character) ? d.character : {}) } }),
+  6: (d) => ({ ...d, version: 7, guild: { name: null, contributed: 0, foundedAt: 0 } }),
 };
 
 /**
@@ -105,7 +117,7 @@ export function migrateSave(raw: unknown): SaveGame | null {
     data = step(data);
   }
   if (data.version !== CURRENT_SAVE_VERSION) return null;
-  const required = ['character', 'vitals', 'inventory', 'equipment', 'skills', 'fire', 'location', 'settings', 'quests', 'stats', 'achievements', 'buffs'];
+  const required = ['character', 'vitals', 'inventory', 'equipment', 'skills', 'fire', 'location', 'settings', 'quests', 'stats', 'achievements', 'buffs', 'guild'];
   for (const k of required) if (!isObj(data[k])) return null;
   const c = data.character as Record<string, unknown>;
   if (typeof c.name !== 'string' || typeof c.level !== 'number' || !isObj(c.base)) return null;

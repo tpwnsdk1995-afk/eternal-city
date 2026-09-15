@@ -3,8 +3,8 @@ import * as taxi from '@core/economy/taxi';
 import { RACE_NAME, type StatKey } from '@data/schema/enums';
 import { allocateStat } from '@core/stats/allocation';
 import { statCap } from '@core/stats/levelCurve';
-import { getStack, removeQty, replaceStack, totalRounds } from '@core/inventory/inventory';
-import { installPart, plusUp, tryEnhance, tryUnique, weaponLabel, type TuneFail } from '@core/tuning/tuning';
+import { getStack, removeQty, removeStack, replaceStack, totalRounds } from '@core/inventory/inventory';
+import { installPart, plusUp, tryEnhance, tryUnique, weaponLabel, type TuneFail, armorLabel } from '@core/tuning/tuning';
 import type { PartId } from '@data/schema/tuning';
 import { PARTS, UNIQUES } from '@data/tuning';
 import { gameRng, type Rng } from '@core/rng';
@@ -21,6 +21,9 @@ import { canRebirth, rebirth } from '@core/stats/rebirth';
 import { balance } from '@data/balance';
 import { applyBuff, formatRemaining } from '@core/combat/buffs';
 import { audio } from '../audio/AudioManager';
+import { combineArmor } from '@core/tuning/tuning';
+import { donate, foundGuild, renameGuild } from '@core/guild/guild';
+import { guildTitle, guildLevel } from '@core/guild/guild';
 
 export interface ActionResult {
   ok: boolean;
@@ -195,6 +198,36 @@ export const actions = {
     return { ok: true };
   },
 
+  // --- 길드 (광진구청 과장) ------------------------------------------------------------------
+
+  foundGuild(name: string): ActionResult {
+    const r = foundGuild(gameState.guild, name, gameState.character.won);
+    if (!r.ok) return fail({ exists: '이미 길드가 있습니다.', noGuild: '', won: '창설 비용이 부족합니다.', name: '길드 이름은 2~16자여야 합니다.', amount: '' }[r.reason]);
+    gameState.setCharacter({ ...gameState.character, won: r.won });
+    gameState.setGuild(r.guild);
+    audio.play('quest_done');
+    return done(`길드 [${r.guild.name}] 창설! 구청이 지원을 시작합니다.`, 'good');
+  },
+
+  renameGuild(name: string): ActionResult {
+    const r = renameGuild(gameState.guild, name);
+    if (!r.ok) return fail(r.reason === 'noGuild' ? '길드가 없습니다.' : '길드 이름은 2~16자여야 합니다.');
+    gameState.setGuild(r.guild);
+    return done(`길드 이름을 [${r.guild.name}]으로 바꿨습니다.`, 'good');
+  },
+
+  donateGuild(amount: number): ActionResult {
+    const r = donate(gameState.guild, amount, gameState.character.won);
+    if (!r.ok) return fail({ exists: '', noGuild: '길드를 먼저 창설하세요.', won: '₩이 부족합니다.', name: '', amount: '기여 금액이 올바르지 않습니다.' }[r.reason]);
+    gameState.setCharacter({ ...gameState.character, won: r.won });
+    gameState.setGuild(r.guild);
+    if (r.leveledTo) {
+      audio.play('level_up');
+      return done(`길드 레벨 ${r.leveledTo} 달성 — ${guildTitle(r.leveledTo)}! 경험치·₩·무게·생명 보너스가 올랐습니다.`, 'good');
+    }
+    return done(`₩${Math.round(amount).toLocaleString('ko-KR')} 기여 (길드 Lv.${guildLevel(r.guild.contributed)})`, 'good');
+  },
+
   // --- 기술상 (tuning) -----------------------------------------------------------------------
 
   /** 강화 one level. `rng` is injectable for deterministic e2e. */
@@ -256,6 +289,24 @@ export const actions = {
     gameState.setInventory(replaceStack(gameState.inventory, r.stack));
     gameState.setEquipment({ ...gameState.equipment });
     return done(`플러스업 성공! ${def.name} +${r.stack.plusUp}`, 'good');
+  },
+
+  /** 방어구 조합: `materialUid` is consumed; `rng` injectable for deterministic e2e. */
+  combineArmor(uid: string, materialUid: string, rng: Rng = gameRng): ActionResult {
+    const a = getStack(gameState.inventory, uid);
+    const b = getStack(gameState.inventory, materialUid);
+    if (!a || !b) return fail('아이템을 찾을 수 없습니다.');
+    const def = registry.item(a.itemId);
+    if (def.kind !== 'armor') return fail('방어구만 조합할 수 있습니다.');
+    if (Object.values(gameState.equipment.armor).includes(materialUid)) return fail('장착 중인 방어구는 재료로 쓸 수 없습니다.');
+    const r = combineArmor(def, a, b, rng);
+    if (!r.ok) return fail({ same: '같은 아이템입니다.', mismatch: '같은 종류의 방어구만 조합할 수 있습니다.', maxed: '이미 전설 접두입니다.', notAllowed: '', alreadyInstalled: '', tooLow: '', hasUnique: '', notWeapon: '', notArmor: '' }[r.reason]);
+    if (gameState.character.won < r.cost) return fail(`조합 비용 ₩${r.cost.toLocaleString('ko-KR')}이 부족합니다.`);
+    gameState.setCharacter({ ...gameState.character, won: gameState.character.won - r.cost });
+    gameState.setInventory(replaceStack(removeStack(gameState.inventory, materialUid), r.stack));
+    gameState.setEquipment({ ...gameState.equipment });
+    audio.play(r.success ? 'enhance_ok' : 'enhance_fail');
+    return r.success ? done(`조합 성공! ${armorLabel(def, r.stack)}`, 'good') : fail(`조합 실패… 재료가 소모되었습니다 (${armorLabel(def, r.stack)})`);
   },
 
   /** 캠페인 챕터 보상 수령 */

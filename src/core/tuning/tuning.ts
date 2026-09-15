@@ -89,6 +89,36 @@ export function plusUp(def: ArmorDef, s: ItemStack): TuneResult {
   return { ok: true, stack: { ...s, plusUp: lv + 1 }, success: true, cost: plusUpCost(def, s) };
 }
 
+// ---------------------------------------------------------------- 방어구 조합 (armor)
+
+export type CombineFail = TuneFail | 'mismatch' | 'same';
+
+/** Chance (%) that combining two of the same armour upgrades the prefix (없음→고대→전설), null at 전설. */
+export function combineChancePct(a: ItemStack): number | null {
+  if (a.prefix === '전설') return null;
+  return a.prefix === '고대' ? T.combineToLegendPct : T.combineToAncientPct;
+}
+
+export function combineCost(def: ArmorDef, a: ItemStack): number {
+  return Math.round(def.price * T.combineCostMult * (a.prefix === '고대' ? 2 : 1));
+}
+
+/**
+ * 방어구 조합: feed a second copy of the same armour (the material, consumed either way) into the
+ * first. Success promotes the prefix one step; the higher 플러스업 of the pair always carries over.
+ */
+export function combineArmor(def: ArmorDef, a: ItemStack, b: ItemStack, rng: Rng): TuneResult | { ok: false; reason: CombineFail } {
+  if (a.uid === b.uid) return { ok: false, reason: 'same' };
+  if (a.itemId !== b.itemId) return { ok: false, reason: 'mismatch' };
+  const chance = combineChancePct(a);
+  if (chance === null) return { ok: false, reason: 'maxed' };
+  const cost = combineCost(def, a);
+  const plus = Math.max(plusUpLevel(a), plusUpLevel(b));
+  const base: ItemStack = { ...a, plusUp: plus || undefined };
+  if (!rng.chance(chance / 100)) return { ok: true, stack: base, success: false, cost };
+  return { ok: true, stack: { ...base, prefix: a.prefix === '고대' ? '전설' : '고대' }, success: true, cost };
+}
+
 /** Armor defense with CL, 플러스업 and 접두 applied. */
 export function armorDefense(def: ArmorDef, s: ItemStack | null): number {
   let d = def.defense * (def.cl ? 1.5 : 1);

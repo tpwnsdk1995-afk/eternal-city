@@ -126,6 +126,10 @@ export const balance = {
     uniqueMinEnhance: 7,
     uniqueSuccessPct: 30,
     uniqueCostMult: 1.2,
+    /** 방어구 조합: chance the prefix steps up (없음→고대 / 고대→전설); the material is consumed either way */
+    combineToAncientPct: 60,
+    combineToLegendPct: 35,
+    combineCostMult: 0.5,
     prefixDefenseMult: { 고대: 1.2, 전설: 1.4 } as Record<'고대' | '전설', number>,
   },
   ai: {
