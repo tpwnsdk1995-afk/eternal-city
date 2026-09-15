@@ -83,9 +83,18 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 - **환생**: Lv.50 이상에서 EL.IA에게 환생 상담 → 레벨 1·스탯 초기화, 스탯 상한 +15/회(최대 10회, 600), 시작 포인트 +10/회, 장비·스킬·₩ 유지
 - 업적 24종(웜 슬레이어·환생자 추가), 저장 스키마 v5(버프), v1~v4 자동 마이그레이션
 
+## M6 — 감염체 · GUEST/패러사이트 · 2005
+
+- **감염체 종족**: 캐릭터 생성에서 인간/감염체 선택(R). 감염체는 총기를 못 쓰고 **변이무기**(발톱·촉수·골검 근접, 산성 토사 곡사)로 싸운다. 최대 생명 +15%, 이동 +10%, 피격 3초 후 자연 재생, 전용 스킬(변이 마스터리·감염 재생). 총기·총기 마스터리는 인간 전용
+- **GUEST 외계인**: 척후(점멸 도약)·전사(에너지 사격), 2005 필드 곳곳에 배치
+- **어설트 D "의정부 폐허 — 패러사이트 근절"**(Lv.45+, 고급 포함): GUEST 소탕 → 뿌리 기물 4개 파괴 → 격막 개방 → **패러사이트 루트**(고정 보스, 긴 촉수) 제거
+- **2005년 폐허의 서울**(허가증 + Lv.40 또는 2004 캠페인 완주): 의정부 폐허 대피소(허브) + 의정부 폐허 · 종로 폐허 · 일산 지하수로(어둠, 차량기지의 변종 오구린)
+- 캠페인 2004 "강변의 겨울"(4챕터) · 2005 "침묵의 폐허"(3챕터), 메인스트림 2005 일반/CL, 업적 3종 추가
+- 저장 스키마 v6(종족), v1~v5 자동 마이그레이션
+
 ## 다음 단계
 
-M6 감염체 캐릭터, GUEST 외계인 · 패러사이트/Parasite root 보스, 2005 이후 연도(의정부 폐허·종로 폐허·일산), 길드/광진구청 과장 시스템 정리.
+원작 로드맵의 큰 줄기(2002~2005, 어설트·캠페인·튠·패러렐·환생)는 모두 들어갔습니다. 이후는 콘텐츠 확장(2006~2008·2017, 길드, 방어구 조합, 사운드, 실제 아트 교체)과 밸런스 튜닝입니다.
 
 ## 구조
 
@@ -93,7 +102,7 @@ M6 감염체 캐릭터, GUEST 외계인 · 패러사이트/Parasite root 보스,
 src/core/   순수 TS 게임 규칙 (Phaser 금지, 전부 유닛 테스트)  stats · combat · weapons · tuning · inventory · skills · ai · assault · progress · map · quest · economy · save
 src/data/   콘텐츠 데이터 + 스키마 + balance.ts (부팅 시 validateAll로 참조 검증)
 src/game/   Phaser 어댑터: scenes · entities · systems(InputMapper, CombatBridge, SpawnSystem) · ui(창들) · textures(코드 드로잉) · state
-e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth)
+e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005)
 ```
 
 `window.__ec` 디버그 훅으로 상태 조회/스폰/텔레포트/어설트 진행을 제어할 수 있습니다(e2e에서 사용).
