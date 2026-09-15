@@ -128,6 +128,12 @@ export class WindowManager {
     this.open('dialog');
   }
 
+  /** Open the trade window stocked by a given shop NPC (debug/e2e; the dialog option does the same). */
+  openShopFor(npcId: string): void {
+    (this.windows.get('shop') as ShopWindow).setNpc(registry.npc(npcId));
+    this.open('shop');
+  }
+
   /** Switch the quest window to a tab and open it. */
   questTab(tab: QuestTab): void {
     (this.windows.get('quest') as QuestWindow).setTab(tab);

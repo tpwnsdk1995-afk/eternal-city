@@ -8,7 +8,7 @@ test.describe('사이버샵 · 버프 · 프리미엄 쿠폰', () => {
     await page.evaluate(() => window.__ec!.state.setCharacter({ ...window.__ec!.state.character, won: 2_000_000, level: 20 }));
     await page.evaluate(() => window.__ec!.state.events.emit('npcInteract', { npcId: 'npc_cybershop' }));
     await page.waitForFunction(() => window.__ec!.windows().includes('dialog'));
-    await page.evaluate(() => window.__ec!.openWindow('shop'));
+    await page.evaluate(() => window.__ec!.openShop('npc_cybershop'));
     await page.waitForFunction(() => window.__ec!.windows().includes('shop'));
     await page.screenshot({ path: 'e2e/out/cybershop.png' });
 
