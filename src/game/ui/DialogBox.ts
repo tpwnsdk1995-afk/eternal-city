@@ -31,7 +31,9 @@ export class DialogBox extends Window {
   refresh(): void {
     this.clearBody();
     if (!this.npc) return;
-    this.content.add(this.scene.add.image(20, 2, this.npc.tex, figureFrame(DIR_S, 0)).setOrigin(0, 0).setDisplaySize(64, 64));
+    const frame = figureFrame(DIR_S, 0);
+    const hasFigureFrames = this.scene.textures.get(this.npc.tex).has(String(frame));
+    this.content.add(this.scene.add.image(20, 2, this.npc.tex, hasFigureFrames ? frame : 0).setOrigin(0, 0).setDisplaySize(64, 64));
     this.label(84, 6, this.line, theme.colors.text, 14, { wordWrap: { width: this.w - 110 } });
     let x = 84;
     for (const o of this.options) {

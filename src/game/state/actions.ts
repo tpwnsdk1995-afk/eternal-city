@@ -1,4 +1,5 @@
-import { registry } from '@data/registry';
+import { MAPS, registry } from '@data/registry';
+import * as taxi from '@core/economy/taxi';
 import type { StatKey } from '@data/schema/enums';
 import { allocateStat } from '@core/stats/allocation';
 import { statCap } from '@core/stats/levelCurve';
@@ -129,6 +130,37 @@ export const actions = {
     gameState.setCharacter({ ...gameState.character, won: gameState.character.won - r.cost });
     gameState.setVitals({});
     return done(`${def.name} 습득 (₩${r.cost.toLocaleString('ko-KR')})`, 'good');
+  },
+
+  /** Register the current map's taxi stand. */
+  taxiRegister(): ActionResult {
+    const def = registry.map(gameState.currentMapId);
+    const r = taxi.register(def, gameState.flags, gameState.character.won);
+    if (!r.ok) return fail({ already: '이미 등록된 정류장입니다.', noMoney: `등록비 ₩${taxi.TAXI_REGISTER_FEE.toLocaleString('ko-KR')}이 부족합니다.`, noStop: '이 지역에는 정류장이 없습니다.' }[r.reason]);
+    gameState.setCharacter({ ...gameState.character, won: r.won });
+    gameState.setFlag(taxi.taxiFlag(def.id), true);
+    return done(`${def.name} 정류장 등록 (₩${taxi.TAXI_REGISTER_FEE.toLocaleString('ko-KR')})`, 'good');
+  },
+
+  /** Pay the fare and travel to a registered stop. */
+  taxiRide(mapId: string): ActionResult {
+    const to = registry.map(mapId);
+    const r = taxi.ride(MAPS, gameState.flags, gameState.character.won, gameState.currentMapId, to, gameState.character.level);
+    if (!r.ok) {
+      const why = {
+        sameMap: '지금 있는 곳입니다.',
+        notRegistered: `${to.name} 정류장에 아직 등록하지 않았습니다. 직접 가서 등록하세요.`,
+        hereNotRegistered: '먼저 이곳 정류장에 등록해야 합니다.',
+        noMoney: '요금이 부족합니다.',
+        noStop: '그곳에는 정류장이 없습니다.',
+        level: `${to.name}은(는) 레벨 ${to.levelRange?.[0]} 권장 지역입니다. 조합원이 태워 주지 않습니다.`,
+      }[r.reason];
+      return fail(why);
+    }
+    gameState.setCharacter({ ...gameState.character, won: r.won });
+    gameState.message(`택시 이동: ${to.name} (₩${r.cost.toLocaleString('ko-KR')})`, 'system');
+    gameState.events.emit('travel', { mapId: to.id, spawn: 'taxi' });
+    return { ok: true };
   },
 
   acceptQuest(id: string): ActionResult {

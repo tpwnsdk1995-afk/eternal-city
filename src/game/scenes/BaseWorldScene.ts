@@ -52,6 +52,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   pickups!: Phaser.Physics.Arcade.Group;
   protected combat: CombatBridge | null = null;
   private lightMask: Phaser.GameObjects.Graphics | null = null;
+  private vendings: { x: number; y: number }[] = [];
   private portalArmed = false;
   private transitioning = false;
 
@@ -81,11 +82,13 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     }
 
     // street furniture: base at the bottom of its tile, y-sorted with characters
+    this.vendings = [];
     for (const d of this.def.decor ?? []) {
       const ts = this.def.tileSize;
       const bx = d.at.x * ts + ts / 2;
       const by = (d.at.y + 1) * ts - 2;
       this.add.image(bx, by, d.tex).setOrigin(0.5, 1).setDepth(depthForY(by));
+      if (d.interact === 'vending') this.vendings.push({ x: bx, y: by - 20 });
     }
 
     const w = this.def.width * this.def.tileSize;
@@ -120,9 +123,11 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     this.mapper = new InputMapper(this, gameState.settings.controlScheme);
     const offSettings = gameState.events.on('settings', (s) => this.mapper.setScheme(s.controlScheme));
     const offTitle = gameState.events.on('goTitle', () => this.backToTitle());
+    const offTravel = gameState.events.on('travel', ({ mapId, spawn }) => this.goToMap(mapId, spawn));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       offSettings();
       offTitle();
+      offTravel();
     });
 
     for (const n of this.def.npcs ?? []) {
@@ -167,13 +172,19 @@ export abstract class BaseWorldScene extends Phaser.Scene {
 
     if (intent.hotkey) gameState.events.emit('hotkey', intent.hotkey);
 
-    // classic: clicking an NPC talks instead of walking
+    // classic: clicking an NPC / vending machine interacts instead of walking
     let consumedClick = false;
     if (intent.clickedWorld) {
       const npc = this.npcs.find((n) => dist({ x: n.x, y: n.y }, intent.clickedWorld!) < 20);
       if (npc && dist(this.player.pos, { x: npc.x, y: npc.y }) <= NPC_INTERACT_RADIUS) {
         gameState.events.emit('npcInteract', { npcId: npc.def.id });
         consumedClick = true;
+      } else {
+        const v = this.vendings.find((p) => dist(p, intent.clickedWorld!) < 24);
+        if (v && dist(this.player.pos, v) <= NPC_INTERACT_RADIUS + 16) {
+          gameState.events.emit('npcInteract', { npcId: 'npc_vending' });
+          consumedClick = true;
+        }
       }
     }
     this.player.applyIntent(consumedClick ? { ...intent, clickedWorld: null } : intent, delta, this.mapper.scheme);
@@ -185,7 +196,10 @@ export abstract class BaseWorldScene extends Phaser.Scene {
       n.setNear(near);
       if (near) nearest = n;
     }
-    if (nearest && intent.interactPressed) gameState.events.emit('npcInteract', { npcId: nearest.def.id });
+    if (intent.interactPressed) {
+      if (nearest) gameState.events.emit('npcInteract', { npcId: nearest.def.id });
+      else if (this.vendings.some((v) => dist(this.player.pos, v) <= NPC_INTERACT_RADIUS + 16)) gameState.events.emit('npcInteract', { npcId: 'npc_vending' });
+    }
 
     // portals: must step out of every portal once after arriving before they re-arm
     const inPortal = this.def.portals.find((p) => pointInRect(this.def, this.player.x, this.player.y, p.rect));

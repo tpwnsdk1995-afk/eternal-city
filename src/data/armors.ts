@@ -9,4 +9,5 @@ export const ARMORS: ArmorDef[] = [
 export const CONSUMABLES: ConsumableDef[] = [
   { kind: 'consumable', id: 'bandage', name: '붕대', effect: { hp: 40 }, weightKg: 0.1, price: 800, iconTex: TEX.icon_bandage },
   { kind: 'consumable', id: 'energy_drink', name: '에너지 드링크', effect: { stamina: 60 }, weightKg: 0.2, price: 600, iconTex: TEX.icon_energy_drink },
+  { kind: 'consumable', id: 'painkiller', name: '진통제', effect: { hp: 15, ap: 10 }, weightKg: 0.05, price: 500, iconTex: TEX.icon_painkiller },
 ];

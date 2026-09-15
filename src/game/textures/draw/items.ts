@@ -152,6 +152,17 @@ export function drawIconEnergyDrink(ctx: Ctx, _f: number, w: number, h: number):
 
 export const drawIconConsumable = drawIconBandage;
 
+/** Orange pill bottle */
+export function drawIconPainkiller(ctx: Ctx, _f: number, w: number, h: number): void {
+  iconShadow(ctx, w, h);
+  fill(ctx, 11, 8, 10, 4, '#f4f4f4'); // cap
+  fill(ctx, 10, 12, 12, 15, '#e08a2a');
+  fill(ctx, 10, 12, 2, 15, 'rgba(255,255,255,0.3)');
+  fill(ctx, 12, 16, 8, 7, '#f7f0dc'); // label
+  fill(ctx, 13, 18, 6, 1.2, '#c23b3b');
+  fill(ctx, 13, 20.5, 4, 1.2, '#6b6f7a');
+}
+
 /** Folded military document with a red classification stamp */
 export function drawIconDocument(ctx: Ctx, _f: number, w: number, h: number): void {
   iconShadow(ctx, w, h);

@@ -47,7 +47,7 @@ export const achasanStation: MapDef = {
     { at: { x: 16, y: 22 }, tex: TEX.deco_busstop, solid: true },
     ...[10, 30, 50].map((x) => ({ at: { x, y: 22 }, tex: TEX.deco_lamp, solid: true })),
     ...[6, 26, 46, 64].map((x) => ({ at: { x, y: 45 }, tex: TEX.deco_lamp, solid: true })),
-    { at: { x: 40, y: 15 }, tex: TEX.deco_vending, solid: true },
+    { at: { x: 40, y: 15 }, tex: TEX.deco_vending, solid: true, interact: 'vending' },
     { at: { x: 54, y: 15 }, tex: TEX.deco_phone, solid: true },
     { at: { x: 52, y: 39 }, tex: TEX.deco_sign },
     { at: { x: 8, y: 16 }, tex: TEX.deco_tree, solid: true },
@@ -86,6 +86,8 @@ export const achasanStation: MapDef = {
     default: { x: 4, y: 30 },
     fromJunggokStation: { x: 4, y: 30 },
     fromSewer: { x: 52, y: 39 },
+    taxi: { x: 8, y: 24 },
   },
+  npcs: [{ id: 'npc_taxi', at: { x: 6, y: 24 } }],
   safeZone: false,
 };

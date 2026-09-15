@@ -47,8 +47,8 @@ export const hangangPark: MapDef = {
     ...[12, 28, 66, 84].map((x) => ({ at: { x, y: 34 }, tex: TEX.deco_tree, solid: true })),
     ...[10, 34, 58, 82].map((x) => ({ at: { x, y: 38 }, tex: TEX.deco_bench, solid: true })),
     ...[4, 24, 44, 64, 84].map((x) => ({ at: { x, y: 39 }, tex: TEX.deco_lamp, solid: true })),
-    { at: { x: 42, y: 20 }, tex: TEX.deco_vending, solid: true },
-    { at: { x: 43, y: 20 }, tex: TEX.deco_vending, solid: true },
+    { at: { x: 42, y: 20 }, tex: TEX.deco_vending, solid: true, interact: 'vending' },
+    { at: { x: 43, y: 20 }, tex: TEX.deco_vending, solid: true, interact: 'vending' },
     { at: { x: 56, y: 20 }, tex: TEX.deco_trash, solid: true },
     { at: { x: 50, y: 6 }, tex: TEX.deco_sign },
     { at: { x: 58, y: 14 }, tex: TEX.deco_phone, solid: true },
@@ -90,6 +90,8 @@ export const hangangPark: MapDef = {
   spawnPoints: {
     default: { x: 60, y: 4 },
     fromJunggok: { x: 60, y: 4 },
+    taxi: { x: 54, y: 6 },
   },
+  npcs: [{ id: 'npc_taxi', at: { x: 52, y: 6 } }],
   safeZone: false,
 };

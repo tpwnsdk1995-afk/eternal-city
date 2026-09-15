@@ -39,8 +39,8 @@ export const gwangjinParking: MapDef = {
   decor: [
     // tall pillar sprites standing on the pillar tiles (tile is already solid)
     ...PILLAR_X.flatMap((x) => PILLAR_Y.map((y) => ({ at: { x, y }, tex: TEX.deco_pillar }))),
-    { at: { x: 34, y: 4 }, tex: TEX.deco_vending, solid: true },
-    { at: { x: 35, y: 4 }, tex: TEX.deco_vending, solid: true },
+    { at: { x: 34, y: 4 }, tex: TEX.deco_vending, solid: true, interact: 'vending' },
+    { at: { x: 35, y: 4 }, tex: TEX.deco_vending, solid: true, interact: 'vending' },
     { at: { x: 5, y: 4 }, tex: TEX.deco_trash, solid: true },
     { at: { x: 36, y: 12 }, tex: TEX.deco_sign },
     { at: { x: 2, y: 20 }, tex: TEX.deco_phone, solid: true },
@@ -51,11 +51,13 @@ export const gwangjinParking: MapDef = {
   spawnPoints: {
     default: { x: 20, y: 12 },
     fromField: { x: 35, y: 15 },
+    taxi: { x: 33, y: 21 },
   },
   npcs: [
     { id: 'npc_elia', at: { x: 12, y: 5 } },
     { id: 'npc_shop', at: { x: 20, y: 5 } },
     { id: 'npc_assault', at: { x: 28, y: 5 } },
+    { id: 'npc_taxi', at: { x: 35, y: 21 } },
   ],
   safeZone: true,
 };

@@ -21,12 +21,13 @@ import { junggokStation } from './maps/junggok-station';
 import { achasanStation } from './maps/achasan-station';
 import { sewer } from './maps/sewer';
 import { hangangPark } from './maps/hangang-park';
+import { pyeongchangDong } from './maps/pyeongchang-dong';
 import { assaultA } from './assaults/assault-a';
 
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
 
 export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES, ...MISC];
-export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark];
+export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong];
 export const ASSAULTS: AssaultDef[] = [assaultA];
 
 const items = byId(ITEMS);

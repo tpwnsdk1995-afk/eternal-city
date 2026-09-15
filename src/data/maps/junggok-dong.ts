@@ -25,7 +25,7 @@ const furniture = buildings.flatMap((b, i) => {
     { at: { x: ring.x, y: ring.y + ring.h - 1 }, tex: TEX.deco_lamp, solid: true }, // SW corner
     { at: { x: ring.x + ring.w - 1, y: ring.y }, tex: TEX.deco_lamp, solid: true }, // NE corner
   ];
-  if (i % 3 === 0) items.push({ at: { x: ring.x, y: ring.y + 4 }, tex: TEX.deco_vending, solid: true });
+  if (i % 3 === 0) items.push({ at: { x: ring.x, y: ring.y + 4 }, tex: TEX.deco_vending, solid: true, interact: 'vending' });
   if (i % 3 === 1) items.push({ at: { x: ring.x + ring.w - 1, y: ring.y + 7 }, tex: TEX.deco_phone, solid: true });
   if (i % 2 === 0) items.push({ at: { x: ring.x + ring.w - 1, y: ring.y + ring.h - 1 }, tex: TEX.deco_trash, solid: true });
   if (i % 4 === 2) items.push({ at: { x: ring.x + 5, y: ring.y }, tex: TEX.deco_sign });
@@ -134,8 +134,12 @@ export const junggokDong: MapDef = {
     fromSchool: { x: 48, y: 4 },
     fromStation: { x: 95, y: 43 },
     fromHangang: { x: 60, y: 75 },
+    taxi: { x: 6, y: 77 },
   },
-  // 중곡동 경찰서 앞 (구청 입구 옆 보도)
-  npcs: [{ id: 'npc_kimhun', at: { x: 9, y: 71 } }],
+  // 중곡동 경찰서 앞 (구청 입구 옆 보도) + 택시 정류장
+  npcs: [
+    { id: 'npc_kimhun', at: { x: 9, y: 71 } },
+    { id: 'npc_taxi', at: { x: 8, y: 77 } },
+  ],
   safeZone: false,
 };

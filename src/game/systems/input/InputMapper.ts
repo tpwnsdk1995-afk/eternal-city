@@ -37,6 +37,8 @@ export class InputMapper {
   private capsLatch = false;
   private pendingClick: { x: number; y: number; shift: boolean } | null = null;
   private pendingHotkey: Hotkey | null = null;
+  private pendingInteract = false;
+  private pendingSpace = false;
   private crouched = false;
 
   constructor(
@@ -56,6 +58,8 @@ export class InputMapper {
     kb.on('keydown', (ev: KeyboardEvent) => {
       if (typeof ev.getModifierState === 'function') this.capsLatch = ev.getModifierState('CapsLock');
       if (ev.repeat) return;
+      if (ev.code === 'KeyE') this.pendingInteract = true;
+      if (ev.code === 'Space') this.pendingSpace = true;
       const hk = this.hotkeyFor(ev.code);
       if (hk) this.pendingHotkey = hk;
     });
@@ -90,16 +94,21 @@ export class InputMapper {
     const click = this.pendingClick;
     this.pendingClick = null;
 
+    const space = this.pendingSpace;
+    this.pendingSpace = false;
+    const interactPressed = this.pendingInteract;
+    this.pendingInteract = false;
+
     let crouchPressed = false;
     let jumpPressed = false;
     if (this.scheme === 'classic') {
-      if (jd(k.SPACE)) {
+      if (space) {
         if (this.crouched) jumpPressed = true;
         else crouchPressed = true;
       }
     } else {
       if (jd(k.C)) crouchPressed = true;
-      if (jd(k.SPACE)) jumpPressed = true;
+      if (space) jumpPressed = true;
     }
 
     let moveDir: Vec2 | null = null;
@@ -129,7 +138,7 @@ export class InputMapper {
       aimWorld,
       fireHeld,
       subFirePressed: jd(k.CTRL),
-      interactPressed: jd(k.E),
+      interactPressed,
       hotkey,
     };
   }

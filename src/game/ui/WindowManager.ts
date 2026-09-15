@@ -7,6 +7,7 @@ import { actions } from '../state/actions';
 import { ResultWindow } from './ResultWindow';
 import { MenuWindow } from './MenuWindow';
 import { QuestWindow } from './QuestWindow';
+import { TaxiWindow } from './TaxiWindow';
 import { questService } from '../state/questService';
 import type { Window } from './Window';
 import { InventoryWindow } from './InventoryWindow';
@@ -16,7 +17,7 @@ import { ShopWindow } from './ShopWindow';
 import { DialogBox } from './DialogBox';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 
-export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu' | 'quest';
+export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu' | 'quest' | 'taxi';
 
 const HUD_H = 108;
 
@@ -34,7 +35,8 @@ export class WindowManager {
     const result = new ResultWindow(scene, (GAME_WIDTH - 460) / 2, 140);
     const menu = new MenuWindow(scene, (GAME_WIDTH - 440) / 2, 120);
     const quest = new QuestWindow(scene, GAME_WIDTH - 460 - 12, 40);
-    for (const w of [inv, status, skills, shop, dialog, result, menu, quest]) {
+    const taxiW = new TaxiWindow(scene, (GAME_WIDTH - 520) / 2, 60);
+    for (const w of [inv, status, skills, shop, dialog, result, menu, quest, taxiW]) {
       this.windows.set(w.key as WindowKey, w);
       w.setVisible(false);
       w.on('close', () => this.close(w.key as WindowKey));
@@ -154,6 +156,17 @@ export class WindowManager {
       switch (npc.role) {
         case 'quest':
           return [...questOpts, closeOpt];
+        case 'taxi':
+          return [
+            {
+              label: '택시 이용',
+              onPick: () => {
+                this.close('dialog');
+                this.open('taxi');
+              },
+            },
+            closeOpt,
+          ];
         case 'shop':
           return [
             {

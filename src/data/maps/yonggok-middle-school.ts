@@ -59,7 +59,7 @@ export const yonggokMiddleSchool: MapDef = {
     ...[2, 67].flatMap((x) => [22, 30, 38].map((y) => ({ at: { x, y }, tex: TEX.deco_tree, solid: true }))),
     { at: { x: 8, y: 16 }, tex: TEX.deco_bench, solid: true },
     { at: { x: 60, y: 16 }, tex: TEX.deco_bench, solid: true },
-    { at: { x: 20, y: 16 }, tex: TEX.deco_vending, solid: true },
+    { at: { x: 20, y: 16 }, tex: TEX.deco_vending, solid: true, interact: 'vending' },
     { at: { x: 22, y: 16 }, tex: TEX.deco_trash, solid: true },
     { at: { x: 47, y: 16 }, tex: TEX.deco_sign },
     { at: { x: 30, y: 49 }, tex: TEX.deco_lamp, solid: true },
@@ -101,6 +101,8 @@ export const yonggokMiddleSchool: MapDef = {
   spawnPoints: {
     default: { x: 35, y: 47 },
     fromJunggok: { x: 35, y: 47 },
+    taxi: { x: 28, y: 15 },
   },
+  npcs: [{ id: 'npc_taxi', at: { x: 26, y: 15 } }],
   safeZone: false,
 };

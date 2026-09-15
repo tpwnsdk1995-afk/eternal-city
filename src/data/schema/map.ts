@@ -57,7 +57,7 @@ export interface MapDef {
   fills?: { rect: Rect; tile: TileId; solid?: boolean }[];
   obstacles: { rect: Rect; tile: TileId; kind: 'building' | 'car' | 'wall' | 'pillar' | 'fence' }[];
   /** Street furniture sprites; `at` is the tile the base stands on. `solid` blocks that tile. */
-  decor?: { at: Vec2; tex: TexKey; solid?: boolean }[];
+  decor?: { at: Vec2; tex: TexKey; solid?: boolean; interact?: 'vending' }[];
   spawnZones?: SpawnZoneDef[];
   portals: PortalDef[];
   spawnPoints: Record<string, Vec2>; // tile coords; must include 'default'

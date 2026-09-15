@@ -56,6 +56,8 @@ export interface GameEvents extends Record<string, unknown> {
   hotkey: string;
   npcInteract: { npcId: string };
   startAssault: { assaultId: string };
+  /** taxi ride / scripted travel to another map */
+  travel: { mapId: string; spawn: string };
   assault: AssaultHud | null;
   assaultResult: AssaultResult;
   menu: undefined;

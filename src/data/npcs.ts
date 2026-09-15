@@ -39,6 +39,21 @@ export const NPCS: NpcDef[] = [
     quests: ['q_junggok_cleanup', 'q_wito_documents'],
   },
   {
+    id: 'npc_taxi',
+    name: '운송조합원',
+    role: 'taxi',
+    tex: TEX.npc_taxi,
+    lines: ['등록비 내면 조합 차량을 태워 드립니다. 등록한 정류장끼리만 갑니다.', '기름값이 금값이라 요금은 거리대로 받습니다.'],
+  },
+  {
+    id: 'npc_vending',
+    name: '자판기',
+    role: 'shop',
+    tex: TEX.deco_vending,
+    lines: ['……동전 넣는 소리가 난다.'],
+    stock: ['bandage', 'energy_drink', 'painkiller'],
+  },
+  {
     id: 'npc_assault',
     name: '어설트 접수원',
     role: 'assault',

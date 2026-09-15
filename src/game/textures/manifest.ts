@@ -14,6 +14,7 @@ import {
   drawIconBandage,
   drawIconConsumable,
   drawIconDocument,
+  drawIconPainkiller,
   drawIconEnergyDrink,
   drawIconGlock17,
   drawIconM1911,
@@ -81,6 +82,7 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.npc_shop]: figure('npc_shop'),
   [TEX.npc_assault]: figure('npc_assault'),
   [TEX.npc_kimhun]: figure('npc_kimhun'),
+  [TEX.npc_taxi]: figure('npc_taxi'),
   [TEX.wito_soldier]: figure('wito_soldier'),
 
   [TEX.deco_lamp]: single(drawLamp, 32, 80),
@@ -124,6 +126,7 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.icon_bandage]: single(drawIconBandage, 32),
   [TEX.icon_energy_drink]: single(drawIconEnergyDrink, 32),
   [TEX.icon_document]: single(drawIconDocument, 32),
+  [TEX.icon_painkiller]: single(drawIconPainkiller, 32),
   [TEX.icon_ammo_normal]: single(drawIconAmmoNormal, 32),
   [TEX.icon_ammo_incendiary]: single(drawIconAmmoIncendiary, 32),
   [TEX.icon_armor_top]: single(drawIconArmorTop, 32),
