@@ -46,8 +46,18 @@ export abstract class Window extends Phaser.GameObjects.Container {
   /** Rebuild contents from current state. */
   abstract refresh(): void;
 
+  private buttons: Phaser.GameObjects.Text[] = [];
+
   protected clearBody(): void {
     this.content.removeAll(true);
+    this.buttons = [];
+  }
+
+  /** Screen-space centre of the first button whose label starts with `label` (debug/e2e). */
+  buttonPos(label: string): { x: number; y: number } | null {
+    const b = this.buttons.find((t) => t.active && t.text.startsWith(label));
+    if (!b) return null;
+    return { x: this.x + this.content.x + b.x + b.width / 2, y: this.y + this.content.y + b.y + b.height / 2 };
   }
 
   /** Small clickable text button. */
@@ -59,6 +69,7 @@ export abstract class Window extends Phaser.GameObjects.Container {
     t.on('pointerout', () => t.setStyle({ backgroundColor: '#1a1e24' }));
     t.on('pointerdown', (p: Phaser.Input.Pointer) => onClick(p));
     this.content.add(t);
+    this.buttons.push(t);
     return t;
   }
 

@@ -13,6 +13,8 @@ import { balance } from '@data/balance';
 export class TitleScene extends Phaser.Scene {
   private busy = false;
   private rain!: Rain;
+  private importStatus!: Phaser.GameObjects.Text;
+  private showSlot: ((row: SaveRow) => void) | null = null;
 
   constructor() {
     super('Title');
@@ -34,18 +36,28 @@ export class TitleScene extends Phaser.Scene {
 
     // menu panel
     const panelW = 420;
-    const panelH = 170;
-    const py = GAME_HEIGHT / 2 + 40;
+    const panelH = 214;
+    const py = GAME_HEIGHT / 2 + 20;
     this.add.nineslice(cx, py, TEX.ui_panel, 0, panelW, panelH, 8, 8, 8, 8).setOrigin(0.5, 0).setAlpha(0.92);
     this.menuItem(py + 44, '▶ 새 게임 시작  (Enter)', () => this.newGame());
     const cont = this.menuItem(py + 94, '계속하기  (C)', () => void this.continueGame()).setVisible(false);
     const info = this.add.text(cx, py + 126, '', theme.textStyle(12, '#8a8f9c')).setOrigin(0.5);
+    // 세이브 파일 불러오기 (다른 기기에서 내보낸 .json)
+    const imp = this.add.text(cx, py + 172, '세이브 파일 불러오기…', theme.textStyle(15, theme.colors.muted)).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    imp.on('pointerover', () => imp.setColor('#ffffff'));
+    imp.on('pointerout', () => imp.setColor(theme.colors.muted));
+    imp.on('pointerdown', () => void this.importSave());
+    this.importStatus = this.add.text(cx, py + 196, '', theme.textStyle(11, '#8a8f9c')).setOrigin(0.5);
 
     void saveService.loadSettings();
-    void saveService.peek().then((row: SaveRow | null) => {
-      if (!row || !this.scene.isActive()) return;
+    const showSlot = (row: SaveRow) => {
       cont.setVisible(true);
       info.setText(`${row.name}  Lv.${row.level} · ${row.mapName} · ${new Date(row.updatedAt).toLocaleString('ko-KR')}`);
+    };
+    this.showSlot = showSlot;
+    void saveService.peek().then((row: SaveRow | null) => {
+      if (!row || !this.scene.isActive()) return;
+      showSlot(row);
       this.input.keyboard?.once('keydown-C', () => void this.continueGame());
     });
     this.input.keyboard?.once('keydown-ENTER', () => this.newGame());
@@ -71,6 +83,20 @@ export class TitleScene extends Phaser.Scene {
     if (this.busy) return;
     this.busy = true;
     this.scene.start('CharacterCreate');
+  }
+
+  /** Pick an exported .json → store it in the slot → continue straight into it. */
+  private async importSave(): Promise<void> {
+    if (this.busy) return;
+    const r = await saveService.importFromPicker();
+    if (!r || !this.scene.isActive()) return;
+    if (!r.ok) {
+      this.importStatus.setText(saveService.describeImportFail(r)).setColor(theme.colors.bad);
+      return;
+    }
+    if (r.row) this.showSlot?.(r.row);
+    this.importStatus.setText(`${r.row?.name ?? ''} 세이브를 불러왔습니다 — 이어서 시작합니다.`).setColor(theme.colors.good);
+    await this.continueGame();
   }
 
   private async continueGame(): Promise<void> {

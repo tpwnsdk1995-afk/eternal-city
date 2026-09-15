@@ -101,6 +101,11 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 - 설정 `터치 조작: 자동/켬/끔`(저장·복원), `viewport-fit=cover` · 확대 방지 · 스크롤 바운스 차단
 - e2e `touch.spec.ts`(`?touch=1`로 강제, 스틱 이동/달리기·자동 조준 사격·조준 드래그·점프·탭·퀵슬롯·설정 토글) + 데스크톱에서 숨김 확인
 
+## M8 — 마무리 (진행 중)
+
+- **세이브 파일 내보내기/불러오기**: Esc 메뉴 → `내보내기 (파일)`(`.json` 내려받기) / `클립보드 복사`, `불러오기 (파일)` / `클립보드 붙여넣기`(불러오면 그 캐릭터로 바뀌고 저장 위치로 이동). 타이틀 화면의 `세이브 파일 불러오기…`로 새 기기에서 바로 이어하기. 파일은 체크섬이 붙은 봉투 형식이며 예전 스키마(v1~)도 자동 마이그레이션, 손상·잘림·상위 버전 파일은 이유를 표시하고 거부
+- 저장 자체는 계속 자동(맵 이동·레벨 업·장비/스킬 변경·60초마다·탭 닫을 때, 브라우저 IndexedDB)
+
 ## 다음 단계
 
 원작 로드맵의 큰 줄기(2002~2005, 어설트·캠페인·튠·패러렐·환생)는 모두 들어갔습니다. 이후는 콘텐츠 확장(2006~2008·2017, 길드, 방어구 조합, 사운드, 실제 아트 교체)과 밸런스 튜닝입니다.
@@ -111,7 +116,7 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 src/core/   순수 TS 게임 규칙 (Phaser 금지, 전부 유닛 테스트)  stats · combat · weapons · tuning · inventory · skills · ai · assault · progress · map · quest · economy · save
 src/data/   콘텐츠 데이터 + 스키마 + balance.ts (부팅 시 validateAll로 참조 검증)
 src/game/   Phaser 어댑터: scenes · entities · systems(InputMapper, CombatBridge, SpawnSystem) · ui(창들) · textures(코드 드로잉) · state
-e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch)
+e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch · save-transfer)
 ```
 
 `window.__ec` 디버그 훅으로 상태 조회/스폰/텔레포트/어설트 진행을 제어할 수 있습니다(e2e에서 사용).

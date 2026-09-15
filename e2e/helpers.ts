@@ -30,3 +30,16 @@ export async function warpToField(page: Page): Promise<void> {
   await page.waitForFunction(() => window.__ec?.scene() === 'Field');
   await page.waitForTimeout(300);
 }
+
+/**
+ * Click a canvas UI element. Phaser reads the pointer position from the last move, so a bare
+ * `mouse.click` can land before the position is registered; move first, then press.
+ */
+export async function clickAt(page: Page, pos: { x: number; y: number } | null): Promise<void> {
+  if (!pos) throw new Error('clickAt: no position');
+  await page.mouse.move(pos.x, pos.y);
+  await page.waitForTimeout(80);
+  await page.mouse.down();
+  await page.waitForTimeout(60);
+  await page.mouse.up();
+}

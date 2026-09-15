@@ -60,6 +60,10 @@ export interface EcDebug {
   give(itemId: string, qty?: number): void;
   save(): Promise<unknown>;
   hasSave(): Promise<boolean>;
+  /** Portable save text (what 내보내기 writes), or null without a save. */
+  exportSave(): Promise<string | null>;
+  /** Validate + store exported text into the slot (what 불러오기 does before loading). */
+  importSave(text: string): Promise<{ ok: boolean; reason?: string }>;
   /** Open window keys (top last). */
   windows(): string[];
   openWindow(key: WindowKey): void;
@@ -68,6 +72,8 @@ export interface EcDebug {
   /** Open the shop window with a specific merchant's stock. */
   openShop(npcId: string): void;
   closeWindows(): void;
+  /** Screen centre of a labelled button inside an open window (canvas UI has no DOM to query). */
+  buttonPos(key: WindowKey, label: string): { x: number; y: number } | null;
   /** On-screen touch control layout (screen px), or null when the UI scene is not running. */
   touch(): ReturnType<UIScene['touch']['snapshot']> | null;
   /** Same validated player actions the windows use (equip/use/allocate/buy/sell/skills). */
@@ -123,11 +129,14 @@ export function exposeDebug(game: Phaser.Game): void {
     },
     save: () => saveService.save(),
     hasSave: () => saveService.peek().then((r) => !!r),
+    exportSave: () => saveService.exportText(),
+    importSave: (text) => saveService.importText(text).then((r) => (r.ok ? { ok: true } : { ok: false, reason: r.reason })),
     windows: () => uiScene()?.windows.openKeys() ?? [],
     openWindow: (key) => uiScene()?.windows.open(key),
     questTab: (tab) => uiScene()?.windows.questTab(tab),
     openShop: (npcId) => uiScene()?.windows.openShopFor(npcId),
     closeWindows: () => uiScene()?.windows.closeAll(),
+    buttonPos: (key, label) => uiScene()?.windows.buttonPos(key, label) ?? null,
     touch: () => uiScene()?.touch.snapshot() ?? null,
     actions,
     fps: () => game.loop.actualFps,

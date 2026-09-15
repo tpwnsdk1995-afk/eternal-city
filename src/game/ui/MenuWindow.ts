@@ -9,7 +9,7 @@ import { theme } from './theme';
 /** Esc menu: control scheme, FPS overlay, manual save, back to title. */
 export class MenuWindow extends Window {
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, 'menu', x, y, 440, 520, '메뉴 (Esc)');
+    super(scene, 'menu', x, y, 440, 584, '메뉴 (Esc)');
   }
 
   refresh(): void {
@@ -44,5 +44,29 @@ export class MenuWindow extends Window {
     this.button(130, y, '타이틀로 (저장 후)', () => gameState.events.emit('goTitle', undefined), theme.colors.bad, 13);
     y += 40;
     this.label(20, y, '자동 저장: 맵 이동 · 레벨 업 · 장비/스킬 변경 · 60초마다 · 창 닫을 때', '#6b7280', 11);
+    y += 24;
+    this.label(20, y, '다른 기기로 옮기기 — 세이브 파일', theme.colors.muted, 12);
+    y += 20;
+    this.button(20, y, '내보내기 (파일)', () => void saveService.exportToFile().then((n) => gameState.message(n ? `세이브 파일을 내려받았습니다: ${n}` : '내보낼 세이브가 없습니다.', n ? 'good' : 'bad')), '#9be7ff', 13);
+    this.button(150, y, '클립보드 복사', () => void saveService.exportToClipboard().then((ok) => gameState.message(ok ? '세이브를 클립보드에 복사했습니다. 다른 기기에서 "클립보드 붙여넣기"로 불러오세요.' : '클립보드 복사에 실패했습니다.', ok ? 'good' : 'bad')), '#9be7ff', 13);
+    y += 32;
+    this.button(20, y, '불러오기 (파일)', () => void saveService.importFromPicker().then((r) => this.afterImport(r)), '#ffd166', 13);
+    this.button(150, y, '클립보드 붙여넣기', () => void saveService.importFromClipboard().then((r) => this.afterImport(r ?? { ok: false, reason: 'parse' })), '#ffd166', 13);
+    y += 30;
+    this.label(20, y, '불러오면 현재 캐릭터를 덮어쓰고 그 세이브의 위치로 이동합니다.', '#6b7280', 11);
+  }
+
+  /** Imported into the slot → swap the live character and travel to where it was saved. */
+  private afterImport(r: Awaited<ReturnType<typeof saveService.importFromPicker>>): void {
+    if (!r) return; // picker cancelled
+    if (!r.ok) {
+      gameState.message(saveService.describeImportFail(r), 'bad');
+      return;
+    }
+    void saveService.load().then((save) => {
+      if (!save) return gameState.message('불러온 세이브를 적용하지 못했습니다.', 'bad');
+      gameState.message(`${save.character.name} Lv.${save.character.level} 세이브를 불러왔습니다.`, 'good');
+      gameState.events.emit('travel', { mapId: save.location.mapId, spawn: save.location.spawn });
+    });
   }
 }

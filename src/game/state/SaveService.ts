@@ -4,6 +4,7 @@ import { hubForYear } from '@core/world/parallel';
 import { initialFireState } from '@core/weapons/fireController';
 import { emptyStatus } from '@core/combat/statusEffects';
 import { CURRENT_SAVE_VERSION, migrateSave, type SaveGame } from '@core/save/saveSchema';
+import { decodeSaveFile, describeDecodeFail, encodeSaveFile, saveFileName, type DecodeResult } from '@core/save/transfer';
 import { db, type SaveRow } from './db';
 import { gameState } from './GameState';
 
@@ -159,6 +160,116 @@ class SaveService {
   async loadSettings(): Promise<void> {
     const row = await db.settings.get(SETTINGS_KEY);
     if (row && typeof row.value === 'object' && row.value) gameState.settings = { ...gameState.settings, ...(row.value as Partial<typeof gameState.settings>) };
+  }
+
+  // --- 내보내기 / 불러오기 (move a save between devices) ----------------------------------------
+
+  /** Portable text of the live character (or of the stored slot when no character is loaded). */
+  async exportText(slot = DEFAULT_SLOT): Promise<string | null> {
+    if (this.hasCharacter) return encodeSaveFile(takeSnapshot());
+    const row = await db.saves.get(slot);
+    const save = row ? migrateSave(row.data) : null;
+    return save ? encodeSaveFile(save) : null;
+  }
+
+  /** Download the save as a .json file. Returns the file name, or null when nothing to export. */
+  async exportToFile(): Promise<string | null> {
+    const text = await this.exportText();
+    if (!text) return null;
+    const save = decodeSaveFile(text);
+    const name = save.ok ? saveFileName(save.save) : 'eternal-city_save.json';
+    if (typeof document === 'undefined') return name;
+    const blob = new Blob([text], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, 1000);
+    return name;
+  }
+
+  /** Copy the save text to the clipboard (mobile browsers that block downloads). */
+  async exportToClipboard(): Promise<boolean> {
+    const text = await this.exportText();
+    if (!text || typeof navigator === 'undefined' || !navigator.clipboard) return false;
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Validate + store an exported save into the slot. Does not touch the live state — callers
+   * decide whether to `load()` it right away (title) or travel to its location (in-game).
+   */
+  async importText(text: string, slot = DEFAULT_SLOT): Promise<DecodeResult & { row?: SaveRow }> {
+    const r = decodeSaveFile(text);
+    if (!r.ok) return r;
+    const data = r.save;
+    const loc = saveLocation(data.location.mapId);
+    const row: SaveRow = {
+      slot,
+      name: data.character.name,
+      level: data.character.level,
+      mapName: registry.map(loc.mapId).name,
+      updatedAt: Date.now(),
+      data: { ...data, location: loc },
+    };
+    await db.saves.put(row);
+    return { ...r, row };
+  }
+
+  /** Open the browser file picker and import the chosen .json. Resolves null when cancelled. */
+  importFromPicker(): Promise<(DecodeResult & { row?: SaveRow }) | null> {
+    return new Promise((resolve) => {
+      if (typeof document === 'undefined') return resolve(null);
+      let input = document.getElementById('ec-import') as HTMLInputElement | null;
+      if (!input) {
+        input = document.createElement('input');
+        input.type = 'file';
+        input.id = 'ec-import';
+        input.accept = '.json,application/json';
+        input.style.position = 'fixed';
+        input.style.left = '-9999px';
+        document.body.appendChild(input);
+      }
+      input.value = '';
+      input.onchange = async () => {
+        const f = input!.files?.[0];
+        if (!f) return resolve(null);
+        try {
+          resolve(await this.importText(await f.text()));
+        } catch {
+          resolve({ ok: false, reason: 'parse' });
+        }
+      };
+      input.oncancel = () => resolve(null);
+      input.click();
+    });
+  }
+
+  /** Import from the clipboard text (paired with exportToClipboard). */
+  async importFromClipboard(): Promise<(DecodeResult & { row?: SaveRow }) | null> {
+    if (typeof navigator === 'undefined' || !navigator.clipboard?.readText) return null;
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text.trim()) return null;
+      return await this.importText(text);
+    } catch {
+      return null;
+    }
+  }
+
+  describeImportFail(r: DecodeResult): string {
+    return r.ok ? '' : describeDecodeFail(r.reason);
   }
 }
 
