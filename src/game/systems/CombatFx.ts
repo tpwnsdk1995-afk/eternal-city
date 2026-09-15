@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { TEX } from '@data/textureKeys';
+import { ANIM, TEX } from '@data/textureKeys';
 import type { Vec2 } from '@core/math/vec';
 
 const DECAL_CAP = 70;
@@ -92,6 +92,35 @@ export class CombatFx {
   aoeMarker(at: Vec2, radius: number, durationMs: number): void {
     const img = this.scene.add.image(at.x, at.y, TEX.jump_marker).setDepth(6).setDisplaySize(radius * 2, radius * 2).setAlpha(0.9);
     this.scene.tweens.add({ targets: img, alpha: 0, duration: durationMs, onComplete: () => img.destroy() });
+  }
+
+  /** Launcher blast: animated fireball sized to the AoE radius, a fading ring and a scorch decal. */
+  explosion(at: Vec2, radius: number): void {
+    const scorch = this.scene.add.image(at.x, at.y, TEX.scorch).setDepth(3).setDisplaySize(radius * 1.6, radius * 1.6).setRotation(Math.random() * Math.PI * 2);
+    this.decals.push(scorch);
+    if (this.decals.length > DECAL_CAP) this.decals.shift()?.destroy();
+    this.scene.tweens.add({
+      targets: scorch,
+      alpha: 0,
+      duration: 5000,
+      delay: 12000,
+      onComplete: () => {
+        this.decals = this.decals.filter((d) => d !== scorch);
+        scorch.destroy();
+      },
+    });
+    const ring = this.scene.add.image(at.x, at.y, TEX.jump_marker).setDepth(6).setDisplaySize(radius * 0.6, radius * 0.6).setAlpha(0.8).setTint(0xffb060);
+    this.scene.tweens.add({ targets: ring, displayWidth: radius * 2.2, displayHeight: radius * 2.2, alpha: 0, duration: 260, ease: 'Quad.easeOut', onComplete: () => ring.destroy() });
+    const boom = this.scene.add.sprite(at.x, at.y - 10, TEX.explosion, 0).setDepth(13).setDisplaySize(radius * 2.4, radius * 2.4).setBlendMode(Phaser.BlendModes.ADD);
+    boom.play(ANIM.explosion_blast);
+    boom.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => boom.destroy());
+    // lingering smoke
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2 + Math.random();
+      const d = radius * 0.4 * Math.random();
+      const puff = this.scene.add.image(at.x + Math.cos(a) * d, at.y - 8 + Math.sin(a) * d, TEX.smoke_puff).setDepth(12).setScale(1.5 + Math.random()).setAlpha(0.7);
+      this.scene.tweens.add({ targets: puff, y: puff.y - 30 - Math.random() * 20, alpha: 0, scale: puff.scale * 2.2, duration: 900 + Math.random() * 500, onComplete: () => puff.destroy() });
+    }
   }
 
   hitFlash(target: Phaser.GameObjects.Sprite, color = 0xff5555): void {

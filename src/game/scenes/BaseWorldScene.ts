@@ -232,6 +232,11 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     return (this.enemies.getChildren() as Enemy[]).filter((e) => e.alive).map((e) => ({ uid: e.uid, id: e.def.id, hp: e.hp, x: e.x, y: e.y, mode: e.brain.mode }));
   }
 
+  /** Launcher rounds in flight (debug/e2e). */
+  projectilesSnapshot(): { x: number; y: number; travelled: number; maxDist: number }[] {
+    return this.combat?.projectilesSnapshot() ?? [];
+  }
+
   /** Death → fade → respawn in the safe zone at half HP. */
   playerDied(): void {
     if (this.transitioning) return;

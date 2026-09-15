@@ -26,6 +26,7 @@ export interface HudSnapshot {
   won: number;
   weaponName: string | null;
   ammo: number;
+  ammoKind: string;
   mapId: string;
   mapName: string;
 }
@@ -44,6 +45,8 @@ export interface EcDebug {
   /** Spawn a monster offset from the player (combat maps only). Returns its uid. */
   spawn(monsterId: string, dx?: number, dy?: number): string | null;
   enemies(): { uid: string; id: string; hp: number; x: number; y: number; mode: string }[];
+  /** Launcher rounds currently flying. */
+  projectiles(): { x: number; y: number; travelled: number; maxDist: number }[];
   god(on: boolean): void;
   teleport(x: number, y: number): void;
   killAll(): void;
@@ -91,6 +94,7 @@ export function exposeDebug(game: Phaser.Game): void {
       return s.spawnEnemyAt(monsterId, p.x + dx, p.y + dy)?.uid ?? null;
     },
     enemies: () => worldScene()?.enemiesSnapshot() ?? [],
+    projectiles: () => worldScene()?.projectilesSnapshot() ?? [],
     god: (on) => {
       gameState.flags.god = on;
     },
@@ -129,6 +133,7 @@ export function exposeDebug(game: Phaser.Game): void {
         won: gameState.character.won,
         weaponName: w?.def.name ?? null,
         ammo: w ? totalRounds(gameState.inventory, registry.item, w.def.caliber, gameState.fire.ammoKind) : 0,
+        ammoKind: gameState.fire.ammoKind,
         mapId: gameState.currentMapId,
         mapName: registry.map(gameState.currentMapId).name,
       };

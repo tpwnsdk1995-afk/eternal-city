@@ -6,7 +6,8 @@ import { angleTo, dist, fromAngle, type Vec2 } from '@core/math/vec';
 import { gameRng } from '@core/rng';
 import type { BuiltMap } from '@core/map/mapBuild';
 import { castRay, type RayTarget } from '@core/combat/hitscan';
-import { computeHit, type AttackerCtx } from '@core/combat/damage';
+import { computeHit, gradeMult, type AttackerCtx } from '@core/combat/damage';
+import { aoeFalloff, targetsInBlast } from '@core/combat/projectile';
 import { spreadRadians } from '@core/combat/accuracy';
 import { applyBurn, isBurning, isInvulnerable, tickBurn } from '@core/combat/statusEffects';
 import { rollConsciousness } from '@core/combat/consciousness';
@@ -26,6 +27,7 @@ import { gameState } from '../state/GameState';
 import { questService } from '../state/questService';
 import { Enemy } from '../entities/Enemy';
 import { Pickup } from '../entities/Pickup';
+import { Projectile } from '../entities/Projectile';
 import type { Objective } from '../entities/Objective';
 import type { Player } from '../entities/Player';
 import type { InputIntent } from './input/InputMapper';
@@ -55,6 +57,10 @@ const MSG_THROTTLE_MS = 1500;
 const ENEMY_TRACER = 0xff8a7a;
 const AI_LOD_DISTANCE = 720; // px — beyond roughly a screen away
 const AI_LOD_INTERVAL_MS = 180;
+/** 기물 take extra blast damage — launchers are the 어설트 breaching tool. */
+const OBJECTIVE_BLAST_MULT = 1.5;
+/** own blast → own HP, before armour */
+const SELF_BLAST_MULT = 0.5;
 
 /**
  * Glue between input/entities and the pure combat rules: player hitscan fire, enemy AI ticks and
@@ -64,12 +70,22 @@ export class CombatBridge {
   readonly fx: CombatFx;
   readonly floating: FloatingText;
   private lastMsgAt: Record<string, number> = {};
+  private projectiles: Projectile[] = [];
   playerDead = false;
 
   constructor(private host: CombatHost) {
     this.fx = new CombatFx(host.scene);
     this.floating = new FloatingText(host.scene);
     host.scene.physics.add.overlap(host.player, host.pickups, (_p, obj) => this.collect(obj as Pickup));
+    host.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.projectiles.forEach((p) => p.destroy());
+      this.projectiles = [];
+    });
+  }
+
+  /** Rounds currently in flight (debug/e2e). */
+  projectilesSnapshot(): { x: number; y: number; travelled: number; maxDist: number }[] {
+    return this.projectiles.map((p) => ({ x: p.state.pos.x, y: p.state.pos.y, travelled: p.state.travelled, maxDist: p.state.maxDist }));
   }
 
   update(intent: InputIntent, now: number, dtMs: number): void {
@@ -81,6 +97,7 @@ export class CombatBridge {
       gameState.message(gameState.fire.subFire ? '서브연사 ON (연사 120rpm · 피해 50%)' : '서브연사 OFF', 'system');
     }
     if (intent.fireHeld && player.canFire) this.playerFire(now, intent.aimWorld);
+    this.updateProjectiles(dtMs, now);
 
     // enemies — far ones (off-screen) think at a lower rate to keep big fields cheap
     const grid = this.host.built.collision;
@@ -186,7 +203,7 @@ export class CombatBridge {
     };
 
     if (melee) return this.meleeSwing(w.def.range, origin, baseAngle, targets, byUid, objById, ctx, now);
-    if (w.def.projectile) return this.launchProjectile(w.def, origin, baseAngle, ctx);
+    if (w.def.projectile) return this.launchProjectile(w.def, origin, baseAngle, aim, ctx);
 
     this.fx.muzzle(muzzle, baseAngle);
     this.fx.casing({ x: origin.x + Math.cos(baseAngle) * 6, y: origin.y + Math.sin(baseAngle) * 6 }, baseAngle);
@@ -256,11 +273,71 @@ export class CombatBridge {
     }
   }
 
-  /** 투척/중화기: a visible shell that explodes on impact or at the aimed distance (M3-3 fleshes this out). */
-  private launchProjectile(def: WeaponDef, origin: Vec2, angle: number, ctx: AttackerCtx): void {
+  /** 투척/중화기: a visible shell that arcs to the aimed point (M79) or flies straight until impact (RPG-7). */
+  private launchProjectile(def: WeaponDef, origin: Vec2, angle: number, aim: Vec2, ctx: AttackerCtx): void {
     this.fx.muzzle({ x: origin.x + Math.cos(angle) * MUZZLE_OFFSET, y: origin.y + Math.sin(angle) * MUZZLE_OFFSET }, angle);
     this.host.scene.cameras.main.shake(80, 0.004);
+    this.projectiles.push(new Projectile(this.host.scene, def, origin, angle, dist(origin, aim), ctx));
     this.host.onLaunch?.(def, origin, angle, ctx);
+  }
+
+  private updateProjectiles(dtMs: number, now: number): void {
+    if (this.projectiles.length === 0) return;
+    const enemies = this.aliveEnemies();
+    const objectives = this.host.objectives?.() ?? [];
+    const targets: RayTarget[] = [
+      ...enemies.map((e) => ({ id: e.uid, x: e.x, y: e.y, r: e.radius })),
+      ...objectives.map((o) => ({ id: OBJ_PREFIX + o.def.id, x: o.x, y: o.y, r: o.radius })),
+    ];
+    for (const p of this.projectiles) {
+      const at = p.step(dtMs, this.host.built.collision, targets);
+      if (at) this.explode(at, p.state.aoeRadius, p.ctx, now);
+    }
+    this.projectiles = this.projectiles.filter((p) => !p.done);
+  }
+
+  /** Blast damage: every enemy/objective in the radius takes falloff-scaled damage; the shooter too. */
+  private explode(at: Vec2, radius: number, ctx: AttackerCtx, now: number): void {
+    this.fx.explosion(at, radius);
+    this.host.scene.cameras.main.shake(180, 0.008);
+    const enemies = this.aliveEnemies();
+    const objectives = this.host.objectives?.() ?? [];
+    const byUid = new Map(enemies.map((e) => [e.uid, e]));
+    const objById = new Map(objectives.map((o) => [OBJ_PREFIX + o.def.id, o]));
+    const targets: RayTarget[] = [
+      ...enemies.map((e) => ({ id: e.uid, x: e.x, y: e.y, r: e.radius })),
+      ...objectives.map((o) => ({ id: OBJ_PREFIX + o.def.id, x: o.x, y: o.y, r: o.radius })),
+    ];
+    // blasts don't roll to-hit — inside the radius you're hit; accuracy stayed with the launch
+    const blastCtx: AttackerCtx = { ...ctx, baseAccuracy: 1, moving: false, crouching: false, mods: { ...ctx.mods, accPct: 1 } };
+    for (const t of targetsInBlast(at, radius, targets)) {
+      const obj = objById.get(t.id);
+      if (obj) {
+        const res = computeHit(blastCtx, { skin: '강성', defense: 0, maxHp: obj.maxHp, burning: false }, 0, gameRng);
+        const dmg = Math.max(1, Math.round(res.damage * t.mult * OBJECTIVE_BLAST_MULT));
+        this.fx.spark({ x: obj.x, y: obj.y });
+        this.floating.spawn(obj.x, obj.y - 20, `${dmg}`, '#ffd166', 13, true);
+        if (obj.damage(dmg)) this.host.onObjectiveDestroyed?.(obj.def.id);
+        continue;
+      }
+      const e = byUid.get(t.id);
+      if (!e || !e.alive) continue;
+      const res = computeHit(blastCtx, { skin: e.def.skin, defense: e.def.defense, maxHp: e.maxHp, burning: isBurning(e.status, now) }, 0, gameRng);
+      const dmg = Math.max(1, Math.round(res.damage * t.mult));
+      this.fx.blood({ x: e.x, y: e.y });
+      this.floating.spawn(e.x, e.y, `${dmg}`, res.crit ? '#ffe066' : '#ffb347', res.crit ? 16 : 14, true);
+      const away = fromAngle(angleTo(at, e.pos));
+      e.knockback(away, now, Math.round(dmg * 0.3), 0.6);
+      if (e.damage(dmg)) this.killEnemy(e, now);
+    }
+    // self-damage: standing inside your own blast hurts (halved, armour applies)
+    const { player } = this.host;
+    const selfMult = aoeFalloff(dist(at, player.pos), radius, PLAYER_RADIUS);
+    if (selfMult > 0) {
+      const base = ctx.baseDamage * gradeMult(ctx.grade) * selfMult * SELF_BLAST_MULT;
+      this.hurtPlayer(base, now);
+      this.throttled('selfBlast', '폭발 범위 안에 있습니다!', 'bad');
+    }
   }
 
   killEnemy(e: Enemy, now: number): void {

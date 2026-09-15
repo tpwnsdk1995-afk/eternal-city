@@ -53,6 +53,11 @@ export const TEX = {
   blood: 'blood',
   fire: 'fire',
   jump_marker: 'jump_marker',
+  shell_grenade: 'shell_grenade',
+  rocket: 'rocket',
+  explosion: 'explosion',
+  scorch: 'scorch',
+  smoke_puff: 'smoke_puff',
   // ui
   ui_panel: 'ui_panel',
   ui_slot: 'ui_slot',
@@ -101,6 +106,7 @@ export type TexKey = (typeof TEX)[keyof typeof TEX];
 
 export const ANIM = {
   fire_burn: 'fire_burn',
+  explosion_blast: 'explosion_blast',
 } as const;
 
 export type AnimKey = (typeof ANIM)[keyof typeof ANIM];

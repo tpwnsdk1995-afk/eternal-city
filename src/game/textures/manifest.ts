@@ -42,7 +42,7 @@ import {
   drawPickupWon,
 } from './draw/items';
 import { drawTitleBackground } from './draw/title';
-import { drawBlood, drawFire, drawJumpMarker, drawMuzzle, drawTracer } from './draw/fx';
+import { drawBlood, drawExplosion, drawFire, drawJumpMarker, drawMuzzle, drawRocket, drawScorch, drawShellGrenade, drawSmokePuff, drawTracer } from './draw/fx';
 import { drawBench, drawBusStop, drawFlagpole, drawGoal, drawHydrant, drawLamp, drawPhone, drawPillar, drawSign, drawTrash, drawTree, drawVending } from './draw/decor';
 import { drawCrosshair, drawUiPanel, drawUiSlot } from './draw/ui';
 
@@ -126,6 +126,11 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.blood]: single(drawBlood, 24),
   [TEX.fire]: { frameW: 16, frameH: 16, frames: 3, draw: drawFire, anim: { key: ANIM.fire_burn, frameRate: 10, repeat: -1 } },
   [TEX.jump_marker]: single(drawJumpMarker, 80),
+  [TEX.shell_grenade]: single(drawShellGrenade, 10, 6),
+  [TEX.rocket]: single(drawRocket, 22, 8),
+  [TEX.explosion]: { frameW: 96, frameH: 96, frames: 6, draw: drawExplosion, anim: { key: ANIM.explosion_blast, frameRate: 18, repeat: 0 } },
+  [TEX.scorch]: single(drawScorch, 64),
+  [TEX.smoke_puff]: single(drawSmokePuff, 16),
 
   [TEX.ui_panel]: single(drawUiPanel, 48),
   [TEX.ui_slot]: single(drawUiSlot, 48),
