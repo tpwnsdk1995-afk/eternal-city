@@ -48,9 +48,18 @@ export const TEX = {
   ui_panel: 'ui_panel',
   ui_slot: 'ui_slot',
   crosshair: 'crosshair',
+  // fx (extra)
+  casing: 'casing',
+  title_bg: 'title_bg',
   // icons
   icon_pistol: 'icon_pistol',
   icon_smg: 'icon_smg',
+  icon_glock17: 'icon_glock17',
+  icon_m1911: 'icon_m1911',
+  icon_mp5: 'icon_mp5',
+  icon_uzi: 'icon_uzi',
+  icon_bandage: 'icon_bandage',
+  icon_energy_drink: 'icon_energy_drink',
   icon_ammo_normal: 'icon_ammo_normal',
   icon_ammo_incendiary: 'icon_ammo_incendiary',
   icon_armor_top: 'icon_armor_top',

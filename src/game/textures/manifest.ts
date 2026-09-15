@@ -5,19 +5,27 @@ import { WALK_FRAMES } from '../systems/facing';
 import {
   drawBarricade,
   drawBooth,
+  drawCasing,
   drawGate,
   drawIconAmmoIncendiary,
   drawIconAmmoNormal,
   drawIconArmorBottom,
   drawIconArmorTop,
+  drawIconBandage,
   drawIconConsumable,
+  drawIconEnergyDrink,
+  drawIconGlock17,
+  drawIconM1911,
+  drawIconMp5,
   drawIconPistol,
   drawIconSkillMastery,
   drawIconSkillPassive,
   drawIconSmg,
+  drawIconUzi,
   drawPickupItem,
   drawPickupWon,
 } from './draw/items';
+import { drawTitleBackground } from './draw/title';
 import { drawBlood, drawFire, drawJumpMarker, drawMuzzle, drawTracer } from './draw/fx';
 import { drawBench, drawBusStop, drawHydrant, drawLamp, drawPhone, drawPillar, drawSign, drawTrash, drawTree, drawVending } from './draw/decor';
 import { drawCrosshair, drawUiPanel, drawUiSlot } from './draw/ui';
@@ -95,8 +103,17 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.ui_slot]: single(drawUiSlot, 48),
   [TEX.crosshair]: single(drawCrosshair, 24),
 
+  [TEX.casing]: single(drawCasing, 5, 3),
+  [TEX.title_bg]: single(drawTitleBackground, 1280, 720),
+
   [TEX.icon_pistol]: single(drawIconPistol, 32),
   [TEX.icon_smg]: single(drawIconSmg, 32),
+  [TEX.icon_glock17]: single(drawIconGlock17, 32),
+  [TEX.icon_m1911]: single(drawIconM1911, 32),
+  [TEX.icon_mp5]: single(drawIconMp5, 32),
+  [TEX.icon_uzi]: single(drawIconUzi, 32),
+  [TEX.icon_bandage]: single(drawIconBandage, 32),
+  [TEX.icon_energy_drink]: single(drawIconEnergyDrink, 32),
   [TEX.icon_ammo_normal]: single(drawIconAmmoNormal, 32),
   [TEX.icon_ammo_incendiary]: single(drawIconAmmoIncendiary, 32),
   [TEX.icon_armor_top]: single(drawIconArmorTop, 32),

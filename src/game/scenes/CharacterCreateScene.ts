@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 import { balance } from '@data/balance';
+import { TEX } from '@data/textureKeys';
 import { STAT_KEYS, type StatKey, type Stats } from '@data/schema/enums';
 import { emptyStats } from '@core/stats/character';
 import { derivedStats } from '@core/stats/derived';
@@ -39,8 +40,10 @@ export class CharacterCreateScene extends Phaser.Scene {
     this.valueTexts.clear();
     this.started = false;
     this.cameras.main.setBackgroundColor('#05070a');
+    this.add.image(0, 0, TEX.title_bg).setOrigin(0, 0).setAlpha(0.55);
 
     const cx = GAME_WIDTH / 2;
+    this.add.nineslice(cx, 40, TEX.ui_panel, 0, 640, GAME_HEIGHT - 80, 8, 8, 8, 8).setOrigin(0.5, 0).setAlpha(0.94);
     this.add.text(cx, 70, '캐릭터 생성', theme.textStyle(36, '#e5e7eb', { fontStyle: 'bold' })).setOrigin(0.5);
     this.add.text(cx, 112, '2002년 중곡동, 광진구청 지하주차장에서 시작합니다.', theme.textStyle(14, theme.colors.muted)).setOrigin(0.5);
 

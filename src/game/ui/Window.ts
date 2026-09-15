@@ -15,9 +15,10 @@ export abstract class Window extends Phaser.GameObjects.Container {
     this.key = key;
     this.w = w;
     this.h = h;
-    const panel = scene.add.nineslice(0, 0, TEX.ui_panel, 0, w, h, 6, 6, 6, 6).setOrigin(0, 0);
+    const panel = scene.add.nineslice(0, 0, TEX.ui_panel, 0, w, h, 8, 8, 8, 8).setOrigin(0, 0);
     // swallow clicks so the world underneath never receives them
     panel.setInteractive();
+    const titleBand = scene.add.rectangle(5, 5, w - 10, 27, 0x07080a, 0.75).setOrigin(0, 0);
     this.titleText = scene.add.text(14, 9, title, theme.textStyle(15, theme.colors.brass, { fontStyle: 'bold' }));
     const close = scene.add
       .text(w - 14, 8, '✕', theme.textStyle(15, theme.colors.muted))
@@ -26,9 +27,9 @@ export abstract class Window extends Phaser.GameObjects.Container {
     close.on('pointerover', () => close.setColor('#ffffff'));
     close.on('pointerout', () => close.setColor(theme.colors.muted));
     close.on('pointerdown', () => this.emit('close'));
-    const rule = scene.add.rectangle(10, 32, w - 20, 1, 0x3a3f47).setOrigin(0, 0);
+    const rule = scene.add.rectangle(5, 32, w - 10, 1, 0xc9a227, 0.6).setOrigin(0, 0);
     this.content = scene.add.container(0, 40);
-    this.add([panel, this.titleText, close, rule, this.content]);
+    this.add([panel, titleBand, this.titleText, close, rule, this.content]);
     this.setDepth(100);
     scene.add.existing(this);
   }

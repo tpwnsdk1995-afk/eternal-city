@@ -18,8 +18,8 @@ export const WEAPONS: WeaponDef[] = [
     weightKg: 0.9,
     reqLevel: 1,
     price: 8_000,
-    tex: TEX.icon_pistol,
-    iconTex: TEX.icon_pistol,
+    tex: TEX.icon_glock17,
+    iconTex: TEX.icon_glock17,
   },
   {
     kind: 'weapon',
@@ -37,8 +37,8 @@ export const WEAPONS: WeaponDef[] = [
     weightKg: 1.1,
     reqLevel: 3,
     price: 12_000,
-    tex: TEX.icon_pistol,
-    iconTex: TEX.icon_pistol,
+    tex: TEX.icon_m1911,
+    iconTex: TEX.icon_m1911,
   },
   {
     kind: 'weapon',
@@ -56,8 +56,8 @@ export const WEAPONS: WeaponDef[] = [
     weightKg: 2.8,
     reqLevel: 5,
     price: 35_000,
-    tex: TEX.icon_smg,
-    iconTex: TEX.icon_smg,
+    tex: TEX.icon_mp5,
+    iconTex: TEX.icon_mp5,
   },
   {
     kind: 'weapon',
@@ -75,7 +75,7 @@ export const WEAPONS: WeaponDef[] = [
     weightKg: 3.2,
     reqLevel: 4,
     price: 28_000,
-    tex: TEX.icon_smg,
-    iconTex: TEX.icon_smg,
+    tex: TEX.icon_uzi,
+    iconTex: TEX.icon_uzi,
   },
 ];

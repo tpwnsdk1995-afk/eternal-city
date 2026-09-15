@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type { TexKey } from '@data/textureKeys';
+import { TEX, type TexKey } from '@data/textureKeys';
 import { theme } from './theme';
 
 export interface ListRow {
@@ -53,19 +53,22 @@ export class ListView extends Phaser.GameObjects.Container {
     const visible = this.rows.slice(start, start + this.maxRows);
     visible.forEach((r, i) => {
       const y = i * this.rowH;
-      const bg = this.scene.add.rectangle(0, y, this.listW, this.rowH - 2, 0xffffff, 0.04).setOrigin(0, 0);
+      const bg = this.scene.add.rectangle(0, y, this.listW, this.rowH - 2, 0x1a1e24, 0.55).setOrigin(0, 0);
+      const hi = this.scene.add.rectangle(0, y, this.listW, 1, 0xffffff, 0.06).setOrigin(0, 0);
       if (r.onClick && !r.disabled) {
         bg.setInteractive({ useHandCursor: true });
-        bg.on('pointerover', () => bg.setFillStyle(0xc9a227, 0.16));
-        bg.on('pointerout', () => bg.setFillStyle(0xffffff, 0.04));
+        bg.on('pointerover', () => bg.setFillStyle(0xc9a227, 0.18));
+        bg.on('pointerout', () => bg.setFillStyle(0x1a1e24, 0.55));
         bg.on('pointerdown', (p: Phaser.Input.Pointer) => r.onClick!(p));
       }
-      const objs: Phaser.GameObjects.GameObject[] = [bg];
+      const objs: Phaser.GameObjects.GameObject[] = [bg, hi];
       let tx = 8;
       if (r.icon) {
-        const icon = this.scene.add.image(4, y + (this.rowH - 2) / 2, r.icon).setOrigin(0, 0.5).setDisplaySize(24, 24);
-        objs.push(icon);
-        tx = 34;
+        const cell = this.rowH - 6;
+        const slot = this.scene.add.nineslice(3, y + 2, TEX.ui_slot, 0, cell, cell, 3, 3, 3, 3).setOrigin(0, 0);
+        const icon = this.scene.add.image(3 + cell / 2, y + 2 + cell / 2, r.icon).setDisplaySize(cell - 8, cell - 8);
+        objs.push(slot, icon);
+        tx = cell + 10;
       }
       const color = r.disabled ? '#6b7280' : (r.color ?? theme.colors.text);
       objs.push(this.scene.add.text(tx, y + 4, r.text, theme.textStyle(13, color)));

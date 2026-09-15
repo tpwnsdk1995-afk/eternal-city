@@ -144,6 +144,8 @@ export class CombatBridge {
     const spread = spreadRadians(w.def.spreadDeg, tech) * (player.crouching ? 0.6 : 1) * (player.moving ? 1.4 : 1);
     const muzzle = { x: origin.x + Math.cos(baseAngle) * MUZZLE_OFFSET, y: origin.y + Math.sin(baseAngle) * MUZZLE_OFFSET };
     this.fx.muzzle(muzzle, baseAngle);
+    if (!isMeleeClass(w.def.class)) this.fx.casing({ x: origin.x + Math.cos(baseAngle) * 6, y: origin.y + Math.sin(baseAngle) * 6 }, baseAngle);
+    this.host.scene.cameras.main.shake(40, 0.0012);
 
     const enemies = this.aliveEnemies();
     const objectives = this.host.objectives?.() ?? [];
@@ -210,6 +212,7 @@ export class CombatBridge {
 
   killEnemy(e: Enemy, now: number): void {
     e.kill();
+    this.fx.blood({ x: e.x, y: e.y + 8 }, 1.6 * (e.def.scale ?? 1));
     const xp = xpForKill(e.def, gameState.character.level);
     const r = applyXp(gameState.character, xp);
     gameState.setCharacter(r.character);
