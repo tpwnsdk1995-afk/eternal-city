@@ -56,6 +56,7 @@ export const gwangjinParking: MapDef = {
   npcs: [
     { id: 'npc_elia', at: { x: 12, y: 5 } },
     { id: 'npc_shop', at: { x: 20, y: 5 } },
+    { id: 'npc_tech', at: { x: 24, y: 5 } },
     { id: 'npc_assault', at: { x: 28, y: 5 } },
     { id: 'npc_taxi', at: { x: 35, y: 21 } },
   ],

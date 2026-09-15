@@ -58,6 +58,13 @@ export const NPCS: NpcDef[] = [
     ],
   },
   {
+    id: 'npc_tech',
+    name: '기술상 정 기사',
+    role: 'tech',
+    tex: TEX.npc_tech,
+    lines: ['강화는 운이고 개조는 실력이지. 돈만 있으면 둘 다 해 주마.', '7강 넘긴 총은 유니크 개조를 노려 볼 만해. 실패해도 총은 안 부러져.'],
+  },
+  {
     id: 'npc_kimhun',
     name: '김훈 소대장',
     role: 'quest',

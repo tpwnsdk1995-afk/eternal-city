@@ -23,6 +23,7 @@ export const TEX = {
   npc_assault: 'npc_assault',
   npc_kimhun: 'npc_kimhun',
   npc_taxi: 'npc_taxi',
+  npc_tech: 'npc_tech',
   wito_soldier: 'wito_soldier',
   zombie_dog: 'zombie_dog',
   zombie_hardened: 'zombie_hardened',

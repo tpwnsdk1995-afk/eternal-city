@@ -3,7 +3,11 @@ import * as taxi from '@core/economy/taxi';
 import type { StatKey } from '@data/schema/enums';
 import { allocateStat } from '@core/stats/allocation';
 import { statCap } from '@core/stats/levelCurve';
-import { getStack, removeQty, totalRounds } from '@core/inventory/inventory';
+import { getStack, removeQty, replaceStack, totalRounds } from '@core/inventory/inventory';
+import { installPart, plusUp, tryEnhance, tryUnique, weaponLabel, type TuneFail } from '@core/tuning/tuning';
+import type { PartId } from '@data/schema/tuning';
+import { PARTS, UNIQUES } from '@data/tuning';
+import { gameRng, type Rng } from '@core/rng';
 import { equipStack, pruneEquipment, unequipArmor, unequipWeapon } from '@core/inventory/equipment';
 import { totalWeightKg } from '@core/inventory/weight';
 import { defaultAmmoKind, isAmmoCompatible, selectAmmoKind } from '@core/weapons/fireController';
@@ -167,6 +171,65 @@ export const actions = {
     return { ok: true };
   },
 
+  // --- 기술상 (tuning) -----------------------------------------------------------------------
+
+  /** 강화 one level. `rng` is injectable for deterministic e2e. */
+  enhance(uid: string, rng: Rng = gameRng): ActionResult {
+    const stack = getStack(gameState.inventory, uid);
+    if (!stack) return fail('아이템을 찾을 수 없습니다.');
+    const def = registry.item(stack.itemId);
+    if (def.kind !== 'weapon') return fail('무기만 강화할 수 있습니다.');
+    const r = tryEnhance(def, stack, rng);
+    if (!r.ok) return fail(TUNE_FAIL[r.reason]);
+    if (gameState.character.won < r.cost) return fail(`강화 비용 ₩${r.cost.toLocaleString('ko-KR')}이 부족합니다.`);
+    gameState.setCharacter({ ...gameState.character, won: gameState.character.won - r.cost });
+    gameState.setInventory(replaceStack(gameState.inventory, r.stack));
+    gameState.setEquipment({ ...gameState.equipment }); // HUD/label refresh
+    return r.success ? done(`강화 성공! ${weaponLabel(def, r.stack)}`, 'good') : fail(`강화 실패… ${weaponLabel(def, r.stack)} (−₩${r.cost.toLocaleString('ko-KR')})`);
+  },
+
+  installPart(uid: string, part: PartId): ActionResult {
+    const stack = getStack(gameState.inventory, uid);
+    if (!stack) return fail('아이템을 찾을 수 없습니다.');
+    const def = registry.item(stack.itemId);
+    if (def.kind !== 'weapon') return fail('무기만 개조할 수 있습니다.');
+    const r = installPart(def, stack, part);
+    if (!r.ok) return fail(TUNE_FAIL[r.reason]);
+    if (gameState.character.won < r.cost) return fail(`개조 비용 ₩${r.cost.toLocaleString('ko-KR')}이 부족합니다.`);
+    gameState.setCharacter({ ...gameState.character, won: gameState.character.won - r.cost });
+    gameState.setInventory(replaceStack(gameState.inventory, r.stack));
+    gameState.setEquipment({ ...gameState.equipment });
+    return done(`${PARTS[part].name} 장착 — ${PARTS[part].desc}`, 'good');
+  },
+
+  uniqueTune(uid: string, rng: Rng = gameRng): ActionResult {
+    const stack = getStack(gameState.inventory, uid);
+    if (!stack) return fail('아이템을 찾을 수 없습니다.');
+    const def = registry.item(stack.itemId);
+    if (def.kind !== 'weapon') return fail('무기만 개조할 수 있습니다.');
+    const r = tryUnique(def, stack, rng);
+    if (!r.ok) return fail(TUNE_FAIL[r.reason]);
+    if (gameState.character.won < r.cost) return fail(`유니크 개조 비용 ₩${r.cost.toLocaleString('ko-KR')}이 부족합니다.`);
+    gameState.setCharacter({ ...gameState.character, won: gameState.character.won - r.cost });
+    gameState.setInventory(replaceStack(gameState.inventory, r.stack));
+    gameState.setEquipment({ ...gameState.equipment });
+    return r.success && r.unique ? done(`유니크 개조 성공! [${UNIQUES[r.unique].name}] — ${UNIQUES[r.unique].desc}`, 'good') : fail(`유니크 개조 실패… (−₩${r.cost.toLocaleString('ko-KR')})`);
+  },
+
+  plusUp(uid: string): ActionResult {
+    const stack = getStack(gameState.inventory, uid);
+    if (!stack) return fail('아이템을 찾을 수 없습니다.');
+    const def = registry.item(stack.itemId);
+    if (def.kind !== 'armor') return fail('방어구만 플러스업할 수 있습니다.');
+    const r = plusUp(def, stack);
+    if (!r.ok) return fail(TUNE_FAIL[r.reason]);
+    if (gameState.character.won < r.cost) return fail(`플러스업 비용 ₩${r.cost.toLocaleString('ko-KR')}이 부족합니다.`);
+    gameState.setCharacter({ ...gameState.character, won: gameState.character.won - r.cost });
+    gameState.setInventory(replaceStack(gameState.inventory, r.stack));
+    gameState.setEquipment({ ...gameState.equipment });
+    return done(`플러스업 성공! ${def.name} +${r.stack.plusUp}`, 'good');
+  },
+
   acceptQuest(id: string): ActionResult {
     return questService.accept(id);
   },
@@ -183,6 +246,16 @@ export const actions = {
     gameState.setVitals({});
     return done(`${def.name} ${r.nowActive ? '활성화' : '비활성화'}`);
   },
+};
+
+const TUNE_FAIL: Record<TuneFail, string> = {
+  maxed: '이미 최대치입니다.',
+  notAllowed: '이 무기에는 장착할 수 없는 부품입니다.',
+  alreadyInstalled: '이미 장착된 부품입니다.',
+  tooLow: '유니크 개조는 +7 이상부터 가능합니다.',
+  hasUnique: '이미 유니크 개조가 된 무기입니다.',
+  notWeapon: '무기가 아닙니다.',
+  notArmor: '방어구가 아닙니다.',
 };
 
 export type Actions = typeof actions;

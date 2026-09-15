@@ -37,6 +37,11 @@ export function removeQty(inv: Inventory, uid: string, n: number): Inventory {
   return { ...inv, items: inv.items.map((s) => (s.uid === uid ? { ...s, qty: s.qty - n } : s)) };
 }
 
+/** Swaps a stack in place (same uid), e.g. after 강화/개조. */
+export function replaceStack(inv: Inventory, stack: ItemStack): Inventory {
+  return { ...inv, items: inv.items.map((s) => (s.uid === stack.uid ? stack : s)) };
+}
+
 export function getStack(inv: Inventory, uid: string): ItemStack | undefined {
   return inv.items.find((s) => s.uid === uid);
 }

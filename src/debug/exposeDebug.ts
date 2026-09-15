@@ -7,6 +7,7 @@ import { BaseWorldScene } from '../game/scenes/BaseWorldScene';
 import type { UIScene } from '../game/scenes/UIScene';
 import { AssaultScene } from '../game/scenes/AssaultScene';
 import type { WindowKey } from '../game/ui/WindowManager';
+import { weaponLabel } from '@core/tuning/tuning';
 import { actions, type Actions } from '../game/state/actions';
 import { saveService } from '../game/state/SaveService';
 
@@ -25,6 +26,7 @@ export interface HudSnapshot {
   xp: number;
   won: number;
   weaponName: string | null;
+  weaponLabel: string | null;
   ammo: number;
   ammoKind: string;
   mapId: string;
@@ -132,6 +134,7 @@ export function exposeDebug(game: Phaser.Game): void {
         xp: gameState.character.xp,
         won: gameState.character.won,
         weaponName: w?.def.name ?? null,
+        weaponLabel: w ? weaponLabel(w.def, w.stack) : null,
         ammo: w ? totalRounds(gameState.inventory, registry.item, w.def.caliber, gameState.fire.ammoKind) : 0,
         ammoKind: gameState.fire.ammoKind,
         mapId: gameState.currentMapId,

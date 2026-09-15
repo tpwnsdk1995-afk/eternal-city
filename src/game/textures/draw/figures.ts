@@ -31,6 +31,7 @@ export const FIGURE_STYLES = {
   npc_shop: { skin: '#e0b48c', hair: '#3a3a3a', hairStyle: 'cap', shirt: '#4b5a3a', pants: '#2f3a2a', vest: '#8a7a4a' } as FigureStyle,
   npc_assault: { skin: '#f1c9a5', hair: '#1a1a1a', shirt: '#7a2e2e', pants: '#2a2a33', coat: '#5a1f1f' } as FigureStyle,
   npc_taxi: { skin: '#e8c0a0', hair: '#4a4a4a', hairStyle: 'cap', shirt: '#d9b74a', pants: '#2a2a33', vest: '#3a3a44' } as FigureStyle,
+  npc_tech: { skin: '#e8c0a0', hair: '#5a4a3a', hairStyle: 'cap', shirt: '#3a6a8a', pants: '#2a2a33', shoes: '#111', vest: '#c9a227' } as FigureStyle,
   npc_kimhun: { skin: '#e8c0a0', hair: '#2a2a2a', hairStyle: 'cap', shirt: '#2f3d5c', pants: '#1f2738', shoes: '#111', vest: '#1a2233', gun: 'pistol' } as FigureStyle,
   wito_soldier: { skin: '#e3bd95', hair: '#3a3a2a', hairStyle: 'helmet', helmetColor: '#5a5f45', shirt: '#6b7a48', pants: '#55603a', shoes: '#26281c', gun: 'smg' } as FigureStyle,
 } satisfies Record<string, FigureStyle>;
