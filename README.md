@@ -61,17 +61,29 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 - 상점은 레벨대에 맞는 등급 밴드/무기/탄약만 진열, 장착 무기에 따라 캐릭터가 든 총 스프라이트 변경
 - 저장 스키마 v3(강화/부품/유니크/플러스업), v1·v2 자동 마이그레이션
 
+## M4 — 어설트 다양화 · 캠페인 · 메인스트림 · 업적
+
+- **어설트 3종 × 일반/고급 = 6개**, 접수원의 **어설트 접수 창**(티어·유형·권장 레벨·단계·보상·위약금, 레벨 미달 시 지원 불가)
+  - **A 중곡동 봉쇄선 돌파** (Lv.15+, 기물 파괴 전진형): 정찰대 → 바리케이드 3개 → 게이트 → 공수부대 → 좀비두목
+  - **B 중곡역 부스 방어** (Lv.20+, 거점 방어형): 정찰대 → 90초 안에 3시 부스로 이동 → 부스를 지키며 공수부대 3웨이브(적이 부스를 직접 공격, 부스 파괴 시 실패) → **위토 엘리트 가드**
+  - **C 하수도 심층 — 변종 오구린** (Lv.30+, 보스 사냥형): 120초 돌입 → 강화 좀비 소탕 → **변종 오구린**(도약, 증원) → 90초 탈출
+  - **고급 어설트**: 같은 임무를 적 체력 ×1.7·방어 +8·피해 ×1.4로, 권장 레벨 +10, 보상·위약금 ×2
+- **2002 캠페인 "중곡동의 봄"** 6챕터(퀘스트·허가증·어설트 A·오구린·어설트 B·어설트 C 조건, 순서대로 보상 수령, 완주 시 CL 방탄복)
+- **메인스트림**(구청 지하 **오민석 과장**): 하루 1회 일반(좀비 25·위토 5) / CL(Lv.15·허가증, 좀비 60·위토 20·오구린, CL 장비 확률 보상)
+- **업적 22종**(처치·진영·보스·레벨·어설트·퀘스트·강화·누적 ₩·사망·플래그, 칭호 보상) + 통계 집계, 퀘스트 창 탭(퀘스트/캠페인/업적)
+- 저장 스키마 v4(통계·업적), v1~v3 자동 마이그레이션
+
 ## 다음 단계
 
-M4 어설트 다양화(A/B/C·고급, 부스 방어형·보스형)·캠페인·메인스트림·업적 → M5 패러렐(2003 종로~2004), 레이드 보스, 캐시샵/프리미엄 쿠폰(게임 내 재화), 환생 → M6 감염체·GUEST/패러사이트·2005 이후.
+M5 패러렐(2003 종로~2004 필드군), 연도 이동, 레이드 보스, 캐시샵/프리미엄 쿠폰(게임 내 재화), 환생 → M6 감염체·GUEST/패러사이트·2005 이후.
 
 ## 구조
 
 ```
-src/core/   순수 TS 게임 규칙 (Phaser 금지, 전부 유닛 테스트)  stats · combat · weapons · tuning · inventory · skills · ai · assault · map · quest · economy · save
+src/core/   순수 TS 게임 규칙 (Phaser 금지, 전부 유닛 테스트)  stats · combat · weapons · tuning · inventory · skills · ai · assault · progress · map · quest · economy · save
 src/data/   콘텐츠 데이터 + 스키마 + balance.ts (부팅 시 validateAll로 참조 검증)
 src/game/   Phaser 어댑터: scenes · entities · systems(InputMapper, CombatBridge, SpawnSystem) · ui(창들) · textures(코드 드로잉) · state
-e2e/        Playwright 시나리오 (smoke · combat · windows · assault · save · quest · travel · weapons · launchers · tuning · armor)
+e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C · save · quest · travel · weapons · launchers · tuning · armor · progress)
 ```
 
 `window.__ec` 디버그 훅으로 상태 조회/스폰/텔레포트/어설트 진행을 제어할 수 있습니다(e2e에서 사용).
