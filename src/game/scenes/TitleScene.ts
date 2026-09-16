@@ -117,7 +117,7 @@ export class TitleScene extends Phaser.Scene {
     kb?.on('keydown-F', () => this.scale.toggleFullscreen());
 
     this.add
-      .text(cx, GAME_HEIGHT - 24, '팬 재현 개발 빌드 · 원작식(좌클릭 이동/우클릭 공격) 또는 현대식(좌클릭 공격) — 둘 다 WASD 이동 가능, Esc 메뉴에서 전환 · 휴대폰/태블릿은 화면 조작 자동 (우상단 또는 T로 전환)', theme.textStyle(12, '#6b7280'))
+      .text(cx, GAME_HEIGHT - 24, `팬 재현 개발 빌드 ${__COMMIT__} · 원작식(좌클릭 이동/우클릭 공격) 또는 현대식(좌클릭 공격) — 둘 다 WASD 이동 가능, Esc 메뉴에서 전환 · 휴대폰/태블릿은 화면 조작 자동 (우상단 또는 T로 전환)`, theme.textStyle(12, '#6b7280'))
       .setOrigin(0.5);
   }
 
