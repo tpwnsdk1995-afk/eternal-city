@@ -642,8 +642,8 @@ class AudioManager {
     };
   }
 
-  snapshot(): { unlocked: boolean; ambient: AmbientKind; bgm: BgmKind; recent: string[] } {
-    return { unlocked: this.unlocked, ambient: this.ambientKind, bgm: this.bgmKind, recent: [...this.recent] };
+  snapshot(): { unlocked: boolean; ambient: AmbientKind; bgm: BgmKind; recent: string[]; samples: number } {
+    return { unlocked: this.unlocked, ambient: this.ambientKind, bgm: this.bgmKind, recent: [...this.recent], samples: this.samples.size };
   }
 }
 

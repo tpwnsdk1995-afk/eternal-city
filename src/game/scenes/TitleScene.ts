@@ -72,10 +72,10 @@ export class TitleScene extends Phaser.Scene {
     this.touchToggle.on('pointerdown', () => this.cycleTouch());
     this.renderTouchToggle();
     // 전체화면 (F) — 앱 뷰어/브라우저 창 안의 검은 띠를 없앰; 터치 탭줄의 ⛶와 Esc 메뉴 버튼도 같은 토글
-    const fs = this.add.text(GAME_WIDTH - 16, 44, '⛶ 전체화면  (F)', theme.textStyle(13, theme.colors.muted, { backgroundColor: '#1a1e24', padding: { left: 10, right: 10, top: 4, bottom: 4 } })).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+    const fs = this.add.text(GAME_WIDTH - 16, 44, '⛶ 전체화면  (F)', theme.textStyle(16, theme.colors.muted, { backgroundColor: '#1a1e24', padding: { left: 14, right: 14, top: 8, bottom: 8 } })).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     fs.on('pointerover', () => fs.setStyle({ backgroundColor: '#2a3038' }));
     fs.on('pointerout', () => fs.setStyle({ backgroundColor: '#1a1e24' }));
-    fs.on('pointerdown', () => this.scale.toggleFullscreen());
+    fs.on('pointerup', () => this.scale.toggleFullscreen()); // pointerup: touch needs a release to count as user activation
     void saveService.loadSettings().then(() => this.scene.isActive() && this.renderTouchToggle());
     const cloudText = this.add.text(cx, GAME_HEIGHT - 48, cloudSave.describe(), theme.textStyle(11, '#8a8f9c')).setOrigin(0.5);
     // local slots first (instant), then the account-bound cloud copies if the play page provides them

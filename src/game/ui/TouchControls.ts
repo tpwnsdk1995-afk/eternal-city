@@ -269,11 +269,12 @@ export class TouchControls extends Phaser.GameObjects.Container {
   private tab(x: number, y: number, w: number, h: number, label: string, onTap: () => void): void {
     const bg = this.scene.add.rectangle(x, y, w, h, 0x0b0e14, 0.6).setOrigin(0, 0).setStrokeStyle(1, 0xc9a227, 0.5).setInteractive({ useHandCursor: true });
     const t = this.scene.add.text(x + w / 2, y + h / 2, label, theme.textStyle(13, theme.colors.brass, { fontStyle: 'bold' })).setOrigin(0.5);
-    bg.on('pointerdown', () => {
-      bg.setFillStyle(0x2a3038, 0.9);
+    bg.on('pointerdown', () => bg.setFillStyle(0x2a3038, 0.9));
+    // fire on release: on phones touchstart/pointerdown is not a user activation, so requestFullscreen would be refused
+    bg.on('pointerup', () => {
+      bg.setFillStyle(0x0b0e14, 0.6);
       onTap();
     });
-    bg.on('pointerup', () => bg.setFillStyle(0x0b0e14, 0.6));
     bg.on('pointerout', () => bg.setFillStyle(0x0b0e14, 0.6));
     this.add([bg, t]);
     this.tabs.push({ x, y, w, h });

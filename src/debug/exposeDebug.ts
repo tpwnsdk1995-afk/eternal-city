@@ -69,7 +69,7 @@ export interface EcDebug {
   deleteSave(slot: number): Promise<void>;
   currentSlot(): number;
   /** Procedural audio: unlocked flag, current ambient bed, and the most recent play names. */
-  audio(): { unlocked: boolean; ambient: string; bgm: string; recent: string[] };
+  audio(): { unlocked: boolean; ambient: string; bgm: string; recent: string[]; samples: number };
   /** Cloud-save status (account-bound store on the play page; 'offline' elsewhere). */
   cloud(): { state: string; lastSyncAt: number; text: string };
   /** Portable save text (what 내보내기 writes), or null without a save. */
