@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { weaponLabel } from '@core/tuning/tuning';
 import { activeBuffs, formatRemaining } from '@core/combat/buffs';
-import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
+import { GAME_HEIGHT, GAME_WIDTH, fitCamera } from '../../config/gameConfig';
 import { TEX } from '@data/textureKeys';
 import { registry } from '@data/registry';
 import { totalRounds } from '@core/inventory/inventory';
@@ -68,6 +68,7 @@ export class UIScene extends Phaser.Scene {
   }
 
   create(): void {
+    fitCamera(this.cameras.main);
     // Phaser reuses the scene instance: '타이틀로' stops the UI and the next game relaunches it, so
     // per-run collections must start empty or refreshers touch destroyed objects from the last run.
     this.quickIcons = [];

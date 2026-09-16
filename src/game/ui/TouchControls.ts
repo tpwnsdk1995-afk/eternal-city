@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
+import { GAME_HEIGHT, GAME_WIDTH, toLogical } from '../../config/gameConfig';
 import type { Hotkey } from '../systems/input/InputMapper';
 import { resetTouchState, touchState } from '../systems/input/touchState';
 import { gameState } from '../state/GameState';
@@ -43,7 +43,7 @@ export class TouchControls extends Phaser.GameObjects.Container {
   private fireStart = { x: 0, y: 0 };
   private aimLine: Phaser.GameObjects.Graphics;
   private buttons: RoundButton[] = [];
-  private tabs: { x: number; y: number; w: number; h: number }[] = [];
+  private tabs: { x: number; y: number; w: number; h: number; label: string }[] = [];
   private held = new Map<number, RoundButton>();
   private rotateHint: Phaser.GameObjects.Text;
 
@@ -137,6 +137,7 @@ export class TouchControls extends Phaser.GameObjects.Container {
   snapshot(): { enabled: boolean; stick: { x: number; y: number }; fire: { x: number; y: number }; buttons: Record<string, { x: number; y: number }> } {
     const buttons: Record<string, { x: number; y: number }> = {};
     for (const b of this.buttons) buttons[b.label.replace('\n', '')] = { x: b.x, y: b.y };
+    for (const t of this.tabs) buttons[t.label] = { x: t.x + t.w / 2, y: t.y + t.h / 2 };
     return { enabled: this.visible, stick: { ...this.stickCenter }, fire: { x: this.fireBtn.x, y: this.fireBtn.y }, buttons };
   }
 
@@ -144,7 +145,8 @@ export class TouchControls extends Phaser.GameObjects.Container {
 
   private onDown(p: Phaser.Input.Pointer): void {
     if (!this.visible) return;
-    const { x, y } = p;
+    const x = toLogical(p.x);
+    const y = toLogical(p.y);
     if (this.stickPointer === null && Math.hypot(x - this.stickCenter.x, y - this.stickCenter.y) <= STICK_R + 16) {
       this.stickPointer = p.id;
       this.moveStick(x, y);
@@ -170,10 +172,10 @@ export class TouchControls extends Phaser.GameObjects.Container {
 
   private onMove(p: Phaser.Input.Pointer): void {
     if (!this.visible) return;
-    if (p.id === this.stickPointer) this.moveStick(p.x, p.y);
+    if (p.id === this.stickPointer) this.moveStick(toLogical(p.x), toLogical(p.y));
     else if (p.id === this.firePointer) {
-      const dx = p.x - this.fireStart.x;
-      const dy = p.y - this.fireStart.y;
+      const dx = toLogical(p.x) - this.fireStart.x;
+      const dy = toLogical(p.y) - this.fireStart.y;
       const d = Math.hypot(dx, dy);
       touchState.aimDir = d >= AIM_MIN ? { x: dx / d, y: dy / d } : null;
       this.drawAim();
@@ -279,6 +281,6 @@ export class TouchControls extends Phaser.GameObjects.Container {
     });
     bg.on('pointerout', () => bg.setFillStyle(0x0b0e14, 0.6));
     this.add([bg, t]);
-    this.tabs.push({ x, y, w, h });
+    this.tabs.push({ x, y, w, h, label });
   }
 }

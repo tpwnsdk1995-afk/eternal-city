@@ -78,8 +78,8 @@ describe('xp', () => {
 
   it('tapers kill xp when out-leveling the monster', () => {
     const m = registry.monster('zombie_casual_f');
-    expect(xpForKill(m, 1)).toBe(m.xp);
-    expect(xpForKill(m, 16)).toBe(Math.max(1, Math.round(m.xp * 0.1)));
+    expect(xpForKill(m, 1)).toBe(m.xp * 5);
+    expect(xpForKill(m, 16)).toBe(Math.max(1, Math.round(m.xp * 5 * 0.1)));
   });
 });
 

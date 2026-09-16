@@ -1,3 +1,5 @@
+import { RENDER_SCALE } from '../../config/gameSize';
+
 export const FONT = "'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif";
 
 /** Global UI text scale (Esc 메뉴 → 글자 크기). Read at text creation, so windows pick it up on refresh. */
@@ -27,6 +29,7 @@ export const theme = {
     fontFamily: FONT,
     fontSize: `${Math.round(size * uiScale)}px`,
     color,
+    resolution: RENDER_SCALE, // sharp under the zoomed camera
     ...extra,
   }),
 };

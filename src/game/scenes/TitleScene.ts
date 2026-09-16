@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
+import { GAME_HEIGHT, GAME_WIDTH, fitCamera } from '../../config/gameConfig';
 import { TEX } from '@data/textureKeys';
 import { gameState } from '../state/GameState';
 import { SLOTS, saveService } from '../state/SaveService';
@@ -32,6 +32,7 @@ export class TitleScene extends Phaser.Scene {
   }
 
   create(): void {
+    fitCamera(this.cameras.main);
     this.busy = false;
     audio.ambient('rain');
     audio.bgm('title');

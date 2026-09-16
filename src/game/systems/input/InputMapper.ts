@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { Vec2 } from '@core/math/vec';
 import type { ControlScheme } from '@data/schema/enums';
 import { gameState } from '../../state/GameState';
+import { toLogical } from '../../../config/gameSize';
 import { takePending, touchState } from './touchState';
 
 export type Hotkey = 'inventory' | 'status' | 'skills' | 'quest' | 'minimap' | 'menu' | 'home' | `quick${number}`;
@@ -65,7 +66,7 @@ export class InputMapper {
       if (hk) this.pendingHotkey = hk;
     });
     scene.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
-      if (gameState.uiHit?.(p.x, p.y)) return; // click landed on a window
+      if (gameState.uiHit?.(toLogical(p.x), toLogical(p.y))) return; // click landed on a window
       if (p.leftButtonDown()) this.pendingClick = { x: p.worldX, y: p.worldY, shift: p.event.shiftKey };
     });
     // Tab would move browser focus; keep it in-game.
@@ -125,7 +126,7 @@ export class InputMapper {
     // virtual stick drives movement under either scheme
     if (touch?.moveDir) moveDir = touch.moveDir;
 
-    const overUi = gameState.uiHit?.(pointer.x, pointer.y) ?? false;
+    const overUi = gameState.uiHit?.(toLogical(pointer.x), toLogical(pointer.y)) ?? false;
     let fireHeld = !overUi && (this.scheme === 'classic' ? pointer.rightButtonDown() : pointer.leftButtonDown());
 
     if (touch) {

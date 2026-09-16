@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
+import { GAME_HEIGHT, GAME_WIDTH, fitCamera } from '../../config/gameConfig';
 import { balance } from '@data/balance';
 import { TEX } from '@data/textureKeys';
 import { RACE_NAME, RACES, STAT_KEYS, type Race, type StatKey, type Stats } from '@data/schema/enums';
@@ -45,6 +45,7 @@ export class CharacterCreateScene extends Phaser.Scene {
   }
 
   create(): void {
+    fitCamera(this.cameras.main);
     this.alloc = emptyStats(0);
     this.left = balance.stats.creationPoints;
     this.valueTexts.clear();
@@ -56,35 +57,37 @@ export class CharacterCreateScene extends Phaser.Scene {
     bg.setScale(Math.max(GAME_WIDTH / bg.width, GAME_HEIGHT / bg.height));
 
     const cx = GAME_WIDTH / 2;
-    this.add.nineslice(cx, 40, TEX.ui_panel, 0, 640, GAME_HEIGHT - 80, 8, 8, 8, 8).setOrigin(0.5, 0).setAlpha(0.94);
-    this.add.text(cx, 70, '캐릭터 생성', theme.textStyle(36, '#e5e7eb', { fontStyle: 'bold' })).setOrigin(0.5);
-    this.add.text(cx, 112, '2002년 중곡동, 광진구청 지하주차장에서 시작합니다.', theme.textStyle(14, theme.colors.muted)).setOrigin(0.5);
+    // phone canvas is 540 high: tighter rows so the stat list and the start button never overlap
+    const cy = (desktop: number, phone: number): number => (GAME_HEIGHT < 700 ? phone : desktop);
+    this.add.nineslice(cx, cy(40, 14), TEX.ui_panel, 0, 640, GAME_HEIGHT - cy(80, 28), 8, 8, 8, 8).setOrigin(0.5, 0).setAlpha(0.94);
+    this.add.text(cx, cy(70, 40), '캐릭터 생성', theme.textStyle(cy(36, 26), '#e5e7eb', { fontStyle: 'bold' })).setOrigin(0.5);
+    this.add.text(cx, cy(112, 70), '2002년 중곡동, 광진구청 지하주차장에서 시작합니다.', theme.textStyle(14, theme.colors.muted)).setOrigin(0.5);
 
-    this.add.text(cx - 260, 160, '이름', theme.textStyle(16, theme.colors.brass));
-    const dom = this.add.dom(cx + 40, 172).createFromHTML(
+    this.add.text(cx - 260, cy(160, 98), '이름', theme.textStyle(16, theme.colors.brass));
+    const dom = this.add.dom(cx + 40, cy(172, 110)).createFromHTML(
       `<input id="ec-name" maxlength="10" value="${DEFAULT_NAME}" autocomplete="off" style="width:260px;padding:8px 12px;font:16px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#12161c;color:#e5e7eb;border:1px solid #c9a227;border-radius:3px;outline:none;">`,
     );
     this.nameInput = dom.getChildByID('ec-name') as HTMLInputElement | null;
     this.nameInput?.focus();
 
     // 종족: 인간 / 감염체 (R 키로 전환)
-    this.add.text(cx - 260, 210, '종족  (R)', theme.textStyle(16, theme.colors.brass));
+    this.add.text(cx - 260, cy(210, 142), '종족  (R)', theme.textStyle(16, theme.colors.brass));
     let bx = cx - 150;
     for (const r of RACES) {
-      const b = this.add.text(bx, 208, RACE_NAME[r], theme.textStyle(15, '#ffffff', { backgroundColor: '#1a1e24', padding: { left: 12, right: 12, top: 3, bottom: 3 } })).setInteractive({ useHandCursor: true });
+      const b = this.add.text(bx, cy(208, 140), RACE_NAME[r], theme.textStyle(15, '#ffffff', { backgroundColor: '#1a1e24', padding: { left: 12, right: 12, top: 3, bottom: 3 } })).setInteractive({ useHandCursor: true });
       b.on('pointerdown', () => this.setRace(r));
       this.raceButtons.set(r, b);
       bx += b.width + 10;
     }
-    this.raceDesc = this.add.text(cx - 260, 240, '', theme.textStyle(11, theme.colors.muted, { wordWrap: { width: 520 } }));
+    this.raceDesc = this.add.text(cx - 260, cy(240, 170), '', theme.textStyle(11, theme.colors.muted, { wordWrap: { width: 520 } }));
     this.input.keyboard?.on('keydown-R', (ev: KeyboardEvent) => {
       if (!this.typingName(ev)) this.setRace(this.race === 'human' ? 'infected' : 'human');
     });
 
-    this.add.text(cx - 260, 275, `생성 포인트 배분`, theme.textStyle(16, theme.colors.brass));
-    this.leftText = this.add.text(cx + 260, 277, '', theme.textStyle(14, theme.colors.good)).setOrigin(1, 0);
+    this.add.text(cx - 260, cy(275, 198), `생성 포인트 배분`, theme.textStyle(16, theme.colors.brass));
+    this.leftText = this.add.text(cx + 260, cy(277, 200), '', theme.textStyle(14, theme.colors.good)).setOrigin(1, 0);
 
-    let y = 306;
+    let y = cy(306, 226);
     for (const k of STAT_KEYS) {
       this.add.text(cx - 260, y, k, theme.textStyle(16, '#ffffff', { fontStyle: 'bold' }));
       this.add.text(cx - 190, y + 3, STAT_DESC[k], theme.textStyle(11, theme.colors.muted));
@@ -94,24 +97,24 @@ export class CharacterCreateScene extends Phaser.Scene {
       this.valueTexts.set(k, val);
       void minus;
       void plus;
-      y += 32;
+      y += cy(32, 27);
     }
     this.previewText = this.add.text(cx, y + 10, '', theme.textStyle(12, theme.colors.muted, { align: 'center' })).setOrigin(0.5, 0);
 
     // 알파 훈련장 (tutorial) toggle — T key or click
-    this.trainingBtn = this.add.text(cx, GAME_HEIGHT - 128, '', theme.textStyle(13, theme.colors.muted, { backgroundColor: '#1a1e24', padding: { left: 10, right: 10, top: 3, bottom: 3 } })).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.trainingBtn = this.add.text(cx, GAME_HEIGHT - cy(128, 96), '', theme.textStyle(13, theme.colors.muted, { backgroundColor: '#1a1e24', padding: { left: 10, right: 10, top: 3, bottom: 3 } })).setOrigin(0.5).setInteractive({ useHandCursor: true });
     this.trainingBtn.on('pointerdown', () => this.setTraining(!this.training));
     this.input.keyboard?.on('keydown-T', (ev: KeyboardEvent) => {
       if (!this.typingName(ev)) this.setTraining(!this.training);
     });
     this.setTraining(false);
 
-    const start = this.add.text(cx, GAME_HEIGHT - 90, '▶ 시작  (Enter)', theme.textStyle(24, theme.colors.brass)).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const start = this.add.text(cx, GAME_HEIGHT - cy(90, 60), '▶ 시작  (Enter)', theme.textStyle(cy(24, 20), theme.colors.brass)).setOrigin(0.5).setInteractive({ useHandCursor: true });
     start.on('pointerover', () => start.setColor('#ffffff'));
     start.on('pointerout', () => start.setColor(theme.colors.brass));
     start.on('pointerdown', () => this.start());
     this.input.keyboard?.on('keydown-ENTER', () => this.start());
-    const back = this.add.text(cx, GAME_HEIGHT - 50, '← 타이틀로', theme.textStyle(14, '#6b7280')).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const back = this.add.text(cx, GAME_HEIGHT - cy(50, 26), '← 타이틀로', theme.textStyle(14, '#6b7280')).setOrigin(0.5).setInteractive({ useHandCursor: true });
     back.on('pointerdown', () => this.scene.start('Title'));
 
     this.refresh();

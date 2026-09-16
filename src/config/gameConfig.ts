@@ -7,9 +7,9 @@ import { SafeZoneScene } from '../game/scenes/SafeZoneScene';
 import { FieldScene } from '../game/scenes/FieldScene';
 import { AssaultScene } from '../game/scenes/AssaultScene';
 import { UIScene } from '../game/scenes/UIScene';
-import { GAME_HEIGHT, GAME_WIDTH } from './gameSize';
+import { GAME_HEIGHT, GAME_WIDTH, RENDER_SCALE } from './gameSize';
 
-export { GAME_WIDTH, GAME_HEIGHT } from './gameSize';
+export { GAME_WIDTH, GAME_HEIGHT, RENDER_SCALE, fitCamera, toLogical } from './gameSize';
 
 const params = new URLSearchParams(window.location.search);
 const forceCanvas = params.get('renderer') === 'canvas';
@@ -17,8 +17,8 @@ const forceCanvas = params.get('renderer') === 'canvas';
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: forceCanvas ? Phaser.CANVAS : Phaser.AUTO,
   parent: 'game',
-  width: GAME_WIDTH,
-  height: GAME_HEIGHT,
+  width: GAME_WIDTH * RENDER_SCALE,
+  height: GAME_HEIGHT * RENDER_SCALE,
   backgroundColor: '#05070a',
   pixelArt: true,
   roundPixels: true,

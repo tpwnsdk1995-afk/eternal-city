@@ -21,7 +21,7 @@ const STAT_DESC: Record<StatKey, string> = {
 
 export class StatusWindow extends Window {
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, 'status', x, y, 380, 640, '상태 (C)');
+    super(scene, 'status', x, y, 380, 660, '상태 (C)');
     this.refresh();
   }
 
@@ -33,18 +33,18 @@ export class StatusWindow extends Window {
 
     this.label(14, 2, `${c.name}${gameState.achievements.title ? `  [${gameState.achievements.title}]` : ''}`, '#ffffff', 16, { fontStyle: 'bold' });
     this.label(this.w - 14, 4, `Lv.${c.level}${c.rebirth ? `  환생 ${c.rebirth}` : ''}`, theme.colors.brass, 14).setOrigin(1, 0);
-    this.label(14, 24, `경험치 ${c.xp.toLocaleString('ko-KR')} / ${xpToNext(c.level).toLocaleString('ko-KR')}`, theme.colors.muted, 12);
+    this.label(14, 24, `경험치 ${c.xp.toLocaleString('ko-KR')} / ${xpToNext(c.level).toLocaleString('ko-KR')}`, theme.colors.muted, 13);
     this.label(14, 44, `미배분 스탯 포인트: ${c.unspentPoints}`, c.unspentPoints > 0 ? theme.colors.good : theme.colors.muted, 13, { fontStyle: c.unspentPoints ? 'bold' : 'normal' });
-    this.label(this.w - 14, 44, `상한 ${statCap(c.rebirth)}`, theme.colors.muted, 11).setOrigin(1, 0);
+    this.label(this.w - 14, 44, `상한 ${statCap(c.rebirth)}`, theme.colors.muted, 12).setOrigin(1, 0);
 
     let y = 72;
     for (const k of STAT_KEYS) {
       this.label(14, y, k, '#ffffff', 14, { fontStyle: 'bold' });
-      this.label(74, y + 2, STAT_DESC[k], theme.colors.muted, 10);
+      this.label(74, y + 2, STAT_DESC[k], theme.colors.muted, 12);
       this.label(268, y, `${c.base[k]}`, theme.colors.brass, 14).setOrigin(1, 0);
       if (c.unspentPoints > 0) {
-        this.button(282, y - 1, '+1', () => actions.allocate(k, 1));
-        this.button(318, y - 1, '+5', () => actions.allocate(k, Math.min(5, gameState.character.unspentPoints)));
+        this.button(282, y - 1, '+1', () => actions.allocate(k, 1), undefined, 14);
+        this.button(318, y - 1, '+5', () => actions.allocate(k, Math.min(5, gameState.character.unspentPoints)), undefined, 14);
       }
       y += 30;
     }
@@ -66,8 +66,8 @@ export class StatusWindow extends Window {
       ['무게', `${totalWeightKg(gameState.inventory, registry.item).toFixed(1)} / ${d.maxWeightKg.toFixed(1)} kg`],
     ];
     for (const [k, val] of rows) {
-      this.label(14, y, k, theme.colors.muted, 12);
-      this.label(this.w - 14, y, val, theme.colors.text, 12).setOrigin(1, 0);
+      this.label(14, y, k, theme.colors.muted, 13);
+      this.label(this.w - 14, y, val, theme.colors.text, 13).setOrigin(1, 0);
       y += 20;
     }
 
@@ -94,12 +94,12 @@ export class StatusWindow extends Window {
         const icon = this.scene.add.image(sx + 4, y + 4, def.iconTex).setOrigin(0, 0).setDisplaySize(size - 8, size - 8).setInteractive({ useHandCursor: true });
         icon.on('pointerdown', () => actions.equipToggle(stack.uid));
         this.content.add(icon);
-        if (def.kind === 'armor') this.label(sx + size - 2, y + size - 13, `${Math.round(armorDefense(def, stack))}`, theme.colors.text, 9, { stroke: '#000', strokeThickness: 2 }).setOrigin(1, 0);
+        if (def.kind === 'armor') this.label(sx + size - 2, y + size - 13, `${Math.round(armorDefense(def, stack))}`, theme.colors.text, 11, { stroke: '#000', strokeThickness: 2 }).setOrigin(1, 0);
         if (stack.prefix) this.label(sx + 2, y + 1, stack.prefix === '전설' ? '★' : '◆', stack.prefix === '전설' ? '#ffd166' : '#c9a7ff', 9);
       } else {
         this.label(sx + size / 2, y + size / 2, '—', '#4b5563', 12).setOrigin(0.5);
       }
-      this.label(sx + size / 2, y + size + 2, sd.label, theme.colors.muted, 9).setOrigin(0.5, 0);
+      this.label(sx + size / 2, y + size + 2, sd.label, theme.colors.muted, 11).setOrigin(0.5, 0);
     });
     y += size + 16;
     const w = gameState.weapon();
@@ -109,7 +109,7 @@ export class StatusWindow extends Window {
       const d = st ? registry.item(st.itemId) : null;
       return st && d?.kind === 'armor' ? armorLabel(d, st) : null;
     }).filter((x): x is string => !!x);
-    this.label(14, y, w ? weaponLabel(w.def, w.stack) : '무기 없음', w ? theme.colors.text : theme.colors.muted, 11);
-    this.label(14, y + 16, worn.length ? worn.join(' · ') : '착용한 방어구 없음', theme.colors.muted, 10, { wordWrap: { width: this.w - 28 } });
+    this.label(14, y, w ? weaponLabel(w.def, w.stack) : '무기 없음', w ? theme.colors.text : theme.colors.muted, 13);
+    this.label(14, y + 16, worn.length ? worn.join(' · ') : '착용한 방어구 없음', theme.colors.muted, 12, { wordWrap: { width: this.w - 28 } });
   }
 }

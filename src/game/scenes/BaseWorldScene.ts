@@ -27,7 +27,7 @@ import { rollBreak } from '@core/inventory/death';
 import { hasBuff } from '@core/combat/buffs';
 import { gameRng } from '@core/rng';
 import { Rain } from '../ui/Rain';
-import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameSize'; // not gameConfig: WORLD_ZOOM reads it at load time and gameConfig imports this scene
+import { GAME_HEIGHT, GAME_WIDTH, RENDER_SCALE } from '../../config/gameSize'; // not gameConfig: WORLD_ZOOM reads it at load time and gameConfig imports this scene
 
 /** World camera zoom: 32px tiles render at 48px, so characters read like the original's ~50px sprites. */
 export const WORLD_ZOOM = 1.5 * (GAME_HEIGHT / 720); // phones: keep the same world view on the smaller canvas
@@ -121,7 +121,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.enemies);
 
     this.cameras.main.setBounds(0, 0, w, h);
-    this.cameras.main.setZoom(WORLD_ZOOM);
+    this.cameras.main.setZoom(WORLD_ZOOM * RENDER_SCALE);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
 
     if (this.def.dark) {

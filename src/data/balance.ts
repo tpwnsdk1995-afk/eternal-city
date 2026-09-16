@@ -33,8 +33,8 @@ export const balance = {
     consciousnessMax: 0.5,
     consciousnessInvulnMs: 2000,
     consciousnessCooldownMs: 30_000,
-    meleePerVit: 0.004,
-    rangedPerTech: 0.004,
+    meleePerVit: 0.02,
+    rangedPerTech: 0.02,
     critBase: 0.03,
     critPerTech: 0.0006,
     critMax: 0.5,
@@ -66,6 +66,7 @@ export const balance = {
     killLevelGapGrace: 5,
     killLevelGapPenaltyPerLevel: 0.1,
     killMinMult: 0.1,
+    killMult: 5, // kills give 5x the monster's listed xp (early game felt too slow)
   },
   combat: {
     gradeMult: 1.25,
@@ -142,7 +143,7 @@ export const balance = {
     /** chance (%) that +n → +n+1 succeeds, n = 0..8 */
     enhanceSuccessPct: [50, 45, 40, 35, 30, 25, 20, 15, 10] as readonly number[],
     maxEnhance: 9,
-    enhanceDmgPerLevel: 0.06,
+    enhanceDmgPerLevel: 0.15,
     /** cost = weapon grade price × base × (1 + level × perLevel) */
     enhanceCostBase: 0.12,
     enhanceCostPerLevel: 0.45,

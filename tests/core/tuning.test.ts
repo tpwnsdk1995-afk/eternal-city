@@ -36,12 +36,12 @@ describe('강화', () => {
     expect(r0.ok && r0.stack.enhance === 0).toBe(true);
   });
 
-  it('cost scales with grade price and level; +N raises damage 6% per level', () => {
+  it('cost scales with grade price and level; +N raises damage enhanceDmgPerLevel per level', () => {
     const c0 = enhanceCost(m16, stack(m16));
     const c5 = enhanceCost(m16, stack(m16, { enhance: 5 }));
     expect(c5).toBeGreaterThan(c0 * 3);
     const eff = effectiveWeapon(m16, stack(m16, { enhance: 5 }));
-    expect(eff.def.baseDamage).toBeCloseTo(m16.baseDamage * 1.3);
+    expect(eff.def.baseDamage).toBeCloseTo(m16.baseDamage * (1 + 5 * balance.tuning.enhanceDmgPerLevel));
     expect(eff.def.rpm).toBe(m16.rpm);
   });
 });

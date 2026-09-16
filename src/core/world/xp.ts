@@ -9,7 +9,7 @@ const X = balance.xp;
 export function xpForKill(monster: MonsterDef, playerLevel: number): number {
   const gap = Math.max(0, playerLevel - monster.level - X.killLevelGapGrace);
   const mult = Math.max(X.killMinMult, Math.min(1, 1 - gap * X.killLevelGapPenaltyPerLevel));
-  return Math.max(1, Math.round(monster.xp * mult));
+  return Math.max(1, Math.round(monster.xp * X.killMult * mult));
 }
 
 export interface XpResult {

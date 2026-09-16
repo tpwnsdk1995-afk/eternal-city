@@ -71,9 +71,9 @@ export class ListView extends Phaser.GameObjects.Container {
         tx = cell + 10;
       }
       const color = r.disabled ? '#6b7280' : (r.color ?? theme.colors.text);
-      objs.push(this.scene.add.text(tx, y + 4, r.text, theme.textStyle(13, color)));
-      if (r.sub) objs.push(this.scene.add.text(tx, y + 22, r.sub, theme.textStyle(11, r.disabled ? '#4b5563' : theme.colors.muted)));
-      if (r.right) objs.push(this.scene.add.text(this.listW - 8, y + (this.rowH - 2) / 2, r.right, theme.textStyle(12, r.rightColor ?? theme.colors.brass)).setOrigin(1, 0.5));
+      objs.push(this.scene.add.text(tx, y + 4, r.text, theme.textStyle(14, color)));
+      if (r.sub) objs.push(this.scene.add.text(tx, y + 22, r.sub, theme.textStyle(12, r.disabled ? '#4b5563' : theme.colors.muted)));
+      if (r.right) objs.push(this.scene.add.text(this.listW - 8, y + (this.rowH - 2) / 2, r.right, theme.textStyle(13, r.rightColor ?? theme.colors.brass)).setOrigin(1, 0.5));
       this.rowObjs.push(...objs);
       this.add(objs);
     });

@@ -34,9 +34,10 @@ test.describe('touch controls', () => {
     await page.mouse.move(layout.stick.x + 30, layout.stick.y, { steps: 4 });
     await page.waitForFunction((bx) => (window.__ec!.player()?.x ?? 0) > bx + 40, p0.x, { timeout: 5000 });
     const walkHud = await page.evaluate(() => window.__ec!.hud());
-    // push to the rim → running drains stamina
+    // push to the rim → running, which is free: stamina must not drop
     await page.mouse.move(layout.stick.x + 80, layout.stick.y, { steps: 4 });
-    await page.waitForFunction((st) => window.__ec!.hud().stamina < st - 2, walkHud.stamina, { timeout: 5000 });
+    await page.waitForTimeout(800);
+    expect((await page.evaluate(() => window.__ec!.hud().stamina))).toBeGreaterThanOrEqual(walkHud.stamina - 0.5);
     await page.mouse.up();
     await page.waitForTimeout(200);
     const p1 = (await page.evaluate(() => window.__ec!.player()))!;
@@ -83,7 +84,7 @@ test.describe('touch controls', () => {
     await page.mouse.click(layout.buttons['점프'].x, layout.buttons['점프'].y);
     await page.waitForFunction((st) => window.__ec!.hud().stamina < st - 5, stBefore, { timeout: 3000 });
 
-    await page.mouse.click(640 - 3 * 68 - 34 + 32, 8 + 15); // first tab (인벤) in the top strip
+    await page.mouse.click(layout.buttons['인벤'].x, layout.buttons['인벤'].y); // 인벤 tab in the top strip
     await page.waitForFunction(() => window.__ec!.windows().includes('inventory'), undefined, { timeout: 3000 });
     await page.screenshot({ path: 'e2e/out/touch-inventory.png' });
     await page.evaluate(() => window.__ec!.closeWindows());
