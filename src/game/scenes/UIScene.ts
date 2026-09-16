@@ -65,6 +65,14 @@ export class UIScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Phaser reuses the scene instance: '타이틀로' stops the UI and the next game relaunches it, so
+    // per-run collections must start empty or refreshers touch destroyed objects from the last run.
+    this.quickIcons = [];
+    this.quickCounts = [];
+    this.logLines = [];
+    this.unsubs = [];
+    this.minimapImage = null;
+    this.minimapInfo = null;
     const top = GAME_HEIGHT - HUD_H;
     this.add.nineslice(0, top, TEX.ui_panel, 0, GAME_WIDTH, HUD_H, 8, 8, 8, 8).setOrigin(0, 0);
 

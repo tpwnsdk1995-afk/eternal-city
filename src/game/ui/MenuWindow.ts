@@ -56,6 +56,7 @@ export class MenuWindow extends Window {
     this.button(226, y, '+', () => gameState.setSettings({ bgmVolume: Math.min(1, Math.round((s.bgmVolume + 0.1) * 10) / 10) }), theme.colors.brass, 13);
     this.button(270, y, `글자 크기: ${s.uiScale > 1 ? '크게' : '보통'}`, () => gameState.setSettings({ uiScale: s.uiScale > 1 ? 1 : 1.15 }), theme.colors.brass, 13);
     y += 40;
+    this.label(this.w - 20, y + 4, `슬롯 ${saveService.currentSlot}`, theme.colors.muted, 11).setOrigin(1, 0);
     this.button(20, y, '지금 저장', () => void saveService.save().then(() => gameState.message('저장했습니다.', 'good')), theme.colors.good, 13);
     this.button(130, y, '타이틀로 (저장 후)', () => gameState.events.emit('goTitle', undefined), theme.colors.bad, 13);
     y += 40;

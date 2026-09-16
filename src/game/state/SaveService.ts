@@ -10,6 +10,8 @@ import { gameState } from './GameState';
 import { cloudSave } from './CloudSave';
 
 export const DEFAULT_SLOT = 1;
+export const SLOT_COUNT = 3;
+export const SLOTS = [1, 2, 3] as const;
 const AUTOSAVE_MIN_GAP_MS = 4000;
 const AUTOSAVE_PERIOD_MS = 60_000;
 const SETTINGS_KEY = 'settings';
@@ -80,8 +82,10 @@ class SaveService {
   private timer: ReturnType<typeof setInterval> | null = null;
   /** true once a character exists in memory (new game or loaded) */
   hasCharacter = false;
+  /** the slot the live character saves to (title selection / last load) */
+  currentSlot = DEFAULT_SLOT;
 
-  async save(slot = DEFAULT_SLOT): Promise<SaveRow> {
+  async save(slot = this.currentSlot): Promise<SaveRow> {
     const data = takeSnapshot();
     const row: SaveRow = {
       slot,
@@ -93,7 +97,7 @@ class SaveService {
     };
     await db.saves.put(row);
     this.lastAutosaveAt = performance.now();
-    void cloudSave.push(data); // account-bound copy when the play page provides one
+    void cloudSave.push(data, slot); // account-bound copy when the play page provides one
     return row;
   }
 
@@ -103,17 +107,24 @@ class SaveService {
     return row;
   }
 
-  async load(slot = DEFAULT_SLOT): Promise<SaveGame | null> {
+  async load(slot = this.currentSlot): Promise<SaveGame | null> {
     const row = await db.saves.get(slot);
     const save = row ? migrateSave(row.data) : null;
     if (!save) return null;
     applySnapshot(save);
     this.hasCharacter = true;
+    this.currentSlot = slot;
     return save;
   }
 
-  async deleteSave(slot = DEFAULT_SLOT): Promise<void> {
+  async deleteSave(slot = this.currentSlot): Promise<void> {
     await db.saves.delete(slot);
+    void cloudSave.remove(slot);
+  }
+
+  /** All slots, in order (null = empty/corrupt). */
+  async peekAll(): Promise<(SaveRow | null)[]> {
+    return Promise.all(SLOTS.map((n) => this.peek(n)));
   }
 
   /** Autosave: throttled so bursts of events (level-up + loot) write once. */
@@ -169,7 +180,7 @@ class SaveService {
   // --- 내보내기 / 불러오기 (move a save between devices) ----------------------------------------
 
   /** Portable text of the live character (or of the stored slot when no character is loaded). */
-  async exportText(slot = DEFAULT_SLOT): Promise<string | null> {
+  async exportText(slot = this.currentSlot): Promise<string | null> {
     if (this.hasCharacter) return encodeSaveFile(takeSnapshot());
     const row = await db.saves.get(slot);
     const save = row ? migrateSave(row.data) : null;
@@ -214,7 +225,7 @@ class SaveService {
    * Validate + store an exported save into the slot. Does not touch the live state — callers
    * decide whether to `load()` it right away (title) or travel to its location (in-game).
    */
-  async importText(text: string, slot = DEFAULT_SLOT): Promise<DecodeResult & { row?: SaveRow }> {
+  async importText(text: string, slot = this.currentSlot): Promise<DecodeResult & { row?: SaveRow }> {
     const r = decodeSaveFile(text);
     if (!r.ok) return r;
     const data = r.save;

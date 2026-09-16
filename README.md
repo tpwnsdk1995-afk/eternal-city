@@ -131,6 +131,7 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 - **배경음악(합성)**: 씬별 무드 5종(타이틀 비 · 안전지역 · 필드 · 어설트 · 보스)을 4마디 코드 루프 + 베이스 + 아르페지오 + 16스텝 드럼으로 실시간 합성. 어설트 중 보스 체력바가 뜨면 보스 무드로 전환. Esc 메뉴에서 BGM 켬/끔·볼륨
 - **글자 크기 옵션**(Esc 메뉴: 보통/크게) — 창을 다시 열면 적용. 성능 e2e(`perf.spec.ts`, 200마리 스폰 평균 FPS 기록)
 - **사망 파손·파방클**: 사망하면 35% 확률로 장착 중인 장비 1개가 파손(무기 공격 −20%, 방어구 방어 −25%, 라벨 `[파손]`). 기술상에서 수리(가격의 15%). 사이버샵의 **파손 방지 클립**(7일 버프)을 켜 두면 파손이 일어나지 않습니다(원작 파방클)
+- **세이브 슬롯 3개**: 타이틀에서 숫자 1~3으로 슬롯을 고르고 Enter(빈 슬롯=새 게임, 있는 슬롯=계속하기), Delete 두 번으로 삭제. 슬롯마다 독립 저장·클라우드 문서(`saves/slot1~3`)·파일 불러오기(선택 슬롯). Esc 메뉴에 현재 슬롯 표시
 - **성능 점검 결과**: 헤드리스(SwiftShader) 200마리에서 WebGL 20fps·Canvas 31fps, CPU 프로파일은 88% idle — 병목은 소프트웨어 GPU 합성이고 게임 로직은 여유가 큽니다(빈 필드도 33fps). 실제 GPU가 있는 노트북에서는 60fps 상한에 걸립니다. 느린 기기에서는 `?renderer=canvas`로 캔버스 렌더러를 강제할 수 있습니다
 
 ## 다음 단계
@@ -143,7 +144,7 @@ Esc 메뉴에서 두 방식을 언제든 전환할 수 있습니다.
 src/core/   순수 TS 게임 규칙 (Phaser 금지, 전부 유닛 테스트)  stats · combat · weapons · tuning · inventory · skills · ai · assault · progress · map · quest · economy · save
 src/data/   콘텐츠 데이터 + 스키마 + balance.ts (부팅 시 validateAll로 참조 검증)
 src/game/   Phaser 어댑터: scenes · entities · systems(InputMapper, CombatBridge, SpawnSystem) · ui(창들) · textures(코드 드로잉) · state
-e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch · save-transfer · cloud-save · audio · guild · late-years · assault-ef · tutorial · perf · death)
+e2e/        Playwright 시나리오 (smoke · combat · windows · assault A/B/C/D · save · quest · travel · weapons · launchers · tuning · armor · progress · parallel · raid · cybershop · rebirth · infected · year2005 · touch · save-transfer · cloud-save · audio · guild · late-years · assault-ef · tutorial · perf · death · save-slots)
 ```
 
 `window.__ec` 디버그 훅으로 상태 조회/스폰/텔레포트/어설트 진행을 제어할 수 있습니다(e2e에서 사용).

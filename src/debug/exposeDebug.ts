@@ -61,7 +61,11 @@ export interface EcDebug {
   /** Debug: add an item straight into the inventory (quest progression hooks included). */
   give(itemId: string, qty?: number): void;
   save(): Promise<unknown>;
-  hasSave(): Promise<boolean>;
+  hasSave(slot?: number): Promise<boolean>;
+  /** Title slot summaries (null = empty). */
+  slots(): Promise<({ slot: number; name: string; level: number } | null)[]>;
+  deleteSave(slot: number): Promise<void>;
+  currentSlot(): number;
   /** Procedural audio: unlocked flag, current ambient bed, and the most recent play names. */
   audio(): { unlocked: boolean; ambient: string; bgm: string; recent: string[] };
   /** Cloud-save status (account-bound store on the play page; 'offline' elsewhere). */
@@ -134,7 +138,10 @@ export function exposeDebug(game: Phaser.Game): void {
       questService.syncCollect(itemId);
     },
     save: () => saveService.save(),
-    hasSave: () => saveService.peek().then((r) => !!r),
+    hasSave: (slot) => saveService.peek(slot ?? saveService.currentSlot).then((r) => !!r),
+    slots: () => saveService.peekAll().then((rows) => rows.map((r) => (r ? { slot: r.slot, name: r.name, level: r.level } : null))),
+    deleteSave: (slot) => saveService.deleteSave(slot),
+    currentSlot: () => saveService.currentSlot,
     audio: () => audio.snapshot(),
     cloud: () => ({ state: cloudSave.state, lastSyncAt: cloudSave.lastSyncAt, text: cloudSave.describe() }),
     exportSave: () => saveService.exportText(),

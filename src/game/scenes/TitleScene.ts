@@ -2,7 +2,9 @@ import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 import { TEX } from '@data/textureKeys';
 import { gameState } from '../state/GameState';
-import { saveService } from '../state/SaveService';
+import { SLOTS, saveService } from '../state/SaveService';
+import { db } from '../state/db';
+import { RACE_NAME } from '@data/schema/enums';
 import { cloudSave } from '../state/CloudSave';
 import { audio } from '../audio/AudioManager';
 import { migrateSave } from '@core/save/saveSchema';
@@ -17,8 +19,12 @@ export class TitleScene extends Phaser.Scene {
   private busy = false;
   private rain!: Rain;
   private importStatus!: Phaser.GameObjects.Text;
-  private showSlot: ((row: SaveRow) => void) | null = null;
   private cloudReady: Promise<void> = Promise.resolve();
+  private slotLayer!: Phaser.GameObjects.Container;
+  private rows: (SaveRow | null)[] = [null, null, null];
+  /** highlighted slot index; −1 until the rows are known */
+  private selected = -1;
+  private confirmDelete: number | null = null;
 
   constructor() {
     super('Title');
@@ -40,52 +46,58 @@ export class TitleScene extends Phaser.Scene {
     this.add.text(cx, 250, '2002년 서울 · 중곡동', theme.textStyle(18, theme.colors.muted)).setOrigin(0.5);
     this.tweens.add({ targets: logo, alpha: 0.86, duration: 1800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
-    // menu panel
-    const panelW = 420;
-    const panelH = 214;
-    const py = GAME_HEIGHT / 2 + 20;
+    // 세이브 슬롯 패널
+    const panelW = 620;
+    const panelH = 318;
+    const py = GAME_HEIGHT / 2 - 40;
     this.add.nineslice(cx, py, TEX.ui_panel, 0, panelW, panelH, 8, 8, 8, 8).setOrigin(0.5, 0).setAlpha(0.92);
-    this.menuItem(py + 44, '▶ 새 게임 시작  (Enter)', () => this.newGame());
-    const cont = this.menuItem(py + 94, '계속하기  (C)', () => void this.continueGame()).setVisible(false);
-    const info = this.add.text(cx, py + 126, '', theme.textStyle(12, '#8a8f9c')).setOrigin(0.5);
-    // 세이브 파일 불러오기 (다른 기기에서 내보낸 .json)
-    const imp = this.add.text(cx, py + 172, '세이브 파일 불러오기…', theme.textStyle(15, theme.colors.muted)).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.add.text(cx, py + 12, '세이브 슬롯 — 숫자 1~3 선택 · Enter 시작/계속하기 · Delete 삭제', theme.textStyle(12, theme.colors.muted)).setOrigin(0.5, 0);
+    this.slotLayer = this.add.container(cx - panelW / 2 + 16, py + 38);
+    this.renderSlots();
+    // 세이브 파일 불러오기 (다른 기기에서 내보낸 .json) → 선택한 슬롯
+    const imp = this.add.text(cx, py + 252, '세이브 파일 불러오기… (선택한 슬롯에)', theme.textStyle(14, theme.colors.muted)).setOrigin(0.5).setInteractive({ useHandCursor: true });
     imp.on('pointerover', () => imp.setColor('#ffffff'));
     imp.on('pointerout', () => imp.setColor(theme.colors.muted));
     imp.on('pointerdown', () => void this.importSave());
-    this.importStatus = this.add.text(cx, py + 196, '', theme.textStyle(11, '#8a8f9c')).setOrigin(0.5);
+    this.importStatus = this.add.text(cx, py + 278, '', theme.textStyle(11, '#8a8f9c')).setOrigin(0.5);
 
     void saveService.loadSettings();
-    const showSlot = (row: SaveRow) => {
-      cont.setVisible(true);
-      info.setText(`${row.name}  Lv.${row.level} · ${row.mapName} · ${new Date(row.updatedAt).toLocaleString('ko-KR')}`);
-    };
-    this.showSlot = showSlot;
     const cloudText = this.add.text(cx, GAME_HEIGHT - 48, cloudSave.describe(), theme.textStyle(11, '#8a8f9c')).setOrigin(0.5);
-    let keyArmed = false;
-    const armContinue = () => {
-      if (keyArmed) return;
-      keyArmed = true;
-      this.input.keyboard?.once('keydown-C', () => void this.continueGame());
-    };
-    // local slot first (instant), then the account-bound cloud copy if the play page provides one
-    void saveService.peek().then((row: SaveRow | null) => {
-      if (!row || !this.scene.isActive()) return;
-      showSlot(row);
-      armContinue();
+    // local slots first (instant), then the account-bound cloud copies if the play page provides them
+    void saveService.peekAll().then((rows) => {
+      if (!this.scene.isActive()) return;
+      this.rows = rows;
+      if (this.selected < 0) this.selected = this.defaultSelection();
+      this.renderSlots();
     });
     this.cloudReady = cloudSave
-      .reconcileSlot()
-      .then(({ row }) => {
+      .reconcileAll(SLOTS)
+      .then((rows) => {
         if (!this.scene.isActive()) return;
         cloudText.setText(cloudSave.describe()).setColor(cloudSave.state === 'pulled' ? theme.colors.good : cloudSave.state === 'error' ? theme.colors.bad : '#8a8f9c');
-        if (row && migrateSave(row.data)) {
-          showSlot(row);
-          armContinue();
-        }
+        this.rows = rows.map((r) => (r && migrateSave(r.data) ? r : null));
+        if (this.selected < 0) this.selected = this.defaultSelection();
+        this.renderSlots();
       })
       .catch(() => undefined);
-    this.input.keyboard?.once('keydown-ENTER', () => this.newGame());
+
+    const kb = this.input.keyboard;
+    kb?.on('keydown-ONE', () => this.select(0));
+    kb?.on('keydown-TWO', () => this.select(1));
+    kb?.on('keydown-THREE', () => this.select(2));
+    kb?.on('keydown-ENTER', () => {
+      const i = this.selected < 0 ? this.defaultSelection() : this.selected;
+      if (this.rows[i]) void this.continueGame(i + 1);
+      else this.newGame(i + 1);
+    });
+    kb?.on('keydown-C', () => {
+      const i = this.mostRecent();
+      if (i >= 0) void this.continueGame(i + 1);
+    });
+    kb?.on('keydown-DELETE', () => {
+      const i = this.selected < 0 ? this.defaultSelection() : this.selected;
+      void this.deleteSlot(i + 1);
+    });
 
     this.add
       .text(cx, GAME_HEIGHT - 24, '팬 재현 개발 빌드 · 원작식(좌클릭 이동/우클릭 공격) 또는 현대식(WASD) — Esc 메뉴에서 전환 · 터치 기기는 화면 조작 자동', theme.textStyle(12, '#6b7280'))
@@ -96,39 +108,112 @@ export class TitleScene extends Phaser.Scene {
     this.rain.update(dt);
   }
 
-  private menuItem(y: number, label: string, onPick: () => void): Phaser.GameObjects.Text {
-    const t = this.add.text(GAME_WIDTH / 2, y, label, theme.textStyle(24, theme.colors.brass)).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    t.on('pointerover', () => t.setColor('#ffffff'));
-    t.on('pointerout', () => t.setColor(theme.colors.brass));
-    t.on('pointerdown', onPick);
-    return t;
+  /** First empty slot, else the most recently played one, else slot 1. */
+  private defaultSelection(): number {
+    const empty = this.rows.findIndex((r) => !r);
+    if (empty >= 0 && this.rows.every((r) => !r)) return 0;
+    const recent = this.mostRecent();
+    return recent >= 0 ? recent : Math.max(0, empty);
   }
 
-  private newGame(): void {
+  private mostRecent(): number {
+    let best = -1;
+    let at = -1;
+    this.rows.forEach((r, i) => {
+      if (r && r.updatedAt > at) {
+        at = r.updatedAt;
+        best = i;
+      }
+    });
+    return best;
+  }
+
+  private select(i: number): void {
+    this.selected = i;
+    this.confirmDelete = null;
+    this.renderSlots();
+  }
+
+  private renderSlots(): void {
+    this.slotLayer.removeAll(true);
+    const w = 620 - 32;
+    const sel = this.selected < 0 ? this.defaultSelection() : this.selected;
+    for (let i = 0; i < 3; i++) {
+      const row = this.rows[i];
+      const y = i * 68;
+      const bg = this.add.rectangle(0, y, w, 60, 0xffffff, i === sel ? 0.1 : 0.04).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+      if (i === sel) bg.setStrokeStyle(1, 0xc9a227, 0.8);
+      bg.on('pointerdown', () => this.select(i));
+      const num = this.add.text(12, y + 8, `${i + 1}`, theme.textStyle(26, i === sel ? theme.colors.brass : theme.colors.muted, { fontStyle: 'bold' }));
+      const title = this.add.text(52, y + 8, row ? `${row.name}  Lv.${row.level}` : '빈 슬롯', theme.textStyle(17, row ? '#ffffff' : theme.colors.muted, { fontStyle: 'bold' }));
+      const sub = this.add.text(52, y + 34, row ? `${RACE_NAME[row.data.character.race ?? 'human']} · ${row.mapName} · ${new Date(row.updatedAt).toLocaleString('ko-KR')}` : '새 게임을 시작할 수 있습니다', theme.textStyle(11, '#8a8f9c'));
+      const items: Phaser.GameObjects.GameObject[] = [bg, num, title, sub];
+      const btn = (x: number, label: string, color: string, onPick: () => void) => {
+        const t = this.add.text(x, y + 18, label, theme.textStyle(14, color, { backgroundColor: '#1a1e24', padding: { left: 10, right: 10, top: 3, bottom: 3 } })).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+        t.on('pointerover', () => t.setStyle({ backgroundColor: '#2a3038' }));
+        t.on('pointerout', () => t.setStyle({ backgroundColor: '#1a1e24' }));
+        t.on('pointerdown', onPick);
+        items.push(t);
+        return t;
+      };
+      if (row) {
+        btn(w - 12, this.confirmDelete === i ? '정말 삭제?' : '삭제', this.confirmDelete === i ? theme.colors.bad : theme.colors.muted, () => void this.deleteSlot(i + 1));
+        btn(w - 110, '계속하기', theme.colors.brass, () => void this.continueGame(i + 1));
+      } else {
+        btn(w - 12, '▶ 새 게임', theme.colors.brass, () => this.newGame(i + 1));
+      }
+      this.slotLayer.add(items);
+    }
+  }
+
+  private newGame(slot: number): void {
     if (this.busy) return;
     this.busy = true;
-    this.scene.start('CharacterCreate');
+    this.scene.start('CharacterCreate', { slot });
   }
 
-  /** Pick an exported .json → store it in the slot → continue straight into it. */
+  private async deleteSlot(slot: number): Promise<void> {
+    if (this.busy || !this.rows[slot - 1]) return;
+    if (this.confirmDelete !== slot - 1) {
+      this.confirmDelete = slot - 1;
+      this.selected = slot - 1;
+      this.renderSlots();
+      return;
+    }
+    await saveService.deleteSave(slot);
+    this.rows = [...this.rows];
+    this.rows[slot - 1] = null;
+    this.confirmDelete = null;
+    this.importStatus.setText(`슬롯 ${slot}을 삭제했습니다.`).setColor(theme.colors.muted);
+    this.renderSlots();
+  }
+
+  /** Pick an exported .json → store it in the selected slot → continue straight into it. */
   private async importSave(): Promise<void> {
     if (this.busy) return;
+    const slot = (this.selected < 0 ? this.defaultSelection() : this.selected) + 1;
     const r = await saveService.importFromPicker();
     if (!r || !this.scene.isActive()) return;
     if (!r.ok) {
       this.importStatus.setText(saveService.describeImportFail(r)).setColor(theme.colors.bad);
       return;
     }
-    if (r.row) this.showSlot?.(r.row);
-    this.importStatus.setText(`${r.row?.name ?? ''} 세이브를 불러왔습니다 — 이어서 시작합니다.`).setColor(theme.colors.good);
-    await this.continueGame();
+    // importFromPicker stored into the service's current slot; move the row to the chosen one if needed
+    if (r.row && r.row.slot !== slot) {
+      await saveService.deleteSave(r.row.slot);
+      await db.saves.put({ ...r.row, slot });
+    }
+    this.rows = await saveService.peekAll();
+    this.renderSlots();
+    this.importStatus.setText(`${r.row?.name ?? ''} 세이브를 슬롯 ${slot}에 불러왔습니다 — 이어서 시작합니다.`).setColor(theme.colors.good);
+    await this.continueGame(slot);
   }
 
-  private async continueGame(): Promise<void> {
+  private async continueGame(slot: number): Promise<void> {
     if (this.busy) return;
     this.busy = true;
     await this.cloudReady; // don't start on a stale local slot while a newer cloud save is arriving
-    const save = await saveService.load();
+    const save = await saveService.load(slot);
     if (!save) {
       this.busy = false;
       gameState.message('저장 데이터를 불러올 수 없습니다.', 'bad');

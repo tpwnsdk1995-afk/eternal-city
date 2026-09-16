@@ -16,7 +16,7 @@ interface ClaudeHost {
 }
 
 export type CloudState = 'checking' | 'synced' | 'pulled' | 'pushed' | 'offline' | 'error';
-const DOC_PATH = 'saves/slot1';
+const docPath = (slot: number): string => `saves/slot${slot}`;
 const USE_TIMEOUT_MS = 12_000;
 
 /**
@@ -30,8 +30,8 @@ class CloudSave {
   state: CloudState = 'checking';
   lastSyncAt = 0;
   private pushing: Promise<void> | null = null;
-  private pendingPush: SaveGame | null = null;
-  private pushedSavedAt = 0;
+  private pendingPush: { save: SaveGame; slot: number } | null = null;
+  private pushedSavedAt = new Map<number, number>();
 
   /** Test hook: inject a store instead of asking the host page. */
   useStore(store: CloudDb | null): void {
@@ -64,11 +64,11 @@ class CloudSave {
   }
 
   /** Read the cloud document; null when absent, unreadable, or not a valid save. */
-  async pull(): Promise<SaveGame | null> {
+  async pull(slot = 1): Promise<SaveGame | null> {
     const store = await this.connect();
     if (!store) return null;
     try {
-      const snap = await store.doc(DOC_PATH).get();
+      const snap = await store.doc(docPath(slot)).get();
       if (!snap.exists) return null;
       return migrateSave(snap.data());
     } catch {
@@ -78,8 +78,8 @@ class CloudSave {
   }
 
   /** Write the save to the cloud, coalescing bursts: at most one in-flight write, latest wins. */
-  push(save: SaveGame): Promise<void> {
-    this.pendingPush = save;
+  push(save: SaveGame, slot = 1): Promise<void> {
+    this.pendingPush = { save, slot };
     if (this.pushing) return this.pushing;
     this.pushing = (async () => {
       try {
@@ -88,10 +88,10 @@ class CloudSave {
         while (this.pendingPush) {
           const next = this.pendingPush;
           this.pendingPush = null;
-          if (next.savedAt === this.pushedSavedAt) continue;
-          await store.doc(DOC_PATH).set(next as unknown as Record<string, unknown>);
-          this.pushedSavedAt = next.savedAt;
-          this.lastSyncAt = next.savedAt;
+          if (next.save.savedAt === this.pushedSavedAt.get(next.slot)) continue;
+          await store.doc(docPath(next.slot)).set(next.save as unknown as Record<string, unknown>);
+          this.pushedSavedAt.set(next.slot, next.save.savedAt);
+          this.lastSyncAt = next.save.savedAt;
           if (this.state !== 'pulled') this.state = 'synced';
         }
       } catch {
@@ -101,6 +101,20 @@ class CloudSave {
       }
     })();
     return this.pushing;
+  }
+
+  /** Delete the cloud copy of a slot (title-screen 삭제). Best effort. */
+  async remove(slot: number): Promise<void> {
+    const store = await this.connect();
+    if (!store) return;
+    try {
+      const doc = store.doc(docPath(slot)) as CloudDoc & { delete?: () => Promise<void> };
+      if (doc.delete) await doc.delete();
+      else await doc.set({ deleted: true, savedAt: 0 });
+      this.pushedSavedAt.delete(slot);
+    } catch {
+      /* cloud copy stays; the next save overwrites it */
+    }
   }
 
   /**
@@ -115,32 +129,47 @@ class CloudSave {
       this.state = 'offline';
       return { decision: { action: 'useLocal' }, row: local };
     }
-    const cloud = await this.pull();
-    const decision = reconcile(local ? { savedAt: local.data.savedAt } : null, cloud ? { savedAt: cloud.savedAt } : null);
+    const cloud = await this.pull(slot);
+    const cloudValid = cloud && cloud.savedAt > 0 ? cloud : null;
+    const decision = reconcile(local ? { savedAt: local.data.savedAt } : null, cloudValid ? { savedAt: cloudValid.savedAt } : null);
     switch (decision.action) {
       case 'useCloud': {
-        const data = cloud!;
+        const data = cloudValid!;
         const mapId = registry.hasMap(data.location.mapId) ? data.location.mapId : registry.hasMap('gwangjin-gucheong-parking') ? 'gwangjin-gucheong-parking' : data.location.mapId;
         const row: SaveRow = { slot, name: data.character.name, level: data.character.level, mapName: registry.map(mapId).name, updatedAt: data.savedAt, data };
         await db.saves.put(row);
-        this.pushedSavedAt = data.savedAt;
+        this.pushedSavedAt.set(slot, data.savedAt);
         this.lastSyncAt = data.savedAt;
         this.state = 'pulled';
         return { decision, row };
       }
       case 'pushLocal':
-        await this.push(local!.data);
+        await this.push(local!.data, slot);
         this.state = 'pushed';
         return { decision, row: local };
       case 'useLocal':
-        this.pushedSavedAt = cloud?.savedAt ?? 0;
+        this.pushedSavedAt.set(slot, cloud?.savedAt ?? 0);
         this.lastSyncAt = local?.data.savedAt ?? 0;
         this.state = 'synced';
         return { decision, row: local };
       default:
-        this.state = 'synced';
+        if (this.state === 'checking') this.state = 'synced';
         return { decision, row: null };
     }
+  }
+
+  /** Title: reconcile every slot; the most informative state wins (pulled > pushed > synced). */
+  async reconcileAll(slots: readonly number[]): Promise<(SaveRow | null)[]> {
+    const rows: (SaveRow | null)[] = [];
+    let best: CloudState = 'checking';
+    const rank: Record<CloudState, number> = { checking: 0, synced: 1, pushed: 2, pulled: 3, offline: 4, error: 5 };
+    for (const n of slots) {
+      const r = await this.reconcileSlot(n);
+      rows.push(r.row);
+      if (rank[this.state] > rank[best]) best = this.state;
+    }
+    this.state = best;
+    return rows;
   }
 
   describe(): string {

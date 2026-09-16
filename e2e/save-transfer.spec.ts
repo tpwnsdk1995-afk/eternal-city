@@ -39,7 +39,7 @@ test.describe('save transfer', () => {
     expect(await p2.evaluate(() => window.__ec!.hasSave())).toBe(false);
 
     // 타이틀 → 세이브 파일 불러오기… → picker → continues into the imported character
-    const [chooser] = await Promise.all([p2.waitForEvent('filechooser'), clickAt(p2, { x: 640, y: 360 + 20 + 172 })]); // '세이브 파일 불러오기…' on the title panel
+    const [chooser] = await Promise.all([p2.waitForEvent('filechooser'), clickAt(p2, { x: 640, y: 360 - 40 + 252 })]); // '세이브 파일 불러오기…' under the slot cards
     await chooser.setFiles({ name: 'eternal-city_이동자.json', mimeType: 'application/json', buffer: Buffer.from(text, 'utf-8') });
     await p2.waitForFunction(() => window.__ec?.scene() === 'Field', undefined, { timeout: 15000 });
     const hud = await p2.evaluate(() => window.__ec!.hud());

@@ -23,6 +23,11 @@ const STAT_DESC: Record<StatKey, string> = {
 /** 캐릭터 생성: 이름 + 생성 포인트 5 배분. */
 export class CharacterCreateScene extends Phaser.Scene {
   private training = false;
+  private slot = 1;
+
+  init(data?: { slot?: number }): void {
+    this.slot = data?.slot ?? 1;
+  }
   private trainingBtn!: Phaser.GameObjects.Text;
   private alloc: Stats = emptyStats(0);
   private left = balance.stats.creationPoints;
@@ -155,6 +160,7 @@ export class CharacterCreateScene extends Phaser.Scene {
     gameState.setCharacter({ ...gameState.character, base: { ...this.alloc }, unspentPoints: this.left });
     const d = gameState.derived();
     gameState.setVitals({ hp: d.maxHp, stamina: d.maxStamina, ap: d.maxAp });
+    saveService.currentSlot = this.slot;
     saveService.hasCharacter = true;
     saveService.attach();
     void saveService.save();
