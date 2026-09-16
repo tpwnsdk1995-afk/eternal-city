@@ -12,6 +12,7 @@ import { emptyStats, type PlayerStats } from '@core/world/stats';
 import { emptyAchievements, type AchievementState } from '@core/progress/achievements';
 import { aggregateBuffMods, emptyBuffs, extraWeightKg, pruneExpired, xpMultiplier, wonMultiplier, type BuffState } from '@core/combat/buffs';
 import { emptyGuild, guildPerks, type GuildState } from '@core/guild/guild';
+import type { AssaultScore } from '@core/assault/score';
 import { addMods } from '@data/schema/mods';
 import type { ConsciousnessState } from '@core/combat/consciousness';
 import { balance } from '@data/balance';
@@ -55,6 +56,9 @@ export interface AssaultResult {
   items: { name: string; qty: number }[];
   kills: number;
   timeSec: number;
+  /** 점수 비례 보상 breakdown (set by the assault scene) */
+  score?: AssaultScore;
+  newRecord?: boolean;
 }
 
 export interface GameEvents extends Record<string, unknown> {

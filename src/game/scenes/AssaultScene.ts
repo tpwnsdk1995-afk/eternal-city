@@ -29,6 +29,7 @@ import { refreshTiles } from '../systems/TilemapBuilder';
 import { Objective } from '../entities/Objective';
 import type { Enemy } from '../entities/Enemy';
 import { gameState, type AssaultResult } from '../state/GameState';
+import { scoreAssault } from '@core/assault/score';
 import { progressService } from '../state/progressService';
 import { audio } from '../audio/AudioManager';
 
@@ -234,12 +235,15 @@ export class AssaultScene extends BaseWorldScene {
     if (this.finished) return;
     this.finished = true;
     const timeSec = Math.round((this.time.now - this.rt.startedAt) / 1000);
-    const result: AssaultResult = { name: this.adef.name, success, reason, won: 0, xp: 0, items: [], kills: this.rt.kills, timeSec };
+    const score = scoreAssault(this.adef, { success, kills: this.rt.kills, timeSec });
+    const result: AssaultResult = { name: this.adef.name, success, reason, won: 0, xp: 0, items: [], kills: this.rt.kills, timeSec, score };
 
     if (success) {
-      const R = this.adef.rewards;
+      // 점수 비례 보상: the grade band scales ₩ and XP
+      const R = { ...this.adef.rewards, won: Math.round(this.adef.rewards.won * score.rewardMult), xp: Math.round(this.adef.rewards.xp * score.rewardMult) };
       result.won = R.won;
       result.xp = R.xp;
+      result.newRecord = progressService.recordAssaultBest(this.assaultId, { score: score.score, grade: score.grade, timeSec, kills: this.rt.kills, at: Date.now() });
       let inv = gameState.inventory;
       for (const it of R.items) {
         if (!gameRng.chance(it.chance)) continue;
@@ -255,7 +259,7 @@ export class AssaultScene extends BaseWorldScene {
         gameState.setVitals({ hp: d.maxHp, stamina: d.maxStamina, ap: d.maxAp });
         gameState.message(`레벨 업! Lv.${xr.character.level}`, 'good');
       }
-      gameState.message(`어설트 성공! ₩${R.won.toLocaleString('ko-KR')} · ${R.xp} XP 획득`, 'good');
+      gameState.message(`어설트 성공! ${score.grade}등급 ${score.score.toLocaleString('ko-KR')}점${result.newRecord ? ' (신기록)' : ''} — ₩${R.won.toLocaleString('ko-KR')} · ${R.xp} XP 획득`, 'good');
       this.time.delayedCall(SUCCESS_LINGER_MS, () => this.goToMap(hubForYear(this.def.year), balance.death.respawnPoint));
     } else {
       const penalty = Math.min(gameState.character.won, this.adef.failPenalty.won);

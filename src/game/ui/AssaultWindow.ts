@@ -4,6 +4,8 @@ import { balance } from '@data/balance';
 import type { NpcDef } from '@data/schema/npc';
 import type { AssaultDef } from '@data/schema/assault';
 import { assaultStyle } from '@core/assault/advanced';
+import { GRADE_COLOR, parSec, type AssaultGrade } from '@core/assault/score';
+import { assaultBest, assaultClears } from '@core/world/stats';
 import { gameState } from '../state/GameState';
 import { Window } from './Window';
 import { ListView, type ListRow } from './ListView';
@@ -44,12 +46,13 @@ export class AssaultWindow extends Window {
     const rows: ListRow[] = defs.map((d) => {
       const min = this.minLevel(d);
       const ok = level >= min;
+      const best = assaultBest(gameState.stats, d.id);
       return {
         id: d.id,
         text: `[${d.tier}] ${d.name}`,
-        sub: `${assaultStyle(d)} · Lv.${min}+ · ₩${d.rewards.won.toLocaleString('ko-KR')} · ${d.rewards.xp} XP`,
-        right: ok ? '지원 가능' : `Lv.${min} 필요`,
-        rightColor: ok ? theme.colors.good : theme.colors.bad,
+        sub: `${assaultStyle(d)} · Lv.${min}+ · ₩${d.rewards.won.toLocaleString('ko-KR')} · ${d.rewards.xp} XP${best ? ` · 최고 ${best.grade} ${best.score.toLocaleString('ko-KR')}점` : ''}`,
+        right: !ok ? `Lv.${min} 필요` : best ? `${best.grade}  ×${assaultClears(gameState.stats, d.id)}` : '지원 가능',
+        rightColor: !ok ? theme.colors.bad : best ? GRADE_COLOR[best.grade as AssaultGrade] ?? theme.colors.good : theme.colors.good,
         color: d.id === this.selected ? '#ffffff' : d.advanced ? '#e0a0ff' : ok ? theme.colors.text : theme.colors.muted,
         onClick: () => {
           this.selected = d.id;
@@ -86,6 +89,25 @@ export class AssaultWindow extends Window {
       y += 18;
     }
     this.label(X, y + 4, `실패 위약금 ₩${d.failPenalty.won.toLocaleString('ko-KR')} · 사망 시 구청 지하 부활`, theme.colors.muted, 11);
+    y += 30;
+
+    // 기록판: score-proportional reward + my best run
+    this.label(X, y, '기록판', theme.colors.brass, 12, { fontStyle: 'bold' });
+    y += 20;
+    const par = parSec(d);
+    this.label(X, y, `점수 비례 보상 · 기준 ${Math.round(par / 60)}분 · 보상 S×1.3 A×1.15 B×1.0 C×0.85`, theme.colors.muted, 11);
+    y += 18;
+    const best = assaultBest(gameState.stats, d.id);
+    const clears = assaultClears(gameState.stats, d.id);
+    if (best) {
+      const m = Math.floor(best.timeSec / 60);
+      const s = best.timeSec % 60;
+      this.label(X, y - 2, best.grade, GRADE_COLOR[best.grade as AssaultGrade] ?? theme.colors.text, 22, { fontStyle: 'bold' });
+      this.label(X + 30, y, `${best.score.toLocaleString('ko-KR')}점 · ${m}분 ${s}초 · 처치 ${best.kills} · 클리어 ${clears}회`, theme.colors.text, 12);
+      this.label(X + 30, y + 16, new Date(best.at).toLocaleDateString('ko-KR'), theme.colors.muted, 10);
+    } else {
+      this.label(X, y, clears ? `클리어 ${clears}회 · 점수 기록 없음 (기록판 도입 전)` : '아직 기록이 없습니다. 첫 클리어가 기록판에 오릅니다.', theme.colors.muted, 11);
+    }
 
     const ok = gameState.character.level >= min;
     const b = this.button(0, this.h - 84, ok ? `${d.name} 지원` : `Lv.${min} 이상 지원 가능`, () => this.deploy(d), ok ? '#ff9b9b' : '#6b7280', 14);

@@ -108,6 +108,21 @@ export const balance = {
     entryLevelOverride: null as number | null,
     /** 고급 어설트 scaling */
     advanced: { levelOffset: 10, rewardMult: 2, hpMult: 1.7, defenseBonus: 8, dmgMult: 1.4, xpMult: 1.6, wonMult: 1.5 },
+    /** 점수 비례 보상: kills + clear + time bonus → grade band → reward multiplier */
+    scoring: {
+      killPts: { A: 60, B: 80, C: 100 } as Record<'A' | 'B' | 'C', number>,
+      clearPts: 1500,
+      timePts: 2000,
+      parBaseSec: 240,
+      parPerPhaseSec: 90,
+      advancedMult: 1.5,
+      grades: [
+        { grade: 'S', min: 4000, rewardMult: 1.3 },
+        { grade: 'A', min: 3000, rewardMult: 1.15 },
+        { grade: 'B', min: 2000, rewardMult: 1 },
+        { grade: 'C', min: 0, rewardMult: 0.85 },
+      ] as { grade: 'S' | 'A' | 'B' | 'C'; min: number; rewardMult: number }[],
+    },
   },
   infected: {
     /** 감염체 racial bonuses: tougher and quicker, regenerates instead of using medkits well */

@@ -15,6 +15,17 @@ export interface PlayerStats {
   /** ₩ picked up or rewarded (spending is not subtracted) */
   wonEarned: number;
   maxEnhance: number;
+  /** best scored clear per assault id (absent in saves from before the scoreboard) */
+  assaultBest?: Record<string, AssaultBest>;
+}
+
+export interface AssaultBest {
+  score: number;
+  grade: string;
+  timeSec: number;
+  kills: number;
+  /** epoch ms */
+  at: number;
 }
 
 export const emptyStats = (): PlayerStats => ({
@@ -28,7 +39,18 @@ export const emptyStats = (): PlayerStats => ({
   deaths: 0,
   wonEarned: 0,
   maxEnhance: 0,
+  assaultBest: {},
 });
+
+export const assaultBest = (s: PlayerStats, id: string): AssaultBest | undefined => s.assaultBest?.[id];
+
+/** Keeps the higher score (ties go to the faster run); reports whether this run is the new best. */
+export function recordAssaultBest(s: PlayerStats, assaultId: string, entry: AssaultBest): { stats: PlayerStats; newRecord: boolean } {
+  const prev = s.assaultBest?.[assaultId];
+  const better = !prev || entry.score > prev.score || (entry.score === prev.score && entry.timeSec < prev.timeSec);
+  if (!better) return { stats: s, newRecord: false };
+  return { stats: { ...s, assaultBest: { ...(s.assaultBest ?? {}), [assaultId]: entry } }, newRecord: true };
+}
 
 export function recordKill(s: PlayerStats, m: MonsterDef): PlayerStats {
   return {

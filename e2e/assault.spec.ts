@@ -60,6 +60,11 @@ test.describe('assault A — 중곡동 봉쇄선 돌파', () => {
 
     const after = await page.evaluate(() => window.__ec!.hud());
     expect(after.won).toBeGreaterThanOrEqual(before.won + 5000);
+    // 점수 비례 보상: the clear is scored, graded and written to the 기록판
+    const best = await page.evaluate(() => window.__ec!.state.stats.assaultBest?.['assault-a']);
+    expect(best).toBeTruthy();
+    expect(['S', 'A', 'B', 'C']).toContain(best!.grade);
+    expect(best!.score).toBeGreaterThan(1500);
     expect(after.level).toBeGreaterThan(before.level); // 600 XP + kills → several levels
     await page.waitForFunction(() => window.__ec!.scene() === 'SafeZone', null, { timeout: 15000 });
     expect(await page.evaluate(() => window.__ec!.windows())).toContain('result');

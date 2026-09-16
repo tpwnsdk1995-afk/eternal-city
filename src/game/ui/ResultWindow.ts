@@ -1,14 +1,15 @@
 import type Phaser from 'phaser';
 import type { AssaultResult } from '../state/GameState';
+import { GRADE_COLOR } from '@core/assault/score';
 import { Window } from './Window';
 import { theme } from './theme';
 
-/** 어설트 결과 screen. */
+/** 어설트 결과 screen: outcome, 점수/등급 (점수 비례 보상), then the payout. */
 export class ResultWindow extends Window {
   private result: AssaultResult | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, 'result', x, y, 460, 300, '어설트 결과');
+    super(scene, 'result', x, y, 460, 380, '어설트 결과');
   }
 
   show(r: AssaultResult): void {
@@ -26,7 +27,17 @@ export class ResultWindow extends Window {
     this.label(this.w / 2, 42, r.name, theme.colors.muted, 13).setOrigin(0.5, 0);
     if (!r.success) this.label(this.w / 2, 62, r.reason === 'timeout' ? '제한 시간을 초과했습니다.' : r.reason === 'booth' ? '지켜야 할 부스가 파괴되었습니다.' : '작전 중 사망했습니다.', theme.colors.muted, 12).setOrigin(0.5, 0);
 
-    let y = 92;
+    let y = 84;
+    const sc = r.score;
+    if (sc) {
+      // grade badge + score line
+      this.label(24, y - 2, sc.grade, GRADE_COLOR[sc.grade], 34, { fontStyle: 'bold' });
+      this.label(64, y + 2, `${sc.score.toLocaleString('ko-KR')}점${r.newRecord ? '  ★ 신기록' : ''}`, r.newRecord ? '#ffd166' : theme.colors.text, 16, { fontStyle: 'bold' });
+      this.label(64, y + 24, `처치 ${sc.killPts.toLocaleString('ko-KR')} · 클리어 ${sc.clearPts.toLocaleString('ko-KR')} · 시간 보너스 ${sc.timePts.toLocaleString('ko-KR')} (기준 ${Math.round(sc.parSec / 60)}분)`, theme.colors.muted, 11);
+      if (r.success) this.label(this.w - 24, y + 4, `보상 ×${sc.rewardMult.toFixed(2)}`, GRADE_COLOR[sc.grade], 13).setOrigin(1, 0);
+      y += 52;
+    }
+
     const row = (k: string, v: string, color = theme.colors.text) => {
       this.label(24, y, k, theme.colors.muted, 13);
       this.label(this.w - 24, y, v, color, 13).setOrigin(1, 0);

@@ -3,7 +3,7 @@ import type { MonsterDef } from '@data/schema/monster';
 import type { AchievementDef } from '@data/schema/progress';
 import { newlyUnlocked, unlock, type ProgressCtx } from '@core/progress/achievements';
 import { chapterStatus, claimChapter, type CampaignCtx } from '@core/progress/campaign';
-import { recordAssault, recordDeath, recordEnhance, recordKill, recordQuest, recordWon, type PlayerStats } from '@core/world/stats';
+import { recordAssault, recordAssaultBest, recordDeath, recordEnhance, recordKill, recordQuest, recordWon, type AssaultBest, type PlayerStats } from '@core/world/stats';
 import { addItem } from '@core/inventory/inventory';
 import { applyXp } from '@core/world/xp';
 import { gameState } from './GameState';
@@ -33,6 +33,13 @@ export const progressService = {
 
   recordAssault(assaultId: string, success: boolean): void {
     this.private_set(recordAssault(gameState.stats, assaultId, success));
+  },
+
+  /** Stores the run on the 기록판 if it beats the previous best; returns whether it did. */
+  recordAssaultBest(assaultId: string, entry: AssaultBest): boolean {
+    const r = recordAssaultBest(gameState.stats, assaultId, entry);
+    if (r.newRecord) this.private_set(r.stats);
+    return r.newRecord;
   },
 
   recordQuest(): void {
