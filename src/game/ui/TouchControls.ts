@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 import type { Hotkey } from '../systems/input/InputMapper';
 import { resetTouchState, touchState } from '../systems/input/touchState';
+import { gameState } from '../state/GameState';
 import { theme } from './theme';
 
 const HUD_H = 108;
@@ -73,14 +74,15 @@ export class TouchControls extends Phaser.GameObjects.Container {
     this.action(ax + 40, ay - 130, '서브\n연사', () => (touchState.pending.subFire = true));
 
     // --- top strip: windows --------------------------------------------------------------------
-    const tabs: [string, Hotkey | 'fullscreen'][] = [['인벤', 'inventory'], ['상태', 'status'], ['스킬', 'skills'], ['퀘스트', 'quest'], ['지도', 'minimap'], ['귀환', 'home'], ['메뉴', 'menu'], ['⛶', 'fullscreen']];
+    const tabs: [string, Hotkey | 'fullscreen' | 'pause'][] = [['인벤', 'inventory'], ['상태', 'status'], ['스킬', 'skills'], ['퀘스트', 'quest'], ['지도', 'minimap'], ['귀환', 'home'], ['메뉴', 'menu'], ['⏸ 정지', 'pause'], ['⛶', 'fullscreen']];
     let tx = GAME_HEIGHT < 720 ? 240 : GAME_WIDTH / 2 - (tabs.length * 68) / 2; // phone: right of the top-left minimap
     for (const [label, hk] of tabs) {
       this.tab(tx, 8, 64, 30, label, () => {
         if (hk === 'fullscreen') {
           if (scene.scale.isFullscreen) scene.scale.stopFullscreen();
           else if (scene.scale.fullscreen.available) scene.scale.startFullscreen();
-        } else touchState.pending.hotkey = hk;
+        } else if (hk === 'pause') gameState.events.emit('hotkey', 'pause'); // straight to the UI scene: the world scene is frozen while paused
+        else touchState.pending.hotkey = hk;
       });
       tx += 68;
     }

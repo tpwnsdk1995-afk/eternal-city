@@ -19,6 +19,7 @@ export const HUD_H = 108;
 /** Height of the visible charcoal strip; the rest of HUD_H is transparent world. */
 export const HUD_BAR_H = 78;
 const LOG_MAX = 5;
+const WORLD_SCENES = ['SafeZone', 'Field', 'Assault'];
 const QUICK_SLOTS = 9;
 
 /**
@@ -56,6 +57,7 @@ export class UIScene extends Phaser.Scene {
   private minimapDots!: Phaser.GameObjects.Graphics;
   private minimapInfo: MinimapInfo | null = null;
   private minimapAt = 0;
+  private pauseOverlay!: Phaser.GameObjects.Container;
   private questTracker!: Phaser.GameObjects.Text;
   private permitText!: Phaser.GameObjects.Text;
   private buffText!: Phaser.GameObjects.Text;
@@ -219,7 +221,13 @@ export class UIScene extends Phaser.Scene {
     });
     on('quests', () => this.refreshQuests());
     on('flags', () => this.refreshQuests());
-    on('hotkey', (k) => this.windows.handleHotkey(k));
+    on('hotkey', (k) => (k === 'pause' ? this.setPaused(true) : this.windows.handleHotkey(k)));
+    // pause: P key toggles; touch tab / hotkey pauses; tapping the dimmed screen resumes
+    this.input.keyboard?.on('keydown-P', () => this.setPaused(!this.pauseOverlay.visible));
+    this.pauseOverlay = this.add.container(0, 0, [
+      this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6).setOrigin(0, 0).setInteractive().on('pointerdown', () => this.setPaused(false)),
+      this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, '⏸ 일시정지\n\n화면을 누르면 계속합니다', theme.textStyle(34, '#ffffff', { align: 'center', stroke: '#000', strokeThickness: 6 })).setOrigin(0.5),
+    ]).setDepth(500).setVisible(false);
     on('npcInteract', ({ npcId }) => this.windows.talkTo(npcId));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.unsubs.forEach((u) => u());
@@ -237,7 +245,18 @@ export class UIScene extends Phaser.Scene {
     for (const m of gameState.log.slice(-LOG_MAX)) this.pushLog(m.text, m.tone);
   }
 
+  private setPaused(on: boolean): void {
+    for (const k of WORLD_SCENES) {
+      if (on && this.scene.isActive(k)) this.scene.pause(k);
+      else if (!on && this.scene.isPaused(k)) this.scene.resume(k);
+    }
+    this.pauseOverlay.setVisible(on);
+    this.touch.setEnabled(!on && touchControlsEnabled(gameState.settings.touchControls)); // so the tabs under the overlay stay quiet
+  }
+
   update(time: number): void {
+    // a scene change (travel, death) ends the pause underneath us: drop the overlay
+    if (this.pauseOverlay.visible && !WORLD_SCENES.some((k) => this.scene.isPaused(k))) this.setPaused(false);
     if (this.fpsText.visible) this.fpsText.setText(`${Math.round(this.game.loop.actualFps)} fps`);
     if (this.minimapPanel.visible && time - this.minimapAt > 120) {
       this.minimapAt = time;

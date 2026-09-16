@@ -30,8 +30,10 @@ export abstract class Window extends Phaser.GameObjects.Container {
     const emblem = scene.add.nineslice(10, 10, TEX.ui_button, 0, 18, 18, 3, 3, 3, 3).setOrigin(0, 0);
     const emblemDot = scene.add.rectangle(19, 19, 6, 6, 0xc9a227, 1);
     this.titleText = scene.add.text(34, 9, title, theme.textStyle(15, theme.colors.brass, { fontStyle: 'bold' }));
-    const closeBtn = scene.add.nineslice(w - 28, 10, TEX.ui_button, 0, 18, 18, 3, 3, 3, 3).setOrigin(0, 0).setInteractive({ useHandCursor: true });
-    const closeX = scene.add.text(w - 19, 19, '✕', theme.textStyle(12, '#e5e7eb', { fontStyle: 'bold' })).setOrigin(0.5);
+    // close button: 26px box, but a 64px tap zone around it so a thumb lands it on a phone
+    const closeBtn = scene.add.nineslice(w - 34, 6, TEX.ui_button, 0, 26, 26, 3, 3, 3, 3).setOrigin(0, 0)
+      .setInteractive({ hitArea: new Phaser.Geom.Rectangle(-19, -19, 64, 64), hitAreaCallback: Phaser.Geom.Rectangle.Contains, useHandCursor: true });
+    const closeX = scene.add.text(w - 21, 19, '✕', theme.textStyle(17, '#e5e7eb', { fontStyle: 'bold' })).setOrigin(0.5);
     closeBtn.on('pointerover', () => closeX.setColor('#ffd166'));
     closeBtn.on('pointerout', () => closeX.setColor('#e5e7eb'));
     closeBtn.on('pointerdown', () => this.emit('close'));

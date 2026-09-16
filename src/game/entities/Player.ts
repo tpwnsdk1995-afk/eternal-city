@@ -25,7 +25,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   jumping = false;
   private jumpT = 0;
   private stuck: StuckTracker;
-  private idleSince = 0;
   moving = false;
   running = false;
 
@@ -106,7 +105,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     const overweight = totalWeightKg(gameState.inventory, registry.item) > derived.maxWeightKg;
-    const wantsRun = (intent.runHeld || intent.runToggled || this.runLatched) && !this.crouching && vit.stamina > 0;
+    const wantsRun = (intent.runHeld || intent.runToggled || this.runLatched) && !this.crouching; // running is free: no stamina gate
 
     let dir: Vec2 = { x: 0, y: 0 };
     if (intent.moveDir) {
@@ -139,11 +138,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (overweight) speed *= balance.derived.overweightMult;
     this.setVelocity(dir.x * speed, dir.y * speed);
 
-    // stamina
+    // running costs no stamina (only jumps do); stamina regenerates whether moving or not
     if (this.running) {
-      this.idleSince = 0;
-      // read the live value: a jump earlier in this frame may already have spent stamina
-      gameState.setVitals({ stamina: gameState.vitals.stamina - balance.stamina.runDrainPerSec * (dtMs / 1000) });
       // footstep dust kicked up behind the runner
       this.dustT += dtMs;
       if (this.dustT >= 170) {
@@ -151,12 +147,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         const puff = this.scene.add.image(this.x - dir.x * 6 + (Math.random() - 0.5) * 6, this.y + 14, TEX.dust).setDepth(4).setScale(0.8 + Math.random() * 0.4).setAlpha(0.65);
         this.scene.tweens.add({ targets: puff, y: puff.y - 6, x: puff.x - dir.x * 6, alpha: 0, scale: puff.scale * 1.8, duration: 380, onComplete: () => puff.destroy() });
       }
-    } else {
-      this.dustT = 0;
-      this.idleSince += dtMs;
-      if (this.idleSince >= balance.stamina.regenDelayMs && gameState.vitals.stamina < derived.maxStamina) {
-        gameState.setVitals({ stamina: gameState.vitals.stamina + balance.stamina.regenPerSec * (dtMs / 1000) });
-      }
+    } else this.dustT = 0;
+    if (gameState.vitals.stamina < derived.maxStamina) {
+      gameState.setVitals({ stamina: gameState.vitals.stamina + balance.stamina.regenPerSec * (dtMs / 1000) });
     }
     // 감염체 natural regeneration (pauses after being hit — CombatBridge stamps lastHurtAt)
     if (gameState.character.race === 'infected' && vit.hp < derived.maxHp && Date.now() - gameState.lastHurtAt > balance.infected.regenDelayMs) {
