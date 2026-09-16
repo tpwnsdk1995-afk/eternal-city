@@ -111,9 +111,12 @@ class SaveService {
     const row = await db.saves.get(slot);
     const save = row ? migrateSave(row.data) : null;
     if (!save) return null;
+    // Re-point first and mute autosave: applySnapshot emits equipment/skills events, and an attached
+    // listener would otherwise write this character into whatever slot was current before.
+    this.hasCharacter = false;
+    this.currentSlot = slot;
     applySnapshot(save);
     this.hasCharacter = true;
-    this.currentSlot = slot;
     return save;
   }
 

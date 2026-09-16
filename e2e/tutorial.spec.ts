@@ -16,11 +16,19 @@ test.describe('알파 훈련장 (tutorial)', () => {
     await page.fill('#ec-name', '신입');
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
     await page.waitForTimeout(150);
-    await page.keyboard.press('t'); // 훈련장부터 시작 (Phaser handles the key on its next step)
-    await page.waitForFunction(() => {
+    // 훈련장부터 시작 — Phaser handles the key on a later step; under heavy load a press can be dropped, so re-press until the box ticks
+    const ticked = () => page.evaluate(() => {
       const sc = window.__ec!.game.scene.getScene('CharacterCreate') as unknown as { trainingBtn?: { text: string } };
       return sc.trainingBtn?.text.startsWith('☑') ?? false;
     });
+    for (let attempt = 0; attempt < 6 && !(await ticked()); attempt++) {
+      await page.keyboard.press('t');
+      await page.waitForFunction(() => {
+        const sc = window.__ec!.game.scene.getScene('CharacterCreate') as unknown as { trainingBtn?: { text: string } };
+        return sc.trainingBtn?.text.startsWith('☑') ?? false;
+      }, null, { timeout: 1500 }).catch(() => undefined);
+    }
+    expect(await ticked()).toBe(true);
     await page.screenshot({ path: 'e2e/out/charcreate-training.png' });
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => window.__ec?.scene() === 'Field');

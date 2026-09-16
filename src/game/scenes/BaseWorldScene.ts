@@ -298,6 +298,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     this.transitioning = true;
     this.player.stopMoving();
     void saveService.save().finally(() => {
+      saveService.hasCharacter = false; // no autosave (timer / stray events) while the title screen is up
       this.cameras.main.fadeOut(250, 0, 0, 0);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
         this.scene.stop('UI');

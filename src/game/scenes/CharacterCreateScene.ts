@@ -156,11 +156,14 @@ export class CharacterCreateScene extends Phaser.Scene {
     if (this.started) return;
     this.started = true;
     const name = (this.nameInput?.value ?? '').trim().slice(0, 10) || DEFAULT_NAME;
+    // Point the service at this slot *before* the new kit is set up: newGame() emits equipment/skills
+    // events, and a still-attached autosave would otherwise write this character into the previous slot.
+    saveService.hasCharacter = false;
+    saveService.currentSlot = this.slot;
     gameState.newGame(name, this.race);
     gameState.setCharacter({ ...gameState.character, base: { ...this.alloc }, unspentPoints: this.left });
     const d = gameState.derived();
     gameState.setVitals({ hp: d.maxHp, stamina: d.maxStamina, ap: d.maxAp });
-    saveService.currentSlot = this.slot;
     saveService.hasCharacter = true;
     saveService.attach();
     void saveService.save();
