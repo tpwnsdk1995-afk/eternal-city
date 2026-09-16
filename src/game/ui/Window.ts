@@ -18,18 +18,22 @@ export abstract class Window extends Phaser.GameObjects.Container {
     const panel = scene.add.nineslice(0, 0, TEX.ui_panel, 0, w, h, 8, 8, 8, 8).setOrigin(0, 0);
     // swallow clicks so the world underneath never receives them
     panel.setInteractive();
-    const titleBand = scene.add.rectangle(5, 5, w - 10, 27, 0x07080a, 0.75).setOrigin(0, 0);
-    this.titleText = scene.add.text(14, 9, title, theme.textStyle(15, theme.colors.brass, { fontStyle: 'bold' }));
-    const close = scene.add
-      .text(w - 14, 8, '✕', theme.textStyle(15, theme.colors.muted))
-      .setOrigin(1, 0)
-      .setInteractive({ useHandCursor: true });
-    close.on('pointerover', () => close.setColor('#ffffff'));
-    close.on('pointerout', () => close.setColor(theme.colors.muted));
-    close.on('pointerdown', () => this.emit('close'));
-    const rule = scene.add.rectangle(5, 32, w - 10, 1, 0xc9a227, 0.6).setOrigin(0, 0);
+    // body a shade lighter than the frame so text and icons read; framed by a second inner line
+    const body = scene.add.rectangle(6, 36, w - 12, h - 42, 0x161a21, 0.72).setOrigin(0, 0);
+    const inner = scene.add.rectangle(6, 36, w - 12, h - 42).setOrigin(0, 0).setStrokeStyle(1, 0x3a414d, 1).setFillStyle();
+    // sunken steel title band with an emblem square on the left
+    const titleBand = scene.add.nineslice(6, 6, TEX.ui_slot, 0, w - 12, 26, 3, 3, 3, 3).setOrigin(0, 0);
+    const emblem = scene.add.nineslice(10, 10, TEX.ui_button, 0, 18, 18, 3, 3, 3, 3).setOrigin(0, 0);
+    const emblemDot = scene.add.rectangle(19, 19, 6, 6, 0xc9a227, 1);
+    this.titleText = scene.add.text(34, 9, title, theme.textStyle(15, theme.colors.brass, { fontStyle: 'bold' }));
+    const closeBtn = scene.add.nineslice(w - 28, 10, TEX.ui_button, 0, 18, 18, 3, 3, 3, 3).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+    const closeX = scene.add.text(w - 19, 19, '✕', theme.textStyle(12, '#e5e7eb', { fontStyle: 'bold' })).setOrigin(0.5);
+    closeBtn.on('pointerover', () => closeX.setColor('#ffd166'));
+    closeBtn.on('pointerout', () => closeX.setColor('#e5e7eb'));
+    closeBtn.on('pointerdown', () => this.emit('close'));
+    const rule = scene.add.rectangle(6, 33, w - 12, 1, 0xc9a227, 0.5).setOrigin(0, 0);
     this.content = scene.add.container(0, 40);
-    this.add([panel, titleBand, this.titleText, close, rule, this.content]);
+    this.add([panel, body, inner, titleBand, emblem, emblemDot, this.titleText, closeBtn, closeX, rule, this.content]);
     this.setDepth(100);
     scene.add.existing(this);
   }

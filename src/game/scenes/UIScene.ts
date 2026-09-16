@@ -75,6 +75,8 @@ export class UIScene extends Phaser.Scene {
     this.minimapInfo = null;
     const top = GAME_HEIGHT - HUD_H;
     this.add.nineslice(0, top, TEX.ui_panel, 0, GAME_WIDTH, HUD_H, 8, 8, 8, 8).setOrigin(0, 0);
+    // three-way split like the original: [portrait+gauges] | [weapon+quickslots] | [money/map/xp]
+    for (const dx of [338, GAME_WIDTH - 300]) this.add.nineslice(dx, top + 6, TEX.ui_divider, 0, 8, HUD_H - 12, 0, 0, 10, 10).setOrigin(0, 0);
 
     // --- left: portrait + gauges ---------------------------------------------------------------
     this.add.nineslice(12, top + 12, TEX.ui_slot, 0, 72, 72, 3, 3, 3, 3).setOrigin(0, 0);
@@ -113,9 +115,11 @@ export class UIScene extends Phaser.Scene {
     this.xp = new Gauge(this, GAME_WIDTH - 16 - 260, top + 66, 260, 12, theme.colors.xp, 'EXP');
     this.fpsText = this.add.text(GAME_WIDTH - 8, GAME_HEIGHT - HUD_H - 16, '', theme.textStyle(11, theme.colors.muted)).setOrigin(1, 0).setVisible(gameState.settings.showFps);
 
-    // --- top-left log --------------------------------------------------------------------------
+    // --- message log: bottom-left above the HUD on a translucent band (the original's chat box spot)
+    const logH = LOG_MAX * 18 + 10;
+    this.add.rectangle(8, top - 6 - logH, 540, logH, 0x000000, 0.42).setOrigin(0, 0).setDepth(39);
     for (let i = 0; i < LOG_MAX; i++) {
-      this.logLines.push(this.add.text(16, 12 + i * 20, '', theme.textStyle(13, theme.colors.text, { stroke: '#000', strokeThickness: 3 })));
+      this.logLines.push(this.add.text(16, top - 6 - logH + 5 + i * 18, '', theme.textStyle(12, theme.colors.text, { stroke: '#000', strokeThickness: 3 })).setDepth(40));
     }
 
     // --- minimap (top-right) -----------------------------------------------------------------

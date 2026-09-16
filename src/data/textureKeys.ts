@@ -118,6 +118,8 @@ export const TEX = {
   // ui
   ui_panel: 'ui_panel',
   ui_slot: 'ui_slot',
+  ui_divider: 'ui_divider',
+  ui_button: 'ui_button',
   crosshair: 'crosshair',
   // fx (extra)
   casing: 'casing',

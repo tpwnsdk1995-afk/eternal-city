@@ -83,7 +83,7 @@ import {
   drawWreckBus,
   drawWreckCar,
 } from './draw/decor';
-import { drawCrosshair, drawUiPanel, drawUiSlot } from './draw/ui';
+import { drawCrosshair, drawUiButton, drawUiDivider, drawUiPanel, drawUiSlot } from './draw/ui';
 
 export type DrawFn = (ctx: CanvasRenderingContext2D, frame: number, w: number, h: number) => void;
 
@@ -234,6 +234,8 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
 
   [TEX.ui_panel]: single(drawUiPanel, 48),
   [TEX.ui_slot]: single(drawUiSlot, 48),
+  [TEX.ui_divider]: single(drawUiDivider, 8, 96),
+  [TEX.ui_button]: single(drawUiButton, 20),
   [TEX.crosshair]: single(drawCrosshair, 24),
 
   [TEX.casing]: single(drawCasing, 5, 3),
