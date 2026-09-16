@@ -28,11 +28,23 @@ export class CombatFx {
     this.scene.tweens.add({ targets: img, alpha: 0, duration: 90, onComplete: () => img.destroy() });
   }
 
+  /** Directional 3-frame flash anchored at the barrel tip (origin near the left edge of the cone). */
   muzzle(at: Vec2, rotation: number): void {
-    const img = this.scene.add.image(at.x, at.y, TEX.muzzle).setDepth(12).setRotation(rotation).setScale(1 + Math.random() * 0.5).setBlendMode(Phaser.BlendModes.ADD);
-    const glow = this.scene.add.image(at.x, at.y, TEX.muzzle).setDepth(11).setScale(2.6).setAlpha(0.35).setTint(0xffb060).setBlendMode(Phaser.BlendModes.ADD);
-    this.scene.tweens.add({ targets: img, alpha: 0, scale: 0.4, duration: 70, onComplete: () => img.destroy() });
-    this.scene.tweens.add({ targets: glow, alpha: 0, duration: 110, onComplete: () => glow.destroy() });
+    const img = this.scene.add
+      .image(at.x, at.y, TEX.muzzle, 0)
+      .setOrigin(0.1, 0.5)
+      .setDepth(12)
+      .setRotation(rotation)
+      .setScale(0.9 + Math.random() * 0.4, 0.8 + Math.random() * 0.5)
+      .setBlendMode(Phaser.BlendModes.ADD);
+    const glow = this.scene.add.image(at.x, at.y, TEX.smoke_puff).setDepth(11).setScale(3).setAlpha(0.45).setTint(0xffb060).setBlendMode(Phaser.BlendModes.ADD);
+    this.scene.time.delayedCall(28, () => img.active && img.setFrame(1));
+    this.scene.time.delayedCall(56, () => img.active && img.setFrame(2).setAlpha(0.7));
+    this.scene.time.delayedCall(90, () => img.destroy());
+    this.scene.tweens.add({ targets: glow, alpha: 0, scale: 1.5, duration: 120, onComplete: () => glow.destroy() });
+    // lingering wisp of gun smoke drifting off the barrel
+    const smoke = this.scene.add.image(at.x + Math.cos(rotation) * 6, at.y + Math.sin(rotation) * 6, TEX.smoke_puff).setDepth(11).setScale(0.5).setAlpha(0.35);
+    this.scene.tweens.add({ targets: smoke, y: smoke.y - 10, x: smoke.x + Math.cos(rotation) * 8, alpha: 0, scale: 1.3, duration: 420, onComplete: () => smoke.destroy() });
   }
 
   /** Brass casing ejected sideways from the weapon. */
@@ -51,25 +63,58 @@ export class CombatFx {
     this.scene.tweens.add({ targets: img, alpha: 0, delay: 2500, duration: 800, onComplete: () => img.destroy() });
   }
 
-  blood(at: Vec2, scale = 1): void {
+  /**
+   * Blood decal. Variant 0 = splatter (hit), 1 = pool (kill), 2 = smear (hit on a moving target).
+   * Undefined → random splatter/smear.
+   */
+  blood(at: Vec2, scale = 1, variant?: 0 | 1 | 2): void {
     audio.at('hit_flesh', at.x, at.y);
+    const v = variant ?? (Math.random() < 0.3 ? 2 : 0);
     const img = this.scene.add
-      .image(at.x, at.y, TEX.blood)
+      .image(at.x, at.y, TEX.blood, v)
       .setDepth(3)
       .setRotation(Math.random() * Math.PI * 2)
       .setScale((0.6 + Math.random() * 0.5) * scale);
     this.decals.push(img);
     if (this.decals.length > DECAL_CAP) this.decals.shift()?.destroy();
+    // a few droplets flying off the impact
+    if (v !== 1) {
+      for (let i = 0; i < 3; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const drop = this.scene.add.image(at.x, at.y, TEX.blood, 0).setDepth(12).setScale(0.18).setAlpha(0.9);
+        this.scene.tweens.add({ targets: drop, x: at.x + Math.cos(a) * (10 + Math.random() * 14), y: at.y + Math.sin(a) * 8 + 10, alpha: 0, duration: 220 + Math.random() * 120, ease: 'Quad.easeOut', onComplete: () => drop.destroy() });
+      }
+    }
     this.scene.tweens.add({
       targets: img,
       alpha: 0,
       duration: 4000,
-      delay: 9000,
+      delay: v === 1 ? 14000 : 9000,
       onComplete: () => {
         this.decals = this.decals.filter((d) => d !== img);
         img.destroy();
       },
     });
+  }
+
+  /** Sparks off an armoured target (장갑/중장갑) — bullets ping instead of drawing blood. */
+  armorSpark(at: Vec2): void {
+    audio.at('hit_wall', at.x, at.y);
+    const burst = this.scene.add.image(at.x, at.y, TEX.spark, 0).setDepth(12).setScale(1.2).setRotation(Math.random() * Math.PI).setBlendMode(Phaser.BlendModes.ADD);
+    this.scene.time.delayedCall(40, () => burst.active && burst.setFrame(1));
+    this.scene.tweens.add({ targets: burst, alpha: 0, scale: 1.6, duration: 130, onComplete: () => burst.destroy() });
+    for (let i = 0; i < 4; i++) {
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.2;
+      const d = 10 + Math.random() * 12;
+      const dot = this.scene.add.image(at.x, at.y, TEX.spark, 1).setDepth(12).setScale(0.3).setTint(0xffd070).setBlendMode(Phaser.BlendModes.ADD);
+      this.scene.tweens.add({ targets: dot, x: at.x + Math.cos(a) * d, y: at.y + Math.sin(a) * d + 12, alpha: 0, duration: 260 + Math.random() * 100, ease: 'Quad.easeIn', onComplete: () => dot.destroy() });
+    }
+  }
+
+  /** Dust puff kicked up under a running foot. */
+  dust(at: Vec2): void {
+    const puff = this.scene.add.image(at.x + (Math.random() - 0.5) * 6, at.y, TEX.dust).setDepth(4).setScale(0.8 + Math.random() * 0.4).setAlpha(0.7);
+    this.scene.tweens.add({ targets: puff, y: at.y - 6, alpha: 0, scale: puff.scale * 1.8, duration: 380, onComplete: () => puff.destroy() });
   }
 
   /** Melee swing arc that fades quickly. */
@@ -87,10 +132,14 @@ export class CombatFx {
     this.scene.tweens.add({ targets: g, alpha: 0, duration: 140, onComplete: () => g.destroy() });
   }
 
+  /** Bullet hitting a wall/objective: short spark burst + a puff of dust. */
   spark(at: Vec2): void {
     audio.at('hit_wall', at.x, at.y);
-    const img = this.scene.add.image(at.x, at.y, TEX.muzzle).setDepth(12).setScale(0.5).setTint(0xffe9a8).setBlendMode(Phaser.BlendModes.ADD);
-    this.scene.tweens.add({ targets: img, alpha: 0, scale: 0.1, duration: 90, onComplete: () => img.destroy() });
+    const img = this.scene.add.image(at.x, at.y, TEX.spark, 0).setDepth(12).setScale(0.8).setRotation(Math.random() * Math.PI).setBlendMode(Phaser.BlendModes.ADD);
+    this.scene.time.delayedCall(35, () => img.active && img.setFrame(1));
+    this.scene.tweens.add({ targets: img, alpha: 0, scale: 1.1, duration: 110, onComplete: () => img.destroy() });
+    const puff = this.scene.add.image(at.x, at.y, TEX.dust).setDepth(12).setScale(0.7).setAlpha(0.6);
+    this.scene.tweens.add({ targets: puff, alpha: 0, scale: 1.6, duration: 300, onComplete: () => puff.destroy() });
   }
 
   /** Red ring showing where a leap will land / landed. */

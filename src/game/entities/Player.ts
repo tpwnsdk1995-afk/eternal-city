@@ -19,6 +19,7 @@ const ARRIVE_RADIUS = 6;
 export class Player extends Phaser.Physics.Arcade.Sprite {
   moveTarget: Vec2 | null = null;
   private runLatched = false;
+  private dustT = 0;
   crouching = false;
   jumping = false;
   private jumpT = 0;
@@ -136,11 +137,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // stamina
     if (this.running) {
       this.idleSince = 0;
-      gameState.setVitals({ stamina: vit.stamina - balance.stamina.runDrainPerSec * (dtMs / 1000) });
+      // read the live value: a jump earlier in this frame may already have spent stamina
+      gameState.setVitals({ stamina: gameState.vitals.stamina - balance.stamina.runDrainPerSec * (dtMs / 1000) });
+      // footstep dust kicked up behind the runner
+      this.dustT += dtMs;
+      if (this.dustT >= 170) {
+        this.dustT = 0;
+        const puff = this.scene.add.image(this.x - dir.x * 6 + (Math.random() - 0.5) * 6, this.y + 14, TEX.dust).setDepth(4).setScale(0.8 + Math.random() * 0.4).setAlpha(0.65);
+        this.scene.tweens.add({ targets: puff, y: puff.y - 6, x: puff.x - dir.x * 6, alpha: 0, scale: puff.scale * 1.8, duration: 380, onComplete: () => puff.destroy() });
+      }
     } else {
+      this.dustT = 0;
       this.idleSince += dtMs;
-      if (this.idleSince >= balance.stamina.regenDelayMs && vit.stamina < derived.maxStamina) {
-        gameState.setVitals({ stamina: vit.stamina + balance.stamina.regenPerSec * (dtMs / 1000) });
+      if (this.idleSince >= balance.stamina.regenDelayMs && gameState.vitals.stamina < derived.maxStamina) {
+        gameState.setVitals({ stamina: gameState.vitals.stamina + balance.stamina.regenPerSec * (dtMs / 1000) });
       }
     }
     // 감염체 natural regeneration (pauses after being hit — CombatBridge stamps lastHurtAt)

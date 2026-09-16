@@ -16,9 +16,10 @@ import { touchControlsEnabled } from '../systems/input/touchState';
 import { MINIMAP_MAX_H, MINIMAP_MAX_W, type MinimapInfo } from '../systems/Minimap';
 
 export const HUD_H = 108;
+/** Height of the visible charcoal strip; the rest of HUD_H is transparent world. */
+export const HUD_BAR_H = 78;
 const LOG_MAX = 5;
 const QUICK_SLOTS = 9;
-const SLOT = 40;
 
 /**
  * Always-on HUD overlay in the original's layout: portrait + gauges on the left, weapon panel
@@ -73,53 +74,62 @@ export class UIScene extends Phaser.Scene {
     this.unsubs = [];
     this.minimapImage = null;
     this.minimapInfo = null;
-    const top = GAME_HEIGHT - HUD_H;
-    this.add.nineslice(0, top, TEX.ui_panel, 0, GAME_WIDTH, HUD_H, 8, 8, 8, 8).setOrigin(0, 0);
-    // three-way split like the original: [portrait+gauges] | [weapon+quickslots] | [money/map/xp]
-    for (const dx of [338, GAME_WIDTH - 300]) this.add.nineslice(dx, top + 6, TEX.ui_divider, 0, 8, HUD_H - 12, 0, 0, 10, 10).setOrigin(0, 0);
 
-    // --- left: portrait + gauges ---------------------------------------------------------------
-    this.add.nineslice(12, top + 12, TEX.ui_slot, 0, 72, 72, 3, 3, 3, 3).setOrigin(0, 0);
-    this.portrait = this.add.image(16, top + 16, TEX.portrait_player).setOrigin(0, 0).setDisplaySize(64, 64);
-    this.nameText = this.add.text(48, top + 88, '', theme.textStyle(12, theme.colors.brass, { fontStyle: 'bold' })).setOrigin(0.5, 0);
-    this.hp = new Gauge(this, 94, top + 14, 232, 18, theme.colors.hp, '생명');
-    this.stamina = new Gauge(this, 94, top + 38, 232, 14, theme.colors.stamina, '지구력');
-    this.ap = new Gauge(this, 94, top + 58, 232, 14, theme.colors.ap, '행동력');
-    this.levelText = this.add.text(94, top + 78, '', theme.textStyle(12, theme.colors.muted));
+    // The original's HUD is a low charcoal strip hugging the bottom edge (portrait-sized button, three
+    // thin stacked bars, a row of black key slots) with the world visible above it. HUD_H stays the
+    // layout reserve for windows/touch controls; the visible bar is HUD_BAR_H tall.
+    const y0 = GAME_HEIGHT - HUD_BAR_H;
+    this.add.nineslice(0, y0, TEX.ui_panel, 0, GAME_WIDTH, HUD_BAR_H, 6, 6, 6, 6).setOrigin(0, 0);
 
-    // --- centre: weapon panel + quickslots ---------------------------------------------------
-    const cx = 350;
-    this.add.nineslice(cx, top + 12, TEX.ui_slot, 0, 52, 52, 3, 3, 3, 3).setOrigin(0, 0);
-    this.weaponIcon = this.add.image(cx + 26, top + 38, TEX.icon_pistol).setDisplaySize(40, 40);
-    this.weaponText = this.add.text(cx + 62, top + 14, '', theme.textStyle(15, theme.colors.text, { fontStyle: 'bold' }));
-    this.ammoText = this.add.text(cx + 62, top + 36, '', theme.textStyle(13, theme.colors.muted));
-    this.subFireText = this.add.text(cx + 62, top + 54, '', theme.textStyle(11, '#9be7ff'));
-    const qx = cx;
-    const qy = top + 70;
+    // --- left: portrait + thin bars (red/blue/green like the original) -----------------------
+    this.add.nineslice(8, y0 + 8, TEX.ui_slot, 0, 62, 62, 3, 3, 3, 3).setOrigin(0, 0);
+    this.portrait = this.add.image(11, y0 + 11, TEX.portrait_player).setOrigin(0, 0).setDisplaySize(56, 56);
+    const bx = 80;
+    const bw = 170;
+    this.hp = new Gauge(this, bx, y0 + 12, bw, 8, theme.colors.hp, '', false);
+    this.ap = new Gauge(this, bx, y0 + 24, bw, 8, theme.colors.ap, '', false);
+    this.stamina = new Gauge(this, bx, y0 + 36, bw, 8, theme.colors.stamina, '', false);
+    this.add.text(bx + bw + 6, y0 + 10, '생명\n행동\n지구', theme.textStyle(9, theme.colors.muted, { lineSpacing: 1 }));
+    this.nameText = this.add.text(bx, y0 + 50, '', theme.textStyle(12, '#f3f4f6', { fontStyle: 'bold' }));
+    this.levelText = this.add.text(bx + 70, y0 + 51, '', theme.textStyle(11, theme.colors.muted));
+
+    // --- centre-left: weapon block — icon well + name (yellow) / ammo (green) like the original's text
+    const cx = 300;
+    this.add.nineslice(cx, y0 + 8, TEX.ui_slot, 0, 62, 62, 3, 3, 3, 3).setOrigin(0, 0);
+    this.weaponIcon = this.add.image(cx + 31, y0 + 39, TEX.icon_pistol).setDisplaySize(44, 44);
+    this.weaponText = this.add.text(cx + 70, y0 + 11, '', theme.textStyle(14, '#ffd23f', { fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }));
+    this.ammoText = this.add.text(cx + 70, y0 + 32, '', theme.textStyle(12, '#8fe36a', { stroke: '#000', strokeThickness: 2 }));
+    this.subFireText = this.add.text(cx + 70, y0 + 50, '', theme.textStyle(10, '#9be7ff'));
+
+    // --- centre: quickslots 1~9 as a row of black key wells (the original's F-key row) ---------
+    const qx = 590;
+    const qy = y0 + 8;
+    const QS = 46;
     for (let i = 0; i < QUICK_SLOTS; i++) {
-      const x = qx + i * (SLOT + 4);
-      this.add.nineslice(x, qy, TEX.ui_slot, 0, SLOT, 32, 3, 3, 3, 3).setOrigin(0, 0);
-      this.add.text(x + 3, qy + 1, `${i + 1}`, theme.textStyle(9, theme.colors.muted));
-      const icon = this.add.image(x + SLOT / 2, qy + 16, TEX.icon_consumable).setDisplaySize(22, 22).setVisible(false);
-      const count = this.add.text(x + SLOT - 3, qy + 30, '', theme.textStyle(10, theme.colors.text, { stroke: '#000', strokeThickness: 2 })).setOrigin(1, 1);
+      const x = qx + i * (QS + 3);
+      this.add.nineslice(x, qy, TEX.ui_slot, 0, QS, 62, 3, 3, 3, 3).setOrigin(0, 0);
+      this.add.text(x + 4, qy + 2, `${i + 1}`, theme.textStyle(9, '#8b8f97'));
+      const icon = this.add.image(x + QS / 2, qy + 33, TEX.icon_consumable).setDisplaySize(26, 26).setVisible(false);
+      const count = this.add.text(x + QS - 4, qy + 60, '', theme.textStyle(11, '#ffd23f', { stroke: '#000', strokeThickness: 2, fontStyle: 'bold' })).setOrigin(1, 1);
       this.quickIcons.push(icon);
       this.quickCounts.push(count);
       // tap/click a quickslot = its number key
       const slot = i + 1;
-      this.add.zone(x, qy, SLOT, 32).setOrigin(0, 0).setInteractive({ useHandCursor: true }).on('pointerdown', () => gameState.events.emit('hotkey', `quick${slot}`));
+      this.add.zone(x, qy, QS, 62).setOrigin(0, 0).setInteractive({ useHandCursor: true }).on('pointerdown', () => gameState.events.emit('hotkey', `quick${slot}`));
     }
 
     // --- right: money / map / xp -------------------------------------------------------------
-    this.wonText = this.add.text(GAME_WIDTH - 16, top + 14, '', theme.textStyle(18, theme.colors.brass, { fontStyle: 'bold' })).setOrigin(1, 0);
-    this.mapText = this.add.text(GAME_WIDTH - 16, top + 42, '', theme.textStyle(13, theme.colors.muted)).setOrigin(1, 0);
-    this.xp = new Gauge(this, GAME_WIDTH - 16 - 260, top + 66, 260, 12, theme.colors.xp, 'EXP');
-    this.fpsText = this.add.text(GAME_WIDTH - 8, GAME_HEIGHT - HUD_H - 16, '', theme.textStyle(11, theme.colors.muted)).setOrigin(1, 0).setVisible(gameState.settings.showFps);
+    this.wonText = this.add.text(GAME_WIDTH - 14, y0 + 9, '', theme.textStyle(16, '#ffd23f', { fontStyle: 'bold', stroke: '#000', strokeThickness: 2 })).setOrigin(1, 0);
+    this.mapText = this.add.text(GAME_WIDTH - 14, y0 + 31, '', theme.textStyle(11, theme.colors.muted)).setOrigin(1, 0);
+    this.xp = new Gauge(this, GAME_WIDTH - 14 - 200, y0 + 50, 200, 7, theme.colors.xp, '', false);
+    this.add.text(GAME_WIDTH - 14 - 200 - 4, y0 + 48, 'EXP', theme.textStyle(9, theme.colors.muted)).setOrigin(1, 0);
+    this.fpsText = this.add.text(8, 6, '', theme.textStyle(11, theme.colors.muted, { stroke: '#000', strokeThickness: 2 })).setVisible(gameState.settings.showFps);
 
     // --- message log: bottom-left above the HUD on a translucent band (the original's chat box spot)
     const logH = LOG_MAX * 18 + 10;
-    this.add.rectangle(8, top - 6 - logH, 540, logH, 0x000000, 0.42).setOrigin(0, 0).setDepth(39);
+    this.add.rectangle(8, y0 - 6 - logH, 540, logH, 0x000000, 0.42).setOrigin(0, 0).setDepth(39);
     for (let i = 0; i < LOG_MAX; i++) {
-      this.logLines.push(this.add.text(16, top - 6 - logH + 5 + i * 18, '', theme.textStyle(12, theme.colors.text, { stroke: '#000', strokeThickness: 3 })).setDepth(40));
+      this.logLines.push(this.add.text(16, y0 - 6 - logH + 5 + i * 18, '', theme.textStyle(12, theme.colors.text, { stroke: '#000', strokeThickness: 3 })).setDepth(40));
     }
 
     // --- minimap (top-right) -----------------------------------------------------------------
@@ -132,9 +142,9 @@ export class UIScene extends Phaser.Scene {
 
     // quest tracker under the minimap
     this.questTracker = this.add.text(GAME_WIDTH - 16, 12 + MINIMAP_MAX_H + 40, '', theme.textStyle(12, '#ffd166', { stroke: '#000', strokeThickness: 3, align: 'right' })).setOrigin(1, 0).setDepth(40);
-    this.permitText = this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - HUD_H + 84, '', theme.textStyle(10, '#6b7280')).setOrigin(1, 0);
+    this.permitText = this.add.text(GAME_WIDTH - 14, GAME_HEIGHT - 14, '', theme.textStyle(9, '#6b7280')).setOrigin(1, 1);
     // active 사이버샵 buffs, bottom-right above the HUD, refreshed every second
-    this.buffText = this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - HUD_H - 12, '', theme.textStyle(11, theme.colors.good, { stroke: '#000', strokeThickness: 3, align: 'right' })).setOrigin(1, 1).setDepth(40);
+    this.buffText = this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - HUD_BAR_H - 8, '', theme.textStyle(11, theme.colors.good, { stroke: '#000', strokeThickness: 3, align: 'right' })).setOrigin(1, 1).setDepth(40);
     this.time.addEvent({ delay: 1000, loop: true, callback: () => this.tickBuffs() });
     this.refreshBuffs();
 
@@ -305,7 +315,7 @@ export class UIScene extends Phaser.Scene {
     const c = gameState.character;
     this.portrait.setTexture(c.race === 'infected' ? TEX.portrait_infected : TEX.portrait_player);
     this.nameText.setText(c.name);
-    this.levelText.setText(`Lv.${c.level}${c.unspentPoints ? `  · 미배분 ${c.unspentPoints}pt (C)` : ''}`);
+    this.levelText.setText(`Lv.${c.level}${c.unspentPoints ? ` · 미배분 ${c.unspentPoints}pt (C)` : ''}`);
     this.levelText.setColor(c.unspentPoints ? theme.colors.good : theme.colors.muted);
     this.xp.set(c.xp, xpToNext(c.level));
     this.wonText.setText(`₩ ${c.won.toLocaleString('ko-KR')}`);
@@ -322,7 +332,7 @@ export class UIScene extends Phaser.Scene {
       return;
     }
     // re-apply the display size: setTexture keeps the old scale, and real-art icons are 64px while drawn ones are 32px
-    this.weaponIcon.setVisible(true).setTexture(w.def.iconTex).setDisplaySize(40, 40);
+    this.weaponIcon.setVisible(true).setTexture(w.def.iconTex).setDisplaySize(44, 44);
     this.weaponText.setText(weaponLabel(w.def, w.stack));
     this.subFireText.setText(gameState.fire.subFire ? '서브연사 ON (Ctrl)' : '');
     if (w.def.class === '근접무기') this.ammoText.setText('근접');
@@ -356,7 +366,7 @@ export class UIScene extends Phaser.Scene {
         this.quickCounts[i].setText('');
         continue;
       }
-      this.quickIcons[i].setVisible(true).setTexture(registry.item(s.itemId).iconTex).setDisplaySize(22, 22);
+      this.quickIcons[i].setVisible(true).setTexture(registry.item(s.itemId).iconTex).setDisplaySize(26, 26);
       this.quickCounts[i].setText(`${s.qty}`);
     }
   }

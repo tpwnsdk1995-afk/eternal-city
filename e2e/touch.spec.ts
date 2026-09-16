@@ -91,7 +91,7 @@ test.describe('touch controls', () => {
     // --- HUD quickslot tap = number key: a bandage in slot 1 heals when the slot is tapped ------
     await page.evaluate(() => window.__ec!.give('bandage', 3));
     await page.evaluate(() => window.__ec!.state.setVitals({ hp: 10 }));
-    await page.mouse.click(350 + 20, 720 - 108 + 70 + 16); // quickslot 1 rectangle
+    await page.mouse.click(590 + 23, 720 - 78 + 8 + 31); // quickslot 1 well (HUD_BAR_H strip, see UIScene)
     await page.waitForFunction(() => window.__ec!.hud().hp > 10, undefined, { timeout: 3000 });
 
     // --- setting toggles the layer off and on -----------------------------------------------

@@ -9,43 +9,149 @@ export function drawTracer(ctx: Ctx, _f: number, w: number, h: number): void {
   ctx.fillRect(0, 0, w, h);
 }
 
-export function drawMuzzle(ctx: Ctx, _f: number, w: number, h: number): void {
-  const cx = w / 2;
+/**
+ * Directional muzzle flash, 3 frames (32×16, fired from the left edge → drawn with origin 0.1,0.5):
+ * 0 hard white core + short petals, 1 long orange cone with side spikes, 2 thin fading wisp.
+ */
+export function drawMuzzle(ctx: Ctx, frame: number, w: number, h: number): void {
+  const ox = w * 0.1;
   const cy = h / 2;
-  ctx.fillStyle = 'rgba(255,220,120,0.95)';
+  const len = [w * 0.55, w * 0.88, w * 0.7][frame % 3];
+  const spread = [h * 0.42, h * 0.5, h * 0.3][frame % 3];
+  const alpha = [0.95, 0.9, 0.55][frame % 3];
+  const cone = ctx.createLinearGradient(ox, 0, ox + len, 0);
+  cone.addColorStop(0, `rgba(255,250,220,${alpha})`);
+  cone.addColorStop(0.35, `rgba(255,200,90,${alpha * 0.9})`);
+  cone.addColorStop(1, 'rgba(255,120,30,0)');
+  ctx.fillStyle = cone;
   ctx.beginPath();
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2;
-    const r = i % 2 ? 3 : 7;
-    ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-  }
+  ctx.moveTo(ox, cy);
+  ctx.quadraticCurveTo(ox + len * 0.35, cy - spread, ox + len, cy - spread * 0.25);
+  ctx.lineTo(ox + len, cy + spread * 0.25);
+  ctx.quadraticCurveTo(ox + len * 0.35, cy + spread, ox, cy);
   ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = '#fff';
+  // side spikes (frames 0/1) — the classic star-shaped flash silhouette
+  if (frame % 3 !== 2) {
+    ctx.fillStyle = `rgba(255,220,130,${alpha * 0.8})`;
+    const n = frame % 3 === 0 ? 4 : 6;
+    for (let i = 0; i < n; i++) {
+      const a = -Math.PI * 0.75 + (i / (n - 1)) * Math.PI * 1.5;
+      const r = i % 2 ? spread * 0.6 : spread * 1.05;
+      const bx = ox + len * 0.22;
+      ctx.beginPath();
+      ctx.moveTo(bx, cy - 1.5);
+      ctx.lineTo(bx + Math.cos(a) * r, cy + Math.sin(a) * r);
+      ctx.lineTo(bx, cy + 1.5);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+  // hot core
+  ctx.fillStyle = `rgba(255,255,255,${alpha})`;
   ctx.beginPath();
-  ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+  ctx.ellipse(ox + len * 0.16, cy, len * 0.16, spread * 0.3, 0, 0, Math.PI * 2);
   ctx.fill();
 }
 
-export function drawBlood(ctx: Ctx, _f: number, w: number, h: number): void {
-  ctx.fillStyle = 'rgba(150,20,20,0.85)';
+/** Blood decal, 3 variants: 0 splatter (hit), 1 pool (kill), 2 smear/drag (hit while moving). */
+export function drawBlood(ctx: Ctx, frame: number, w: number, h: number): void {
   const cx = w / 2;
   const cy = h / 2;
-  ctx.beginPath();
-  ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-  ctx.fill();
-  const pts = [
-    [-8, -4, 2],
-    [7, -6, 2.5],
-    [8, 5, 2],
-    [-6, 7, 1.5],
-    [0, -9, 1.5],
-  ];
-  for (const [dx, dy, r] of pts) {
+  const dark = 'rgba(110,12,14,0.9)';
+  const mid = 'rgba(150,20,20,0.85)';
+  const v = frame % 3;
+  if (v === 0) {
+    ctx.fillStyle = mid;
     ctx.beginPath();
-    ctx.arc(cx + dx, cy + dy, r, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fill();
+    const pts = [
+      [-8, -4, 2],
+      [7, -6, 2.5],
+      [8, 5, 2],
+      [-6, 7, 1.5],
+      [0, -9, 1.5],
+      [10, -1, 1],
+      [-10, 1, 1],
+    ];
+    for (const [dx, dy, r] of pts) {
+      ctx.beginPath();
+      ctx.arc(cx + dx, cy + dy, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = dark;
+    ctx.beginPath();
+    ctx.arc(cx - 1, cy + 1, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    return;
+  }
+  if (v === 1) {
+    // pool: lumpy dark puddle with a glossy highlight
+    ctx.fillStyle = dark;
+    ctx.beginPath();
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      const r = (w / 2 - 2) * (0.8 + ((i * 7) % 4) * 0.06);
+      ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.85);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = mid;
+    ctx.beginPath();
+    ctx.ellipse(cx - 1, cy, w * 0.28, h * 0.2, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,120,120,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(cx - 3, cy - 2, 3, 1.5, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    return;
+  }
+  // smear: streaks dragged to the right
+  ctx.fillStyle = mid;
+  for (let i = 0; i < 4; i++) {
+    const y = cy - 5 + i * 3.2;
+    const l = w * (0.45 + ((i * 5) % 3) * 0.12);
+    ctx.beginPath();
+    ctx.ellipse(cx - w * 0.2 + l / 2, y, l / 2, 1.3 + (i % 2) * 0.6, 0, 0, Math.PI * 2);
     ctx.fill();
   }
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.arc(cx - w * 0.22, cy, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Metal-hit spark burst (2 frames): white-yellow rays + a few hot dots. */
+export function drawSpark(ctx: Ctx, frame: number, w: number, h: number): void {
+  const cx = w / 2;
+  const cy = h / 2;
+  const n = 7;
+  ctx.strokeStyle = frame ? 'rgba(255,200,120,0.75)' : 'rgba(255,245,200,0.95)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + frame * 0.35;
+    const r0 = frame ? 3 : 1;
+    const r1 = (frame ? w * 0.48 : w * 0.34) * (i % 2 ? 0.7 : 1);
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0);
+    ctx.lineTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+    ctx.stroke();
+  }
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, frame ? 1 : 2, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Footstep dust: soft grey-brown puff kicked up while running. */
+export function drawDust(ctx: Ctx, _f: number, w: number, h: number): void {
+  const g = ctx.createRadialGradient(w / 2, h / 2, 1, w / 2, h / 2, w / 2);
+  g.addColorStop(0, 'rgba(170,160,140,0.55)');
+  g.addColorStop(0.6, 'rgba(150,140,125,0.25)');
+  g.addColorStop(1, 'rgba(140,130,115,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
 }
 
 export function drawFire(ctx: Ctx, frame: number, w: number, h: number): void {

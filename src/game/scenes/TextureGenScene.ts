@@ -36,6 +36,11 @@ export class TextureGenScene extends Phaser.Scene {
     // defer one tick so the text paints before the (synchronous) generation
     this.time.delayedCall(0, () => {
       generateAllTextures(this);
+      // Drain the texture uploads now. The ~190 generated canvases (≈9.5M texels) are queued to the GPU
+      // process asynchronously; without this the first world scene stalls for many seconds on software
+      // GL (test runners, GPU-less laptops) while the queue empties. On a real GPU this returns at once.
+      const renderer = this.game.renderer as Phaser.Renderer.WebGL.WebGLRenderer;
+      if (renderer.gl) renderer.gl.finish();
       this.scene.start('Title');
     });
   }

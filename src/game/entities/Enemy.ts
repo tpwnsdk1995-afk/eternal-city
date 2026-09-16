@@ -57,7 +57,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     this.bar = scene.add.graphics().setDepth(11);
     if (def.boss) {
-      this.label = scene.add.text(x, y - 30 * s, def.name, theme.textStyle(13, '#ff9b9b', { stroke: '#000', strokeThickness: 3, fontStyle: 'bold' })).setOrigin(0.5).setDepth(11);
+      this.label = scene.add.text(x, y - 30 * s, def.name, theme.textStyle(12, '#ff3b3b', { stroke: '#000', strokeThickness: 3, fontStyle: 'bold' })).setOrigin(0.5).setDepth(11);
     }
   }
 

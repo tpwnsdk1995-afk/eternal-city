@@ -58,7 +58,7 @@ import {
   drawPickupWon,
 } from './draw/items';
 import { drawTitleBackground } from './draw/title';
-import { drawBlood, drawExplosion, drawFire, drawJumpMarker, drawMuzzle, drawRocket, drawScorch, drawShellGrenade, drawLampGlow, drawSmokePuff, drawTracer } from './draw/fx';
+import { drawBlood, drawExplosion, drawFire, drawJumpMarker, drawMuzzle, drawSpark, drawDust, drawRocket, drawScorch, drawShellGrenade, drawLampGlow, drawSmokePuff, drawTracer } from './draw/fx';
 import {
   drawAc,
   drawBanner,
@@ -221,8 +221,10 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.pickup_item]: single(drawPickupItem, 16),
 
   [TEX.tracer]: single(drawTracer, 16, 4),
-  [TEX.muzzle]: single(drawMuzzle, 16),
-  [TEX.blood]: single(drawBlood, 24),
+  [TEX.muzzle]: { frameW: 32, frameH: 16, frames: 3, draw: drawMuzzle },
+  [TEX.blood]: { frameW: 24, frameH: 24, frames: 3, draw: drawBlood },
+  [TEX.spark]: { frameW: 16, frameH: 16, frames: 2, draw: drawSpark },
+  [TEX.dust]: single(drawDust, 12),
   [TEX.fire]: { frameW: 16, frameH: 16, frames: 3, draw: drawFire, anim: { key: ANIM.fire_burn, frameRate: 10, repeat: -1 } },
   [TEX.jump_marker]: single(drawJumpMarker, 80),
   [TEX.shell_grenade]: single(drawShellGrenade, 10, 6),

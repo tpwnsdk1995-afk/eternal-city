@@ -279,9 +279,9 @@ export class CombatBridge {
         this.floating.spawn(e.x, e.y, 'MISS', '#9aa0a6', 11);
         continue;
       }
-      this.fx.blood(hit.point);
+      this.fleshOrSpark(e, hit.point);
       if (res.crit) audio.play('hit_crit');
-      this.floating.spawn(e.x, e.y, `${res.damage}`, res.crit ? '#ffe066' : '#ffffff', res.crit ? 16 : 13, res.crit);
+      this.floating.spawn(e.x, e.y, `${res.damage}`, res.crit ? '#ffb347' : '#ffd23f', res.crit ? 16 : 13, res.crit);
       if (res.appliesBurn) {
         e.status = applyBurn(e.status, now);
         e.setBurning(true);
@@ -315,8 +315,8 @@ export class CombatBridge {
         this.floating.spawn(e.x, e.y, 'MISS', '#9aa0a6', 11);
         continue;
       }
-      this.fx.blood({ x: e.x, y: e.y });
-      this.floating.spawn(e.x, e.y, `${res.damage}`, res.crit ? '#ffe066' : '#ffffff', res.crit ? 16 : 13, res.crit);
+      this.fleshOrSpark(e, { x: e.x, y: e.y });
+      this.floating.spawn(e.x, e.y, `${res.damage}`, res.crit ? '#ffb347' : '#ffd23f', res.crit ? 16 : 13, res.crit);
       e.knockback(fromAngle(angle), now, Math.round(res.damage * 0.3), 0.35);
       if (e.damage(res.damage)) this.killEnemy(e, now);
     }
@@ -374,7 +374,7 @@ export class CombatBridge {
       if (!e || !e.alive) continue;
       const res = computeHit(blastCtx, { skin: e.def.skin, defense: e.def.defense, maxHp: e.maxHp, burning: isBurning(e.status, now) }, 0, gameRng);
       const dmg = Math.max(1, Math.round(res.damage * t.mult));
-      this.fx.blood({ x: e.x, y: e.y });
+      this.fleshOrSpark(e, { x: e.x, y: e.y });
       this.floating.spawn(e.x, e.y, `${dmg}`, res.crit ? '#ffe066' : '#ffb347', res.crit ? 16 : 14, true);
       const away = fromAngle(angleTo(at, e.pos));
       e.knockback(away, now, Math.round(dmg * 0.3), 0.6);
@@ -390,10 +390,16 @@ export class CombatBridge {
     }
   }
 
+  /** Armoured skins (장갑/중장갑) throw sparks on impact; everything else bleeds. Moving targets smear. */
+  private fleshOrSpark(e: Enemy, at: Vec2): void {
+    if (e.def.skin === '장갑' || e.def.skin === '중장갑') this.fx.armorSpark(at);
+    else this.fx.blood(at, 1, e.body && (Math.abs(e.body.velocity.x) + Math.abs(e.body.velocity.y) > 20) ? 2 : 0);
+  }
+
   killEnemy(e: Enemy, now: number): void {
     e.kill();
     audio.at('enemy_die', e.x, e.y);
-    this.fx.blood({ x: e.x, y: e.y + 8 }, 1.6 * (e.def.scale ?? 1));
+    this.fx.blood({ x: e.x, y: e.y + 8 }, 1.6 * (e.def.scale ?? 1), 1);
     const xp = Math.round(xpForKill(e.def, gameState.character.level) * gameState.xpMult());
     const r = applyXp(gameState.character, xp);
     gameState.setCharacter(r.character);

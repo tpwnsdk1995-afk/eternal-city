@@ -233,7 +233,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   private applyAmbient(w: number, h: number): void {
     const a = this.def.ambient;
     if (!a || this.def.dark) return;
-    const wash = a === 'night' ? { color: 0x0a1220, alpha: 0.34 } : a === 'dusk' ? { color: 0x0c1526, alpha: 0.2 } : { color: 0x101418, alpha: 0.1 };
+    const wash = a === 'night' ? { color: 0x07120f, alpha: 0.36 } : a === 'dusk' ? { color: 0x0a1715, alpha: 0.24 } : { color: 0x0f1412, alpha: 0.12 };
     this.add.rectangle(0, 0, w, h, wash.color, wash.alpha).setOrigin(0, 0).setDepth(28);
     if (a === 'indoor') {
       // cold fluorescent pools under the ceiling fixtures

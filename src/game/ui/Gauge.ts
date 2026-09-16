@@ -45,6 +45,22 @@ export class Gauge extends Phaser.GameObjects.Container {
     const w = this.barW;
     const h = this.barH;
     g.clear();
+    if (h <= 10) {
+      // thin strip like the original's stacked bars: black track, grey frame, solid fill with a gloss line
+      g.fillStyle(0x3a3b3f, 1).fillRect(0, 0, w, h);
+      g.fillStyle(0x08090a, 1).fillRect(1, 1, w - 2, h - 2);
+      const fw = Math.round((w - 2) * ratio);
+      if (fw > 0) {
+        const c0 = Phaser.Display.Color.IntegerToColor(this.color);
+        const dk = Phaser.Display.Color.GetColor(Math.floor(c0.red * 0.6), Math.floor(c0.green * 0.6), Math.floor(c0.blue * 0.6));
+        const lt = Phaser.Display.Color.GetColor(Math.min(255, c0.red + 70), Math.min(255, c0.green + 70), Math.min(255, c0.blue + 70));
+        g.fillStyle(dk, 1).fillRect(1, 1, fw, h - 2);
+        g.fillStyle(this.color, 1).fillRect(1, 1, fw, Math.max(1, h - 4));
+        g.fillStyle(lt, 0.8).fillRect(1, 1, fw, 1);
+      }
+      if (this.showText) this.valueText.setText(`${Math.round(value)}/${Math.round(max)}`);
+      return;
+    }
     // sunken track
     g.fillStyle(0x07080a, 1).fillRect(0, 0, w, h);
     g.fillStyle(0x151920, 1).fillRect(1, 1, w - 2, h - 2);

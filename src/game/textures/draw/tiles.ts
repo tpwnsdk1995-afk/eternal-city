@@ -69,14 +69,14 @@ function bricks(ctx: Ctx, x: number, y0: number, h: number, bw: number, bh: numb
 // ground
 // ---------------------------------------------------------------------------------------------
 
-const ASPHALT = '#3a3d43';
+const ASPHALT = '#37383a';
 
 const asphalt = (ctx: Ctx, x: number, seed = 11) => {
   fill(ctx, x, 0, T, T, ASPHALT);
   grain(ctx, x, 0, T, T, '#44474e', 90, seed);
-  grain(ctx, x, 0, T, T, '#2e3136', 60, seed + 12);
+  grain(ctx, x, 0, T, T, '#2c2c2e', 60, seed + 12);
   grain(ctx, x, 0, T, T, '#50545b', 18, seed + 30);
-  grain(ctx, x, 0, T, T, '#25272b', 10, seed + 41, 2);
+  grain(ctx, x, 0, T, T, '#222224', 10, seed + 41, 2);
 };
 
 const asphaltWet = (ctx: Ctx, x: number) => {

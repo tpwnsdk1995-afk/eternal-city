@@ -107,6 +107,8 @@ export const TEX = {
   tracer: 'tracer',
   muzzle: 'muzzle',
   blood: 'blood',
+  spark: 'spark',
+  dust: 'dust',
   fire: 'fire',
   jump_marker: 'jump_marker',
   shell_grenade: 'shell_grenade',
