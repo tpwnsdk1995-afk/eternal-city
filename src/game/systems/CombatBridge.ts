@@ -8,7 +8,7 @@ import type { BuiltMap } from '@core/map/mapBuild';
 import { castRay, type RayTarget } from '@core/combat/hitscan';
 import { computeHit, gradeMult, type AttackerCtx } from '@core/combat/damage';
 import { aoeFalloff, targetsInBlast } from '@core/combat/projectile';
-import { spreadRadians } from '@core/combat/accuracy';
+import { spreadOffset, stanceSpread } from '@core/combat/accuracy';
 import { applyBurn, isBurning, isInvulnerable, tickBurn } from '@core/combat/statusEffects';
 import { rollConsciousness } from '@core/combat/consciousness';
 import { enemyHitChance, playerDamageTaken } from '@core/combat/enemyAttack';
@@ -212,7 +212,7 @@ export class CombatBridge {
     const baseAngle = angleTo(origin, aim);
     const tech = gameState.character.base['기술'];
     const profile = fireProfile(w.def.class);
-    const spread = spreadRadians(eff.spreadDeg, tech) * (player.crouching ? profile.crouchSpreadMult : 1) * (player.moving ? profile.moveSpreadMult : 1);
+    const spread = stanceSpread({ spreadDeg: eff.spreadDeg, tech, crouching: player.crouching, moving: player.moving, crouchSpreadMult: profile.crouchSpreadMult, moveSpreadMult: profile.moveSpreadMult, pellets: attempt.pellets });
     const muzzle = { x: origin.x + Math.cos(baseAngle) * MUZZLE_OFFSET, y: origin.y + Math.sin(baseAngle) * MUZZLE_OFFSET };
     const melee = isMeleeClass(w.def.class);
 
@@ -257,7 +257,7 @@ export class CombatBridge {
     this.host.scene.cameras.main.shake(40, w.def.class === '기관총' || w.def.class === '산탄총' ? 0.003 : 0.0012);
 
     for (let i = 0; i < attempt.pellets; i++) {
-      const dir = fromAngle(baseAngle + gameRng.range(-spread, spread));
+      const dir = fromAngle(baseAngle + spreadOffset(gameRng, spread, attempt.pellets));
       const hit = castRay(this.host.built.collision, origin, dir, eff.range, targets);
       this.fx.tracer(muzzle, hit.point);
       if (hit.kind === 'wall') this.fx.spark(hit.point);

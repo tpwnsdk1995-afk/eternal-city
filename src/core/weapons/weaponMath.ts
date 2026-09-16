@@ -29,12 +29,14 @@ export interface FireProfile {
   crouchDmgMult: number;
 }
 
-const DEFAULT_PROFILE: FireProfile = { crouchSpreadMult: 0.6, moveSpreadMult: 1.4, moveAccPenalty: 0, crouchDmgMult: 1 };
+// Moving costs a little precision, never the ability to hit what the cursor is on: the cone widens
+// mildly and the accuracy roll drops a few points. Snipers/MGs pay more but still land most shots.
+const DEFAULT_PROFILE: FireProfile = { crouchSpreadMult: 0.6, moveSpreadMult: 1.15, moveAccPenalty: 0, crouchDmgMult: 1 };
 
 export const CLASS_FIRE_PROFILE: Partial<Record<WeaponClass, FireProfile>> = {
-  저격소총: { crouchSpreadMult: 0.25, moveSpreadMult: 3, moveAccPenalty: 0.25, crouchDmgMult: 1.2 },
-  기관총: { crouchSpreadMult: 0.5, moveSpreadMult: 2.2, moveAccPenalty: 0.15, crouchDmgMult: 1 },
-  산탄총: { crouchSpreadMult: 0.8, moveSpreadMult: 1.2, moveAccPenalty: 0, crouchDmgMult: 1 },
+  저격소총: { crouchSpreadMult: 0.25, moveSpreadMult: 2, moveAccPenalty: 0.12, crouchDmgMult: 1.2 },
+  기관총: { crouchSpreadMult: 0.5, moveSpreadMult: 1.5, moveAccPenalty: 0.08, crouchDmgMult: 1 },
+  산탄총: { crouchSpreadMult: 0.8, moveSpreadMult: 1.1, moveAccPenalty: 0, crouchDmgMult: 1 },
 };
 
 export const fireProfile = (cls: WeaponClass): FireProfile => CLASS_FIRE_PROFILE[cls] ?? DEFAULT_PROFILE;

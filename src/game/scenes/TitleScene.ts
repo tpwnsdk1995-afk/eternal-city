@@ -12,6 +12,7 @@ import type { SaveRow } from '../state/db';
 import { theme } from '../ui/theme';
 import { Rain } from '../ui/Rain';
 import { sceneKeyForMap, type WorldSceneData } from './BaseWorldScene';
+import { isTouchDevice, touchControlsEnabled, type TouchSetting } from '../systems/input/touchState';
 import { registry } from '@data/registry';
 import { balance } from '@data/balance';
 
@@ -61,7 +62,13 @@ export class TitleScene extends Phaser.Scene {
     imp.on('pointerdown', () => void this.importSave());
     this.importStatus = this.add.text(cx, py + 278, '', theme.textStyle(11, '#8a8f9c')).setOrigin(0.5);
 
-    void saveService.loadSettings();
+    // 터치 조작 전환 (휴대폰에서 자동 감지가 빗나갈 때 손으로 켬) — 설정은 슬롯과 무관하게 저장
+    this.touchToggle = this.add.text(GAME_WIDTH - 16, 14, '', theme.textStyle(13, theme.colors.muted, { backgroundColor: '#1a1e24', padding: { left: 10, right: 10, top: 4, bottom: 4 } })).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+    this.touchToggle.on('pointerover', () => this.touchToggle.setStyle({ backgroundColor: '#2a3038' }));
+    this.touchToggle.on('pointerout', () => this.touchToggle.setStyle({ backgroundColor: '#1a1e24' }));
+    this.touchToggle.on('pointerdown', () => this.cycleTouch());
+    this.renderTouchToggle();
+    void saveService.loadSettings().then(() => this.scene.isActive() && this.renderTouchToggle());
     const cloudText = this.add.text(cx, GAME_HEIGHT - 48, cloudSave.describe(), theme.textStyle(11, '#8a8f9c')).setOrigin(0.5);
     // local slots first (instant), then the account-bound cloud copies if the play page provides them
     void saveService.peekAll().then((rows) => {
@@ -98,10 +105,29 @@ export class TitleScene extends Phaser.Scene {
       const i = this.selected < 0 ? this.defaultSelection() : this.selected;
       void this.deleteSlot(i + 1);
     });
+    kb?.on('keydown-T', () => this.cycleTouch());
 
     this.add
-      .text(cx, GAME_HEIGHT - 24, '팬 재현 개발 빌드 · 원작식(좌클릭 이동/우클릭 공격) 또는 현대식(WASD) — Esc 메뉴에서 전환 · 터치 기기는 화면 조작 자동', theme.textStyle(12, '#6b7280'))
+      .text(cx, GAME_HEIGHT - 24, '팬 재현 개발 빌드 · 원작식(좌클릭 이동/우클릭 공격) 또는 현대식(좌클릭 공격) — 둘 다 WASD 이동 가능, Esc 메뉴에서 전환 · 휴대폰/태블릿은 화면 조작 자동 (우상단 또는 T로 전환)', theme.textStyle(12, '#6b7280'))
       .setOrigin(0.5);
+  }
+
+  private touchToggle!: Phaser.GameObjects.Text;
+
+  private renderTouchToggle(): void {
+    const s = gameState.settings.touchControls;
+    const on = touchControlsEnabled(s);
+    const label = s === 'auto' ? `자동 · ${isTouchDevice() ? '터치 기기 → 켬' : '데스크톱 → 끔'}` : s === 'on' ? '항상 켬' : '항상 끔';
+    this.touchToggle.setText(`📱 터치 조작: ${label}  (T)`).setColor(on ? theme.colors.good : theme.colors.muted);
+  }
+
+  /** auto → on → off → auto; persisted right away since no save slot is open on the title. */
+  private cycleTouch(): void {
+    const next: Record<TouchSetting, TouchSetting> = { auto: 'on', on: 'off', off: 'auto' };
+    gameState.setSettings({ touchControls: next[gameState.settings.touchControls] });
+    void db.settings.put({ key: 'settings', value: gameState.settings });
+    this.renderTouchToggle();
+    audio.play('ui_open');
   }
 
   update(_t: number, dt: number): void {

@@ -42,12 +42,14 @@ export const balance = {
     critMultPerTech: 0.001,
     accPerTech: 0.0015,
     accDistancePenalty: 0.15,
-    accMovingPenalty: 0.05,
+    accMovingPenalty: 0.03,
     accCrouchBonus: 0.05,
     accMin: 0.05,
     accMax: 0.98,
     spreadReductionPerTech: 0.002,
     spreadMinMult: 0.3,
+    /** widest half-angle a single-bullet weapon can reach after stance multipliers (pellet guns exempt) */
+    spreadCapDeg: 7,
   },
   stamina: {
     runDrainPerSec: 12,

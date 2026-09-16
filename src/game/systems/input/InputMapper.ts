@@ -29,7 +29,7 @@ const KC = Phaser.Input.Keyboard.KeyCodes;
  * Translates raw keyboard/mouse into an `InputIntent` under the active control scheme so that
  * scenes and entities never read the input plugin directly.
  *
- * classic (원작): LMB move · Shift+LMB run · CapsLock run latch · RMB fire · Space crouch/jump · Ctrl sub-fire
+ * classic (원작): LMB move (WASD also) · Shift+LMB run · CapsLock run latch · RMB fire · Space crouch/jump · Ctrl sub-fire
  * modern: WASD move · Shift run · LMB fire · C crouch · Space jump · E interact · Ctrl sub-fire
  */
 export class InputMapper {
@@ -114,14 +114,13 @@ export class InputMapper {
       if (space) jumpPressed = true;
     }
 
+    // WASD moves under either scheme (원작식 keeps click-to-move as well; a held key wins over a pending click)
     let moveDir: Vec2 | null = null;
-    if (this.scheme === 'modern') {
-      const x = (k.D.isDown ? 1 : 0) - (k.A.isDown ? 1 : 0);
-      const y = (k.S.isDown ? 1 : 0) - (k.W.isDown ? 1 : 0);
-      if (x || y) {
-        const l = Math.hypot(x, y);
-        moveDir = { x: x / l, y: y / l };
-      }
+    const x = (k.D.isDown ? 1 : 0) - (k.A.isDown ? 1 : 0);
+    const y = (k.S.isDown ? 1 : 0) - (k.W.isDown ? 1 : 0);
+    if (x || y) {
+      const l = Math.hypot(x, y);
+      moveDir = { x: x / l, y: y / l };
     }
     // virtual stick drives movement under either scheme
     if (touch?.moveDir) moveDir = touch.moveDir;
@@ -211,6 +210,6 @@ export function touchHints(): string[] {
 
 export function schemeHints(scheme: ControlScheme): string[] {
   return scheme === 'classic'
-    ? ['좌클릭 이동 (NPC 클릭 = 대화)', 'Shift+클릭 달리기 · CapsLock 상시 달리기', '우클릭 공격 (마우스 방향)', 'Space 웅크리기 → 다시 Space 점프', 'Ctrl 서브연사 토글 · 1~9 퀵슬롯', 'I 인벤토리 · C 상태 · K 스킬 · Q 퀘스트 · Tab 지도 · Esc 메뉴']
+    ? ['좌클릭 이동 또는 WASD 이동 (NPC 클릭 = 대화)', 'Shift+클릭/Shift 달리기 · CapsLock 상시 달리기', '우클릭 공격 (마우스 방향)', 'Space 웅크리기 → 다시 Space 점프', 'Ctrl 서브연사 토글 · 1~9 퀵슬롯', 'I 인벤토리 · C 상태 · K 스킬 · Q 퀘스트 · Tab 지도 · Esc 메뉴']
     : ['WASD 이동 · Shift 달리기', '좌클릭 공격 (마우스 방향)', 'C 웅크리기 · Space 점프', 'E 상호작용 (NPC)', 'Ctrl 서브연사 토글 · 1~9 퀵슬롯', 'I 인벤토리 · V 상태 · K 스킬 · Q 퀘스트 · Tab 지도 · Esc 메뉴'];
 }

@@ -56,14 +56,22 @@ export function resetTouchState(): void {
   touchState.pending = emptyPending();
 }
 
-/** Coarse pointer / touch capable device (or `?touch=1` for desktop testing). */
+/**
+ * Phone / tablet detection (or `?touch=1` for desktop testing): a coarse primary pointer, a mobile
+ * user agent, or a touch screen on a phone-sized viewport. A touch-screen laptop with a mouse keeps
+ * the desktop controls (its primary pointer is fine); the title screen / Esc menu can force it on.
+ */
 export function isTouchDevice(): boolean {
   if (typeof window === 'undefined') return false;
   if (new URLSearchParams(window.location.search).get('touch') === '1') return true;
   const nav = window.navigator as Navigator & { msMaxTouchPoints?: number };
   const points = nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0;
-  const coarse = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
-  return points > 0 && (coarse || 'ontouchstart' in window);
+  const mm = typeof window.matchMedia === 'function' ? (q: string) => window.matchMedia(q).matches : () => false;
+  if (mm('(pointer: coarse)') && (points > 0 || !mm('(pointer: fine)'))) return true;
+  const mobileUa = /Android|iPhone|iPad|iPod|Mobile|Tablet|Silk|Kindle/i.test(nav.userAgent ?? '');
+  if (points > 0 && mobileUa) return true;
+  const small = Math.min(window.screen?.width ?? 9999, window.screen?.height ?? 9999) <= 900;
+  return points > 0 && 'ontouchstart' in window && small;
 }
 
 export function touchControlsEnabled(setting: TouchSetting): boolean {

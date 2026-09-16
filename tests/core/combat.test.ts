@@ -3,7 +3,7 @@ import type { Rng } from '@core/rng';
 import { ZERO_MODS } from '@data/schema/mods';
 import { skinMult } from '@core/combat/ammoSkinTable';
 import { computeHit, gradeMult, MISS, type AttackerCtx, type TargetCtx } from '@core/combat/damage';
-import { hitChance } from '@core/combat/accuracy';
+import { hitChance, spreadOffset, spreadRadians, stanceSpread } from '@core/combat/accuracy';
 import { applyBurn, emptyStatus, isBurning, tickBurn } from '@core/combat/statusEffects';
 import { rollConsciousness } from '@core/combat/consciousness';
 
@@ -94,12 +94,38 @@ describe('hitChance', () => {
   it('falls off with distance and movement, improves crouched', () => {
     expect(hitChance(base)).toBeCloseTo(0.85);
     expect(hitChance({ ...base, dist: 400 })).toBeCloseTo(0.7);
-    expect(hitChance({ ...base, moving: true })).toBeCloseTo(0.8);
+    expect(hitChance({ ...base, moving: true })).toBeCloseTo(0.82);
     expect(hitChance({ ...base, crouching: true })).toBeCloseTo(0.9);
+  });
+  it('moving keeps a walking gunfight winnable: mid-range SMG still lands most shots', () => {
+    // UZI-ish: baseAccuracy 0.65, half range, no tech
+    expect(hitChance({ ...base, baseAccuracy: 0.65, dist: 170, range: 340, moving: true })).toBeGreaterThan(0.55);
   });
   it('clamps to [0.05, 0.98]', () => {
     expect(hitChance({ ...base, baseAccuracy: 0 })).toBe(0.05);
     expect(hitChance({ ...base, baseAccuracy: 2 })).toBe(0.98);
+  });
+});
+
+describe('spread while moving', () => {
+  const deg = (rad: number) => (rad * 180) / Math.PI;
+  const smg = { spreadDeg: 6, tech: 0, crouching: false, moving: false, crouchSpreadMult: 0.6, moveSpreadMult: 1.15, pellets: 1 };
+  it('widens only mildly on the move and never past the single-bullet cap', () => {
+    expect(deg(stanceSpread(smg))).toBeCloseTo(6);
+    expect(deg(stanceSpread({ ...smg, moving: true }))).toBeCloseTo(6.9);
+    // an MG-class multiplier on an illegal SMG would exceed the cap → clamped to 7°
+    expect(deg(stanceSpread({ ...smg, spreadDeg: 8, moving: true, moveSpreadMult: 1.5 }))).toBeCloseTo(7);
+    // pellet guns keep their full cone
+    expect(deg(stanceSpread({ ...smg, spreadDeg: 16, pellets: 8, moving: true, moveSpreadMult: 1.1 }))).toBeCloseTo(17.6);
+    expect(deg(stanceSpread({ ...smg, crouching: true }))).toBeCloseTo(3.6);
+  });
+  it('single bullets are centre-weighted: averaging two draws halves an edge draw', () => {
+    const half = spreadRadians(6, 0);
+    const edgeThenCentre = { range: (() => { let n = 0; return (a: number, b: number) => (n++ === 0 ? b : (a + b) / 2); })() };
+    expect(spreadOffset(edgeThenCentre, half, 1)).toBeCloseTo(half / 2);
+    const edge = { range: (_a: number, b: number) => b };
+    expect(spreadOffset(edge, half, 8)).toBeCloseTo(half); // pellets stay uniform
+    expect(spreadOffset(edge, 0, 1)).toBe(0);
   });
 });
 
