@@ -54,6 +54,15 @@ export const ART_OVERRIDES: Partial<Record<TexKey, ArtOverride>> = {
   [TEX.icon_acid]: 'art/icon_acid.webp',
   [TEX.icon_bone]: 'art/icon_bone.webp',
   // original-client sprites extracted with tools/ec-extract.py (8 dirs × 6 frames, native ~62px figures)
+  // player: one model (00046) in three firing poses; the six long-gun classes share a sheet, so weapon swaps keep the frame size
+  [TEX.player]: { url: 'art/player.png', frameW: 150, frameH: 156, scale: 0.6 },
+  [TEX.player_melee]: { url: 'art/player_melee.png', frameW: 150, frameH: 156, scale: 0.6 },
+  [TEX.player_smg]: { url: 'art/player_long.png', frameW: 150, frameH: 156, scale: 0.6 },
+  [TEX.player_rifle]: { url: 'art/player_long.png', frameW: 150, frameH: 156, scale: 0.6 },
+  [TEX.player_shotgun]: { url: 'art/player_long.png', frameW: 150, frameH: 156, scale: 0.6 },
+  [TEX.player_sniper]: { url: 'art/player_long.png', frameW: 150, frameH: 156, scale: 0.6 },
+  [TEX.player_mg]: { url: 'art/player_long.png', frameW: 150, frameH: 156, scale: 0.6 },
+  [TEX.player_launcher]: { url: 'art/player_long.png', frameW: 150, frameH: 156, scale: 0.6 },
   [TEX.zombie_casual_f]: { url: 'art/zombie_casual_f.png', frameW: 98, frameH: 152, scale: 0.6 },
   [TEX.zombie_suit_m]: { url: 'art/zombie_suit_m.png', frameW: 146, frameH: 144, scale: 0.6 },
   [TEX.zombie_stripe]: { url: 'art/zombie_stripe.png', frameW: 174, frameH: 150, scale: 0.6 },

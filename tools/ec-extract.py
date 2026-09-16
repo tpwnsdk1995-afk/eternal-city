@@ -28,6 +28,12 @@ SPRITES = {
     'zombie_banshee': dict(file='05770.dat', rid=16246, parts=[0], frames=dict(idle=18, walk=[17, 20, 23], aim=10, death=35)),  # no walk cycle: glides with the idle sway (0-8 is a somersault leap)
     'zombie_office': dict(file='05030.dat', rid=13501, parts=[0], frames=dict(idle=20, walk=[2, 5, 8], aim=12, death=35)),
     'zombie_worker': dict(file='05050.dat', rid=13503, parts=[0], frames=dict(idle=14, walk=[1, 3, 5], aim=8, death=31)),
+    # player: customizable male model 00046 (body, silver hair, blue jacket, jeans, sneakers); 0-11 idle, 12-23 walk,
+    # 36-41 fall back and lie (walk 12 is skipped: its hair frame is corrupt facing up), 72-75 one-hand (pistol) fire, 76-90 two-hand (long gun) fire, 24-25 arm swing.
+    # ponytail: weapons are separate 3-5px layers (parts 7/9/14/16) and are left out; one cell for all three so swaps keep the frame size
+    'player': dict(file='00046.dat', rid=5478, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=74, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
+    'player_long': dict(file='00046.dat', rid=5478, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=80, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
+    'player_melee': dict(file='00046.dat', rid=5478, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=25, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
 }
 
 u16 = lambda b, o: struct.unpack_from('<H', b, o)[0]
@@ -62,7 +68,7 @@ def layers_of(blob, pix_base, fo):
     out = []
     for i in range(u16(blob, fo)):
         p, pix = u32(blob, fo + 2 + 8 * i), u32(blob, fo + 6 + 8 * i)
-        if blob[p] != 1:
+        if not sane_layer(blob, p):  # a few frames (e.g. player shoes 99-104) carry dangling pointers
             continue
         w, h, ox, oy = u16(blob, p + 1), u16(blob, p + 3), s16(blob, p + 5), s16(blob, p + 7)
         img = Image.new('RGBA', (w, h)); px = img.load()
@@ -78,12 +84,17 @@ def layers_of(blob, pix_base, fo):
     return out
 
 
+def sane_layer(blob, p):
+    """a layer header inside the blob with a plausible size; hair 00046 block 0 frame 12 points at garbage (hundreds of 60000px layers)"""
+    return p + 9 <= len(blob) and blob[p] == 1 and 0 < u16(blob, p + 1) <= 256 and 0 < u16(blob, p + 3) <= 256
+
+
 def layer_boxes(blob, fo):
     """-> [(w, h, ox, oy)] without decoding pixels"""
     out = []
     for i in range(u16(blob, fo)):
         p = u32(blob, fo + 2 + 8 * i)
-        if blob[p] == 1:
+        if sane_layer(blob, p):
             out.append((u16(blob, p + 1), u16(blob, p + 3), s16(blob, p + 5), s16(blob, p + 7)))
     return out
 
@@ -134,7 +145,7 @@ def build(key, data, strip=False):
             st.alpha_composite(compose(blob, pix_base, parts, s['parts'], 4, f, cell), (x, y)); dr.text((x + 2, y + 2), str(f), fill=(255, 255, 0, 255))
         os.makedirs(os.path.join(os.path.dirname(__file__), 'out'), exist_ok=True)
         sp = os.path.join(os.path.dirname(__file__), 'out', f'{key}_strip.png'); st.save(sp); print('wrote', os.path.normpath(sp), n, 'frames'); return
-    cell = auto_cell(blob, parts, s['parts'], range(8), cols); cw, ch = cell[0], cell[1]
+    cell = auto_cell(blob, parts, s['parts'], range(8), s.get('cell', cols)); cw, ch = cell[0], cell[1]
     sheet = Image.new('RGBA', (cw * 6, ch * 8))
     for d in range(8):
         block = (6 - d) % 8

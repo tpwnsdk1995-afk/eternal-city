@@ -1,3 +1,4 @@
+import { artScale } from '@data/artOverrides';
 import Phaser from 'phaser';
 import { TEX } from '@data/textureKeys';
 import { DIR_S, aimFrame, depthForY, dirFromAngle, figureFrame, walkFrameAt, type Dir } from '../systems/facing';
@@ -33,13 +34,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   /** aim angle in radians (used for muzzle position / bullet direction) */
   aimAngle = Math.PI / 2;
   private walkT = 0;
+  /** display scale of the current sheet (1 for drawn textures) */
+  private look = 1;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, TEX.player, figureFrame(DIR_S, 0));
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    // 48px frame; collision circle sits around the lower body
-    this.setCircle(10, 14, 18);
     this.setDepth(depthForY(y));
     this.setCollideWorldBounds(true);
     this.stuck = newStuckTracker({ x, y });
@@ -65,6 +66,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       : cls === '투척중화기' ? TEX.player_launcher
       : TEX.player;
     if (this.texture.key !== tex) this.setTexture(tex, this.frame.name);
+    // original-client sheets are ~150px cells shown at 0.6; the drawn figures are 48px at 1. Same world-size body either way.
+    this.look = artScale(tex);
+    const r = 10 / this.look;
+    this.setCircle(r, this.width / 2 - r, this.height * 0.6 - r);
   }
 
   /** the weapon-raised pose shows until this scene time (set on every shot) */
@@ -172,13 +177,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.jumpT += dtMs;
       const t = Math.min(1, this.jumpT / JUMP_MS);
       const s = 1 + Math.sin(t * Math.PI) * 0.35;
-      this.setScale(s);
+      this.setScale(s * this.look);
       if (t >= 1) {
         this.jumping = false;
-        this.setScale(1);
+        this.setScale(this.look);
       }
     } else {
-      this.setScale(this.crouching ? 0.85 : 1);
+      this.setScale((this.crouching ? 0.85 : 1) * this.look);
     }
 
     // walk cycle (frame 0 = neutral stance); faster cadence while running
