@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
-import { ART_OVERRIDES } from '@data/artOverrides';
+import { ART_OVERRIDES, type ArtOverride } from '@data/artOverrides';
 import type { TexKey } from '@data/textureKeys';
 import { generateAllTextures } from '../textures/generateAll';
 
@@ -21,9 +21,11 @@ export class TextureGenScene extends Phaser.Scene {
         color: '#9ca3af',
       })
       .setOrigin(0.5);
-    for (const [key, url] of Object.entries(ART_OVERRIDES) as [TexKey, string][]) {
-      if (!url || this.textures.exists(key)) continue;
-      this.load.image(key, url);
+    for (const [key, art] of Object.entries(ART_OVERRIDES) as [TexKey, ArtOverride][]) {
+      if (!art || this.textures.exists(key)) continue;
+      if (typeof art === 'string') this.load.image(key, art);
+      // pre-rendered figure sheet: frames are numbered left-to-right, top-to-bottom, matching figureFrame()
+      else this.load.spritesheet(key, art.url, { frameWidth: art.frameW, frameHeight: art.frameH });
     }
     this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => {
       console.warn(`[art] ${file.key}: could not load ${file.url}; using the drawn version`);

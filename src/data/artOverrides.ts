@@ -8,7 +8,14 @@ import { TEX, type TexKey } from './textureKeys';
  * Generated with Higgsfield (z_image) from prompts in the 2003 Korean PC-MMORPG portrait style and
  * downscaled to the sizes the HUD/dialog actually display (128px faces, 1280×720 title).
  */
-export const ART_OVERRIDES: Partial<Record<TexKey, string>> = {
+/**
+ * A single image, or a sprite sheet (frame grid, numbered row-major) for figure keys whose 8×6
+ * layout is fixed by `systems/facing` — see `tools/render-sprites.mjs`, which pre-renders 3D models
+ * into that layout the way the original game did.
+ */
+export type ArtOverride = string | { url: string; frameW: number; frameH: number };
+
+export const ART_OVERRIDES: Partial<Record<TexKey, ArtOverride>> = {
   [TEX.portrait_player]: 'art/portrait_player.webp',
   [TEX.portrait_infected]: 'art/portrait_infected.webp',
   [TEX.face_elia]: 'art/face_elia.webp',
@@ -40,4 +47,6 @@ export const ART_OVERRIDES: Partial<Record<TexKey, string>> = {
   [TEX.icon_tentacle]: 'art/icon_tentacle.webp',
   [TEX.icon_acid]: 'art/icon_acid.webp',
   [TEX.icon_bone]: 'art/icon_bone.webp',
+  // pre-rendered 3D figure sheets (8 dirs × 6 frames, 48px) — see tools/render-sprites.mjs
+  [TEX.zombie_suit_m]: { url: 'art/zombie_suit_m.png', frameW: 48, frameH: 48 },
 };
