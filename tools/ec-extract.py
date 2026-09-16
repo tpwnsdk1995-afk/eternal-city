@@ -47,6 +47,39 @@ SPRITES = {
     'npc_kimhun': dict(file='00061.dat', rid=5482, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # camo soldier at ease (03780 6125 is a crouched gunner)
     'npc_taxi': dict(file='04040.dat', rid=6664, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # blue uniform, cap
     'npc_assault': dict(file='00012.dat', rid=4305, parts=[0, 2, 1], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # red coat, blonde
+    # monsters (32): walk 0-9, attack 10-14, idle 20-29, hit+death 30-41 in most files; exceptions noted per line
+    'zombie_dog': dict(file='00064.dat', rid=5498, parts=[0], frames=dict(idle=16, walk=[0, 3, 6], aim=24, death=47)),  # rottweiler: 0-9 trot, 20-29 bite, 40-47 rear up and drop
+    'zombie_hardened': dict(file='05110.dat', rid=13666, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=11, death=35)),  # flail swing 10-12, lies at 35
+    'ogurin': dict(file='04660.dat', rid=11329, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=11, death=34)),  # arm raise 10-14 (12 is 207px tall, skipped)
+    'ogurin_mutant': dict(file='04670.dat', rid=11330, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=10, death=33)),  # blade swing 10; 33 sprawled, 34 is an empty frame
+    'wito_recon': dict(file='04510.dat', rid=9949, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=14, death=34)),  # kick 14-16
+    'wito_soldier': dict(file='00060.dat', rid=5481, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=31, death=41)),  # 9-block file; rifle fire 30-31
+    'wito_airborne': dict(file='05880.dat', rid=16543, parts=[0], frames=dict(idle=16, walk=[0, 2, 4], aim=41, death=31)),  # walk 0-6, 26-31 drops rifle and falls, 40-42 aims
+    'wito_elite': dict(file='04560.dat', rid=10232, parts=[0], frames=dict(idle=20, walk=[0, 4, 8], aim=16, death=48)),  # 0-11 walk, 12-16 kick, 30-37 sinks (unused), 46-49 fall
+    'zombie_police': dict(file='05100.dat', rid=13665, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=11, death=34)),  # rifle fire 10-12
+    'zombie_firefighter': dict(file='05570.dat', rid=15327, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=11, death=33)),  # overhead axe 10-11, flat at 33
+    'wito_engineer': dict(file='05340.dat', rid=14526, parts=[0], frames=dict(idle=20, walk=[0, 2, 4], aim=10, death=16)),  # 27 frames only: 13-16 crumple
+    'wito_turret': dict(file='05360.dat', rid=14563, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=13, death=38)),  # static: 13 muzzle flash, 34-38 wreck
+    'zombie_fire_chief': dict(file='05120.dat', rid=13667, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=11, death=35)),  # whip 10-12, 40-48 more whips
+    'zombie_soldier': dict(file='05070.dat', rid=13539, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=37, death=35)),  # rifle fire 36-39, lies 34-35
+    'larva': dict(file='05650.dat', rid=15511, parts=[0], frames=dict(idle=20, walk=[1, 4, 7], aim=12, death=31)),  # 0-4 are odd crouches; slash 11-14; 31 flattened, 32-33 fragments
+    'wito_elite_trooper': dict(file='05870.dat', rid=16544, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=31, death=36)),  # rifle fire 29-31 and 44-48
+    'mongolian_deathworm': dict(file='05670.dat', rid=15665, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=11, death=40)),  # rears at 11, flat 38-40
+    'guest_scout': dict(file='04774.dat', rid=17475, parts=[0], frames=dict(idle=70, walk=[0, 3, 6], aim=86, death=38)),  # GUEST rig (89 frames): 32-38 fall, 49-78 idles, 85-88 strike
+    'guest_warrior': dict(file='04776.dat', rid=17485, parts=[0], frames=dict(idle=70, walk=[0, 3, 6], aim=86, death=38)),  # same rig
+    'guest_hunter': dict(file='04775.dat', rid=17476, parts=[0], frames=dict(idle=70, walk=[0, 3, 6], aim=86, death=38)),  # same rig (82-84 are a green-tinted variant, unused)
+    'guest_elite': dict(file='04777.dat', rid=17527, parts=[0], frames=dict(idle=70, walk=[0, 3, 6], aim=86, death=38)),  # same rig
+    'parasite_root': dict(file='00574.dat', rid=21472, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=12, death=38)),  # rooted mass: spike 11-13 (205px), topples 34-38
+    'zombie_lord': dict(file='05130.dat', rid=13967, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=12, death=39)),  # arms spread 12, sprawled 38-40
+    'wito_heavy_gunner': dict(file='03780.dat', rid=6125, parts=[0], frames=dict(idle=24, walk=[0, 3, 6], aim=12, death=36)),  # big gun held level 23-30; 10-14 barrel toward viewer; 35-36 down
+    'zombie_ceo': dict(file='05800.dat', rid=16243, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=11, death=15)),  # 26 frames: cane swing 10-11, 12-15 collapses, 16-25 idle
+    'zombie_riot_police': dict(file='05530.dat', rid=15222, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=44, death=35)),  # rifle level 43-45, lies 34-35
+    'wito_drone': dict(file='05460.dat', rid=14852, parts=[0], frames=dict(idle=0, walk=[1, 2, 3], aim=8, death=20)),  # hover pod: lights cycle 0-15, 16-18 blast, 19-20 husk
+    'parasite_spawn': dict(file='05210.dat', rid=14539, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=12, death=36)),  # legs spread 12, flattened 34-36
+    'wito_commander': dict(file='05860.dat', rid=16494, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=11, death=15)),  # 26 frames like the ceo: 12-15 collapses
+    'zombie_ancient': dict(file='04640.dat', rid=11327, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=30, death=33)),  # swing 29-31, flat 33-34
+    'parasite_horror': dict(file='00773.dat', rid=21868, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=12, death=37)),  # pincers up 10-19, 31-37 shrivels
+    'the_wise_one': dict(file='00191.dat', rid=20151, parts=[0], frames=dict(idle=20, walk=[0, 3, 6], aim=38, death=36)),  # tongue 10-19, bones 31-36, horn rears 37-40
 }
 
 u16 = lambda b, o: struct.unpack_from('<H', b, o)[0]
@@ -164,8 +197,10 @@ def build(key, data, strip=False):
         block = (6 - d) % 8
         for c, fr in enumerate(cols):
             sheet.alpha_composite(compose(blob, pix_base, parts, s['parts'], block, fr, cell), (c * cw, d * ch))
+    # idle head height above the frame centre (S block): Enemy hangs the name label / hp bar there instead of at the cell top
+    top = max((oy for pi in s['parts'] for _, _, _, oy in layer_boxes(blob, parts[pi][4][s['frames']['idle']])), default=0) - FEET
     out = os.path.join(os.path.dirname(__file__), '..', 'public', 'art', f'{key}.png')
-    sheet.save(out); print(f'wrote {os.path.normpath(out)} frameW={cw} frameH={ch}  -> data/artOverrides.ts')
+    sheet.save(out); print(f'wrote {os.path.normpath(out)} frameW={cw} frameH={ch} top={top}  -> data/artOverrides.ts')
 
 
 

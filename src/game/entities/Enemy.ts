@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import type { MonsterDef } from '@data/schema/monster';
 import { ANIM, TEX } from '@data/textureKeys';
-import { artScale } from '@data/artOverrides';
+import { artScale, artTop } from '@data/artOverrides';
 import { angleTo, type Vec2 } from '@core/math/vec';
 import { initialBrain, type BrainOutput, type BrainState } from '@core/ai/enemyBrain';
 import { emptyStatus, type StatusState } from '@core/combat/statusEffects';
@@ -46,7 +46,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    const s = (def.scale ?? 1) * artScale(def.tex);
+    // original sheets carry their own proportions, so def.scale only inflates the drawn 48px figures
+    const art = artScale(def.tex);
+    const s = art !== 1 ? art : (def.scale ?? 1);
     this.setScale(s);
     const r = def.bodyRadius / s;
     // circle around the lower body (figures stand with feet near the frame bottom); frame size is unscaled
@@ -57,12 +59,17 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     this.bar = scene.add.graphics().setDepth(11);
     if (def.boss) {
-      this.label = scene.add.text(x, y - 30 * s, def.name, theme.textStyle(12, '#ff3b3b', { stroke: '#000', strokeThickness: 3, fontStyle: 'bold' })).setOrigin(0.5).setDepth(11);
+      this.label = scene.add.text(x, this.top - 6, def.name, theme.textStyle(12, '#ff3b3b', { stroke: '#000', strokeThickness: 3, fontStyle: 'bold' })).setOrigin(0.5).setDepth(11);
     }
   }
 
   get pos(): Vec2 {
     return { x: this.x, y: this.y };
+  }
+
+  /** Head of the idle pose: label and hp bar hang here (a sheet cell is as tall as its attack frame, not its head). */
+  private get top(): number {
+    return this.y - (artTop(this.def.tex) ?? this.height / 2) * this.scale;
   }
 
   get radius(): number {
@@ -178,15 +185,15 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.setDepth(depthForY(this.y));
     if (this.hp < this.maxHp) this.drawBar();
     if (this.fireFx) this.fireFx.setPosition(this.x, this.y - 8);
-    if (this.label) this.label.setPosition(this.x, this.y - 30 * this.scale);
+    if (this.label) this.label.setPosition(this.x, this.top - 6);
   }
 
   private drawBar(): void {
     this.bar.clear();
     if (!this.alive || this.hp >= this.maxHp) return;
-    const w = 28 * this.scale;
+    const w = 28 * (this.def.scale ?? 1);
     const x = this.x - w / 2;
-    const y = this.y - 20 * this.scale;
+    const y = this.top + 4;
     this.bar.fillStyle(0x000000, 0.7).fillRect(x - 1, y - 1, w + 2, 5);
     this.bar.fillStyle(this.def.faction === 'zombie' ? 0xd94b4b : 0xd9a441, 1).fillRect(x, y, w * this.hpRatio, 3);
   }

@@ -71,6 +71,11 @@ export class TitleScene extends Phaser.Scene {
     this.touchToggle.on('pointerout', () => this.touchToggle.setStyle({ backgroundColor: '#1a1e24' }));
     this.touchToggle.on('pointerdown', () => this.cycleTouch());
     this.renderTouchToggle();
+    // 전체화면 (F) — 앱 뷰어/브라우저 창 안의 검은 띠를 없앰; 터치 탭줄의 ⛶와 Esc 메뉴 버튼도 같은 토글
+    const fs = this.add.text(GAME_WIDTH - 16, 44, '⛶ 전체화면  (F)', theme.textStyle(13, theme.colors.muted, { backgroundColor: '#1a1e24', padding: { left: 10, right: 10, top: 4, bottom: 4 } })).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+    fs.on('pointerover', () => fs.setStyle({ backgroundColor: '#2a3038' }));
+    fs.on('pointerout', () => fs.setStyle({ backgroundColor: '#1a1e24' }));
+    fs.on('pointerdown', () => this.scale.toggleFullscreen());
     void saveService.loadSettings().then(() => this.scene.isActive() && this.renderTouchToggle());
     const cloudText = this.add.text(cx, GAME_HEIGHT - 48, cloudSave.describe(), theme.textStyle(11, '#8a8f9c')).setOrigin(0.5);
     // local slots first (instant), then the account-bound cloud copies if the play page provides them
@@ -109,6 +114,7 @@ export class TitleScene extends Phaser.Scene {
       void this.deleteSlot(i + 1);
     });
     kb?.on('keydown-T', () => this.cycleTouch());
+    kb?.on('keydown-F', () => this.scale.toggleFullscreen());
 
     this.add
       .text(cx, GAME_HEIGHT - 24, '팬 재현 개발 빌드 · 원작식(좌클릭 이동/우클릭 공격) 또는 현대식(좌클릭 공격) — 둘 다 WASD 이동 가능, Esc 메뉴에서 전환 · 휴대폰/태블릿은 화면 조작 자동 (우상단 또는 T로 전환)', theme.textStyle(12, '#6b7280'))
