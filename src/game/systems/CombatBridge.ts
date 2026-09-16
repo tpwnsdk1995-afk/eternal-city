@@ -253,6 +253,7 @@ export class CombatBridge {
 
     audio.gunshot(w.def.class, gameState.fire.subFire);
     this.fx.muzzle(muzzle, baseAngle);
+    this.host.player.markFired(this.host.scene.time.now);
     if (w.def.caliber !== 'none') this.fx.casing({ x: origin.x + Math.cos(baseAngle) * 6, y: origin.y + Math.sin(baseAngle) * 6 }, baseAngle);
     this.host.scene.cameras.main.shake(40, w.def.class === '기관총' || w.def.class === '산탄총' ? 0.003 : 0.0012);
 
@@ -324,6 +325,7 @@ export class CombatBridge {
   /** 투척/중화기: a visible shell that arcs to the aimed point (M79) or flies straight until impact (RPG-7). */
   private launchProjectile(def: WeaponDef, origin: Vec2, angle: number, aim: Vec2, ctx: AttackerCtx): void {
     this.fx.muzzle({ x: origin.x + Math.cos(angle) * MUZZLE_OFFSET, y: origin.y + Math.sin(angle) * MUZZLE_OFFSET }, angle);
+    this.host.player.markFired(this.host.scene.time.now);
     this.host.scene.cameras.main.shake(80, 0.004);
     this.projectiles.push(new Projectile(this.host.scene, def, origin, angle, dist(origin, aim), ctx));
     this.host.onLaunch?.(def, origin, angle, ctx);

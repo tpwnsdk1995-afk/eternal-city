@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { TEX } from '@data/textureKeys';
-import { DIR_S, depthForY, dirFromAngle, figureFrame, type Dir } from '../systems/facing';
+import { DIR_S, aimFrame, depthForY, dirFromAngle, figureFrame, walkFrameAt, type Dir } from '../systems/facing';
 import { audio } from '../audio/AudioManager';
 import { balance } from '@data/balance';
 import type { ControlScheme } from '@data/schema/enums';
@@ -57,9 +57,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const tex = gameState.character.race === 'infected' ? TEX.player_infected :
       cls === '근접무기' ? TEX.player_melee
       : cls === '기관단총' ? TEX.player_smg
-      : cls === '돌격소총' || cls === '저격소총' || cls === '기관총' || cls === '산탄총' || cls === '투척중화기' ? TEX.player_rifle
+      : cls === '돌격소총' ? TEX.player_rifle
+      : cls === '산탄총' ? TEX.player_shotgun
+      : cls === '저격소총' ? TEX.player_sniper
+      : cls === '기관총' ? TEX.player_mg
+      : cls === '투척중화기' ? TEX.player_launcher
       : TEX.player;
     if (this.texture.key !== tex) this.setTexture(tex, this.frame.name);
+  }
+
+  /** the weapon-raised pose shows until this scene time (set on every shot) */
+  aimUntil = 0;
+
+  markFired(now: number): void {
+    this.aimUntil = now + 320;
   }
 
   get pos(): Vec2 {
@@ -163,7 +174,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // walk cycle (frame 0 = neutral stance); faster cadence while running
     if (this.moving) this.walkT += dtMs * (this.running ? 1.5 : 1);
     else this.walkT = 0;
-    const walkFrame = this.moving ? 1 + (Math.floor(this.walkT / 140) % 3) : 0;
-    this.setFrame(figureFrame(this.dir, walkFrame));
+    if (this.scene.time.now < this.aimUntil) this.setFrame(aimFrame(this.dir));
+    else this.setFrame(figureFrame(this.dir, this.moving ? walkFrameAt(this.walkT, 130) : 0));
   }
 }

@@ -1,7 +1,7 @@
 import { ANIM, TEX, type AnimKey, type TexKey } from '@data/textureKeys';
 import { drawTilesAtlas, TILE_COUNT } from './draw/tiles';
 import { FIGURE_STYLES, figureDrawer, drawPortrait, type FigureKey } from './draw/figures';
-import { WALK_FRAMES } from '../systems/facing';
+import { FRAMES_PER_DIR } from '../systems/facing';
 import {
   drawBarricade,
   drawRootNode,
@@ -74,12 +74,12 @@ export interface TextureSpec {
   anim?: { key: AnimKey; frameRate: number; repeat: number };
 }
 
-/** 8 directions × 4 walk frames, row per direction. */
+/** 8 directions × (4 walk + aim + death) frames, row per direction. */
 const figure = (key: FigureKey, size = 48): TextureSpec => ({
   frameW: size,
   frameH: size,
-  frames: 8 * WALK_FRAMES,
-  grid: { cols: WALK_FRAMES, rows: 8 },
+  frames: 8 * FRAMES_PER_DIR,
+  grid: { cols: FRAMES_PER_DIR, rows: 8 },
   draw: figureDrawer(FIGURE_STYLES[key]),
 });
 
@@ -97,6 +97,10 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.player_smg]: figure('player_smg'),
   [TEX.player_rifle]: figure('player_rifle'),
   [TEX.player_melee]: figure('player_melee'),
+  [TEX.player_shotgun]: figure('player_shotgun'),
+  [TEX.player_sniper]: figure('player_sniper'),
+  [TEX.player_mg]: figure('player_mg'),
+  [TEX.player_launcher]: figure('player_launcher'),
   [TEX.portrait_player]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.player, w, h), 64),
   [TEX.portrait_infected]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.player_infected, w, h), 64),
   // dialog faces — procedural fallbacks; `TextureGenScene` loads real art over these keys when available

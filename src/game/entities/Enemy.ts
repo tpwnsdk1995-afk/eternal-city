@@ -5,7 +5,7 @@ import { angleTo, type Vec2 } from '@core/math/vec';
 import { initialBrain, type BrainOutput, type BrainState } from '@core/ai/enemyBrain';
 import { emptyStatus, type StatusState } from '@core/combat/statusEffects';
 import { theme } from '../ui/theme';
-import { DIR_S, depthForY, dirFromAngle, figureFrame, type Dir } from '../systems/facing';
+import { DIR_S, deathFrame, depthForY, dirFromAngle, figureFrame, walkFrameAt, type Dir } from '../systems/facing';
 import { balance } from '@data/balance';
 
 let nextUid = 1;
@@ -174,8 +174,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     if (!this.alive) return;
     if (this.movingNow) this.walkT += delta * (this.def.moveSpeed > 80 ? 1.4 : 1);
     else this.walkT = 0;
-    const walkFrame = this.movingNow ? 1 + (Math.floor(this.walkT / 160) % 3) : 0;
-    this.setFrame(figureFrame(this.dir, walkFrame));
+    this.setFrame(figureFrame(this.dir, this.movingNow ? walkFrameAt(this.walkT, 150) : 0));
     this.setDepth(depthForY(this.y));
     if (this.hp < this.maxHp) this.drawBar();
     if (this.fireFx) this.fireFx.setPosition(this.x, this.y - 8);
@@ -205,9 +204,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.label = null;
     this.clearTint();
     this.setDepth(4);
-    // collapse: tip over sideways and sink, then fade
-    this.scene.tweens.add({ targets: this, angle: this.dir < 4 ? 80 : -80, y: this.y + 6, scaleY: this.scaleY * 0.85, duration: 260, ease: 'Quad.easeIn' });
-    this.scene.tweens.add({ targets: this, alpha: 0, duration: 900, delay: 700, onComplete: () => this.destroy() });
+    // collapse onto the lying frame (the sheet has a death pose per direction), then fade
+    this.scene.tweens.add({ targets: this, scaleY: this.scaleY * 0.7, duration: 110, ease: 'Quad.easeIn', onComplete: () => { this.setFrame(deathFrame(this.dir)); this.setScale(this.scaleX, this.scaleX); } });
+    this.scene.tweens.add({ targets: this, alpha: 0, duration: 1200, delay: 1600, onComplete: () => this.destroy() });
   }
 
   destroy(fromScene?: boolean): void {
