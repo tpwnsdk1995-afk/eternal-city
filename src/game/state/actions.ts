@@ -21,7 +21,7 @@ import { canRebirth, rebirth } from '@core/stats/rebirth';
 import { balance } from '@data/balance';
 import { applyBuff, formatRemaining } from '@core/combat/buffs';
 import { audio } from '../audio/AudioManager';
-import { combineArmor } from '@core/tuning/tuning';
+import { combineArmor, repair } from '@core/tuning/tuning';
 import { donate, foundGuild, renameGuild } from '@core/guild/guild';
 import { guildTitle, guildLevel } from '@core/guild/guild';
 
@@ -229,6 +229,23 @@ export const actions = {
   },
 
   // --- 기술상 (tuning) -----------------------------------------------------------------------
+
+  /** 기술상 수리: clears 파손 for ₩. */
+  repair(uid: string): ActionResult {
+    const stack = getStack(gameState.inventory, uid);
+    if (!stack) return fail('아이템을 찾을 수 없습니다.');
+    const def = registry.item(stack.itemId);
+    if (def.kind !== 'weapon' && def.kind !== 'armor') return fail('수리할 수 없는 아이템입니다.');
+    const r = repair(def, stack);
+    if (!r.ok) return fail('파손된 장비가 아닙니다.');
+    if (gameState.character.won < r.cost) return fail(`수리 비용 ₩${r.cost.toLocaleString('ko-KR')}이 부족합니다.`);
+    gameState.setCharacter({ ...gameState.character, won: gameState.character.won - r.cost });
+    gameState.setInventory(replaceStack(gameState.inventory, r.stack));
+    gameState.setEquipment({ ...gameState.equipment });
+    audio.play('enhance_ok');
+    return done(`${def.name} 수리 완료`, 'good');
+  },
+
 
   /** 강화 one level. `rng` is injectable for deterministic e2e. */
   enhance(uid: string, rng: Rng = gameRng): ActionResult {

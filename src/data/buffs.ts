@@ -8,5 +8,6 @@ export const BUFFS: BuffDef[] = [
   { id: 'buff_steroid', name: '스테로이드', desc: '공격력 +15%', durationMs: 5 * MIN, mods: { dmgPct: 0.15 } },
   { id: 'buff_focus', name: '집중 렌즈', desc: '명중 +10% · 치명타 +5%', durationMs: 5 * MIN, mods: { accPct: 0.1, critPct: 0.05 } },
   { id: 'buff_ampoule', name: '경험 앰플', desc: '획득 경험치 +50%', durationMs: 30 * MIN, xpMult: 1.5 },
+  { id: 'buff_pabang_clip', name: '파손 방지 클립', desc: '사망 시 장비가 파손되지 않음', durationMs: 7 * DAY },
   { id: 'buff_premium', name: '프리미엄 쿠폰', desc: '경험치 +30% · ₩ 획득 +20% · 무게 한도 +10kg', durationMs: 30 * DAY, xpMult: 1.3, wonMult: 1.2, weightKg: 10 },
 ];

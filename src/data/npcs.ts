@@ -116,7 +116,7 @@ export const NPCS: NpcDef[] = [
     role: 'shop',
     tex: TEX.npc_cyber,
     lines: ['사이버샵에 접속했습니다. 회복 팩, 강화 약물, 프리미엄 쿠폰을 ₩로 구매할 수 있습니다.', '프리미엄 쿠폰은 30일 동안 경험치와 ₩ 획득, 무게 한도를 늘려 줍니다.'],
-    stock: ['hp_pack', 'stamina_pack', 'steroid_shot', 'focus_lens', 'ampoule', 'enhance_ticket', 'premium_coupon'],
+    stock: ['hp_pack', 'stamina_pack', 'steroid_shot', 'focus_lens', 'ampoule', 'enhance_ticket', 'pabang_clip', 'premium_coupon'],
   },
   {
     id: 'npc_kimhun',

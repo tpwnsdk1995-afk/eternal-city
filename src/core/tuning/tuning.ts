@@ -125,8 +125,23 @@ export function armorDefense(def: ArmorDef, s: ItemStack | null): number {
   if (s) {
     d *= 1 + plusUpLevel(s) * T.plusUpDefensePerLevel;
     if (s.prefix) d *= T.prefixDefenseMult[s.prefix];
+    if (s.damaged) d *= 1 - balance.death.brokenArmorPenalty;
   }
   return d;
+}
+
+// ---------------------------------------------------------------- 파손 / 수리
+
+export function repairCost(def: WeaponDef | ArmorDef, s: ItemStack): number {
+  const base = def.kind === 'weapon' ? weaponPrice(def, s.grade ?? def.gradeMin) : def.price;
+  return Math.max(100, Math.round(base * balance.death.repairCostMult));
+}
+
+/** 기술상 수리: clears the 파손 flag (always succeeds; the caller pays). */
+export function repair(def: WeaponDef | ArmorDef, s: ItemStack): TuneResult {
+  if (!s.damaged) return { ok: false, reason: 'maxed' };
+  const { damaged: _d, ...rest } = s;
+  return { ok: true, stack: rest, success: true, cost: repairCost(def, s) };
 }
 
 // ---------------------------------------------------------------- effective weapon
@@ -157,7 +172,7 @@ export function effectiveWeapon(def: WeaponDef, s: ItemStack | null): EffectiveW
   const u = s.unique ? UNIQUES[s.unique] : null;
   range += u?.rangePct ?? 0;
   rpm += u?.rpmPct ?? 0;
-  const baseDamage = def.baseDamage * (1 + enhanceLevel(s) * T.enhanceDmgPerLevel);
+  const baseDamage = def.baseDamage * (1 + enhanceLevel(s) * T.enhanceDmgPerLevel) * (s.damaged ? 1 - balance.death.brokenWeaponPenalty : 1);
   return {
     def: {
       ...def,
@@ -178,6 +193,7 @@ export function weaponLabel(def: WeaponDef, s: ItemStack | null): string {
   let out = `${def.name}  [${g}등급]`;
   if (s && enhanceLevel(s) > 0) out += ` +${enhanceLevel(s)}`;
   if (s?.unique) out += ` [${UNIQUES[s.unique].name}]`;
+  if (s?.damaged) out += ' [파손]';
   return out;
 }
 
@@ -185,5 +201,6 @@ export function armorLabel(def: ArmorDef, s: ItemStack | null): string {
   let out = def.name;
   if (s?.prefix) out = `${s.prefix} ${out}`;
   if (s && plusUpLevel(s) > 0) out += ` +${plusUpLevel(s)}`;
+  if (s?.damaged) out += ' [파손]';
   return out;
 }

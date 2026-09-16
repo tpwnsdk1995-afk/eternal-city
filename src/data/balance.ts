@@ -91,6 +91,13 @@ export const balance = {
     respawnHpPct: 0.5,
     respawnMap: 'gwangjin-gucheong-parking',
     respawnPoint: 'default',
+    /** chance one equipped item breaks on death (파방클 buff prevents it) */
+    breakChance: 0.35,
+    /** damaged weapon: −damage; damaged armour: −defense (fractions) */
+    brokenWeaponPenalty: 0.2,
+    brokenArmorPenalty: 0.25,
+    /** repair price as a fraction of the item's base price */
+    repairCostMult: 0.15,
   },
   assault: {
     /** Testing gate for the reception desk; null = real levelRange (e2e starts missions through the debug hook). */

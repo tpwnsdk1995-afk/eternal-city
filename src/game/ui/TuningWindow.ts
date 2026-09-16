@@ -5,7 +5,7 @@ import { UNIQUES } from '@data/tuning';
 import { balance } from '@data/balance';
 import type { ItemStack } from '@data/schema/item';
 import { gradeMult } from '@core/weapons/weaponMath';
-import { armorDefense, armorLabel, combineChancePct, combineCost, effectiveWeapon, enhanceChancePct, enhanceCost, enhanceLevel, hasPart, partCost, partsAllowed, plusUpCost, plusUpLevel, uniqueCost, weaponLabel } from '@core/tuning/tuning';
+import { armorDefense, armorLabel, combineChancePct, combineCost, effectiveWeapon, repairCost, enhanceChancePct, enhanceCost, enhanceLevel, hasPart, partCost, partsAllowed, plusUpCost, plusUpLevel, uniqueCost, weaponLabel } from '@core/tuning/tuning';
 import { gameState } from '../state/GameState';
 import { actions } from '../state/actions';
 import { Window } from './Window';
@@ -84,8 +84,14 @@ export class TuningWindow extends Window {
     this.label(X + 60, 46, weaponLabel(def, s), '#ffffff', 16, { fontStyle: 'bold' });
     this.label(X + 60, 70, `${def.class} · ${def.caliber} · 공격 ${Math.round(eff.def.baseDamage * gradeMult(g))} · ${eff.def.rpm}rpm · 사거리 ${eff.def.range} · 명중 ${Math.round(eff.def.baseAccuracy * 100)}%`, theme.colors.muted, 11);
 
-    // 강화
     let y = 110;
+    if (s.damaged) {
+      this.label(X, y, '파손됨 — 공격력 −20%. 수리하면 원래대로 돌아옵니다.', theme.colors.bad, 12);
+      const rb = this.button(0, y - 2, `수리 ${won(repairCost(def, s))}`, () => actions.repair(s.uid), theme.colors.good);
+      rb.setX(this.w - 16 - rb.width);
+      y += 28;
+    }
+    // 강화
     this.label(X, y, '강화', theme.colors.brass, 14, { fontStyle: 'bold' });
     const lv = enhanceLevel(s);
     const bonus = Number(gameState.flags.enhanceBonus ?? 0);
@@ -142,7 +148,13 @@ export class TuningWindow extends Window {
     this.content.add(this.scene.add.image(X + 4, 48, def.iconTex).setOrigin(0, 0).setDisplaySize(48, 48));
     this.label(X + 60, 46, armorLabel(def, s), '#ffffff', 16, { fontStyle: 'bold' });
     this.label(X + 60, 70, `${def.slot} · 방어 ${Math.round(armorDefense(def, s))}${def.cl ? ' · CL ×1.5' : ''}${s.prefix ? ` · ${s.prefix} ×${T.prefixDefenseMult[s.prefix]}` : ''}`, theme.colors.muted, 11);
-    const y = 110;
+    let y = 110;
+    if (s.damaged) {
+      this.label(X, y, '파손됨 — 방어 −25%. 수리하면 원래대로 돌아옵니다.', theme.colors.bad, 12);
+      const rb = this.button(0, y - 2, `수리 ${won(repairCost(def, s))}`, () => actions.repair(s.uid), theme.colors.good);
+      rb.setX(this.w - 16 - rb.width);
+      y += 28;
+    }
     this.label(X, y, '플러스업', theme.colors.brass, 14, { fontStyle: 'bold' });
     const lv = plusUpLevel(s);
     this.label(X + 90, y + 1, `+${lv} → +${Math.min(T.maxPlusUp, lv + 1)}   방어 +${T.plusUpDefensePerLevel * 100}%/단계   항상 성공 (최대 +${T.maxPlusUp})`, theme.colors.text, 12);

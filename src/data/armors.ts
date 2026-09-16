@@ -60,5 +60,6 @@ export const CONSUMABLES: ConsumableDef[] = [
   { kind: 'consumable', id: 'focus_lens', name: '집중 렌즈', effect: { buff: 'buff_focus' }, weightKg: 0.05, price: 12_000, iconTex: TEX.icon_lens },
   { kind: 'consumable', id: 'ampoule', name: '경험 앰플', effect: { buff: 'buff_ampoule' }, weightKg: 0.1, price: 25_000, iconTex: TEX.icon_ampoule },
   { kind: 'consumable', id: 'enhance_ticket', name: '특수 강화권', effect: { enhanceBonusPct: 20 }, weightKg: 0.01, price: 40_000, iconTex: TEX.icon_ticket },
+  { kind: 'consumable', id: 'pabang_clip', name: '파손 방지 클립 (7일)', effect: { buff: 'buff_pabang_clip' }, weightKg: 0.01, price: 50_000, iconTex: TEX.icon_ticket },
   { kind: 'consumable', id: 'premium_coupon', name: '프리미엄 쿠폰 (30일)', effect: { buff: 'buff_premium' }, weightKg: 0.01, price: 300_000, iconTex: TEX.icon_coupon },
 ];

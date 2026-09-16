@@ -23,6 +23,9 @@ import { theme } from '../ui/theme';
 import { audio } from '../audio/AudioManager';
 import { ambientForMap } from '@core/audio/sfx';
 import { bgmForScene } from '@core/audio/bgm';
+import { rollBreak } from '@core/inventory/death';
+import { hasBuff } from '@core/combat/buffs';
+import { gameRng } from '@core/rng';
 
 /** World camera zoom: 32px tiles render at 48px, so characters read like the original's ~50px sprites. */
 export const WORLD_ZOOM = 1.5;
@@ -250,6 +253,12 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     if (this.transitioning) return;
     this.transitioning = true;
     progressService.recordDeath();
+    const br = rollBreak(gameState.equipment, gameState.inventory, registry.item, gameRng, hasBuff(gameState.buffs, 'buff_pabang_clip', Date.now()));
+    if (br.broken) {
+      gameState.setInventory(br.inventory);
+      gameState.setEquipment({ ...gameState.equipment });
+      gameState.message(`사망 — ${br.broken.name}이(가) 파손되었습니다. 기술상에서 수리하세요.`, 'bad');
+    } else if (br.spared === 'protected') gameState.message('파손 방지 클립이 장비를 지켰습니다.', 'system');
     this.time.delayedCall(1200, () => {
       const d = gameState.derived();
       gameState.setVitals({ hp: Math.max(1, Math.round(d.maxHp * balance.death.respawnHpPct)), stamina: d.maxStamina, ap: d.maxAp });

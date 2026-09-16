@@ -94,4 +94,6 @@ export interface ItemStack {
   /** 플러스업 +0..+5 (armor) */
   plusUp?: number;
   prefix?: '고대' | '전설';
+  /** 사망 파손: 수리 전까지 무기 공격/방어구 방어가 깎인다 (원작의 파손 → 파방클로 방지) */
+  damaged?: boolean;
 }
