@@ -10,6 +10,17 @@ export const TEX = {
   player_infected: 'player_infected',
   portrait_player: 'portrait_player',
   portrait_infected: 'portrait_infected',
+  // NPC faces for the dialog box (real art when `data/artOverrides` provides one, else a drawn portrait)
+  face_elia: 'face_elia',
+  face_shop: 'face_shop',
+  face_tech: 'face_tech',
+  face_blackmarket: 'face_blackmarket',
+  face_mainstream: 'face_mainstream',
+  face_parallel: 'face_parallel',
+  face_kimhun: 'face_kimhun',
+  face_trainer: 'face_trainer',
+  face_taxi: 'face_taxi',
+  face_assault: 'face_assault',
   // zombies (2002 중곡동)
   zombie_casual_f: 'zombie_casual_f',
   zombie_suit_m: 'zombie_suit_m',

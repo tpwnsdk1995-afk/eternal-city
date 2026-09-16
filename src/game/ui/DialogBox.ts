@@ -32,8 +32,11 @@ export class DialogBox extends Window {
     this.clearBody();
     if (!this.npc) return;
     const frame = figureFrame(DIR_S, 0);
-    const hasFigureFrames = this.scene.textures.get(this.npc.tex).has(String(frame));
-    this.content.add(this.scene.add.image(20, 2, this.npc.tex, hasFigureFrames ? frame : 0).setOrigin(0, 0).setDisplaySize(64, 64));
+    const face = this.npc.face && this.scene.textures.exists(this.npc.face) ? this.npc.face : null;
+    const hasFigureFrames = !face && this.scene.textures.get(this.npc.tex).has(String(frame));
+    const img = this.scene.add.image(20, 2, face ?? this.npc.tex, face ? 0 : hasFigureFrames ? frame : 0).setOrigin(0, 0).setDisplaySize(64, 64);
+    this.content.add(img);
+    if (face) this.content.add(this.scene.add.rectangle(20, 2, 64, 64).setOrigin(0, 0).setStrokeStyle(1, 0xc9a227, 0.7));
     this.label(84, 6, this.line, theme.colors.text, 14, { wordWrap: { width: this.w - 110 } });
     let x = 84;
     for (const o of this.options) {

@@ -7,6 +7,8 @@ export interface NpcDef {
   name: string;
   role: NpcRole;
   tex: TexKey;
+  /** Dialog-box face; the walking figure's front frame is used when absent. */
+  face?: TexKey;
   lines: string[];
   /** For role 'shop': item ids sold. Weapons are sold at every grade in [gradeMin, gradeMax]. */
   stock?: string[];

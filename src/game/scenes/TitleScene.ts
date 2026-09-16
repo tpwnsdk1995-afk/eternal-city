@@ -35,7 +35,10 @@ export class TitleScene extends Phaser.Scene {
     this.busy = false;
     audio.ambient('rain');
     audio.bgm('title');
-    this.add.image(0, 0, TEX.title_bg).setOrigin(0, 0);
+    this.add.image(0, 0, TEX.title_bg).setOrigin(0, 0).setDisplaySize(GAME_WIDTH, GAME_HEIGHT); // real art may be a smaller file
+    // darken the painted street so the logo, slot panel and footer stay readable on top of it
+    this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x05070a, 0.42).setOrigin(0, 0);
+    this.add.rectangle(0, GAME_HEIGHT - 120, GAME_WIDTH, 120, 0x05070a, 0.55).setOrigin(0, 0);
     this.rain = new Rain(this, GAME_WIDTH, GAME_HEIGHT);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.rain.destroy());
 

@@ -99,6 +99,17 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.player_melee]: figure('player_melee'),
   [TEX.portrait_player]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.player, w, h), 64),
   [TEX.portrait_infected]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.player_infected, w, h), 64),
+  // dialog faces — procedural fallbacks; `TextureGenScene` loads real art over these keys when available
+  [TEX.face_elia]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_elia, w, h), 64),
+  [TEX.face_shop]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_shop, w, h), 64),
+  [TEX.face_tech]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_tech, w, h), 64),
+  [TEX.face_blackmarket]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_blackmarket, w, h), 64),
+  [TEX.face_mainstream]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_mainstream, w, h), 64),
+  [TEX.face_parallel]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_parallel, w, h), 64),
+  [TEX.face_kimhun]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_kimhun, w, h), 64),
+  [TEX.face_trainer]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_assault, w, h), 64),
+  [TEX.face_taxi]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_taxi, w, h), 64),
+  [TEX.face_assault]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_assault, w, h), 64),
 
   [TEX.zombie_casual_f]: figure('zombie_casual_f'),
   [TEX.zombie_suit_m]: figure('zombie_suit_m'),
