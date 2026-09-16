@@ -59,7 +59,30 @@ import {
 } from './draw/items';
 import { drawTitleBackground } from './draw/title';
 import { drawBlood, drawExplosion, drawFire, drawJumpMarker, drawMuzzle, drawRocket, drawScorch, drawShellGrenade, drawLampGlow, drawSmokePuff, drawTracer } from './draw/fx';
-import { drawBench, drawBusStop, drawFlagpole, drawGoal, drawHydrant, drawLamp, drawPhone, drawPillar, drawSign, drawTrash, drawTree, drawVending } from './draw/decor';
+import {
+  drawAc,
+  drawBanner,
+  drawBarrier,
+  drawBench,
+  drawBusStop,
+  drawFlagpole,
+  drawFluorescent,
+  drawGoal,
+  drawHydrant,
+  drawLamp,
+  drawPhone,
+  drawPillar,
+  drawPole,
+  drawScooter,
+  drawSign,
+  drawStall,
+  drawTrash,
+  drawTrashbags,
+  drawTree,
+  drawVending,
+  drawWreckBus,
+  drawWreckCar,
+} from './draw/decor';
 import { drawCrosshair, drawUiPanel, drawUiSlot } from './draw/ui';
 
 export type DrawFn = (ctx: CanvasRenderingContext2D, frame: number, w: number, h: number) => void;
@@ -180,6 +203,16 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.deco_pillar]: single(drawPillar, 32, 72),
   [TEX.deco_goal]: single(drawGoal, 64, 40),
   [TEX.deco_flagpole]: single(drawFlagpole, 24, 96),
+  [TEX.deco_pole]: single(drawPole, 24, 112),
+  [TEX.deco_banner]: single(drawBanner, 96, 40),
+  [TEX.deco_trashbags]: single(drawTrashbags, 40, 28),
+  [TEX.deco_stall]: single(drawStall, 64, 64),
+  [TEX.deco_wreck_bus]: single(drawWreckBus, 128, 64),
+  [TEX.deco_wreck_car]: single(drawWreckCar, 64, 40),
+  [TEX.deco_barrier]: single(drawBarrier, 48, 28),
+  [TEX.deco_ac]: single(drawAc, 28, 22),
+  [TEX.deco_scooter]: single(drawScooter, 40, 32),
+  [TEX.deco_fluorescent]: single(drawFluorescent, 64, 24),
 
   [TEX.barricade]: single(drawBarricade, 64),
   [TEX.gate]: single(drawGate, 32),

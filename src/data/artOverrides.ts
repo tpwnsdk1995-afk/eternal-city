@@ -47,6 +47,5 @@ export const ART_OVERRIDES: Partial<Record<TexKey, ArtOverride>> = {
   [TEX.icon_tentacle]: 'art/icon_tentacle.webp',
   [TEX.icon_acid]: 'art/icon_acid.webp',
   [TEX.icon_bone]: 'art/icon_bone.webp',
-  // pre-rendered 3D figure sheets (8 dirs × 6 frames, 48px) — see tools/render-sprites.mjs
-  [TEX.zombie_suit_m]: { url: 'art/zombie_suit_m.png', frameW: 48, frameH: 48 },
+  // pre-rendered 3D figure sheets (8 dirs × 6 frames, 48px) can be dropped in here — see tools/render-sprites.mjs
 };

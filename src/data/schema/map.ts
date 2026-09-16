@@ -60,7 +60,8 @@ export interface MapDef {
   fills?: { rect: Rect; tile: TileId; solid?: boolean }[];
   obstacles: { rect: Rect; tile: TileId; kind: 'building' | 'car' | 'wall' | 'pillar' | 'fence' }[];
   /** Street furniture sprites; `at` is the tile the base stands on. `solid` blocks that tile. */
-  decor?: { at: Vec2; tex: TexKey; solid?: boolean; interact?: 'vending' }[];
+  /** props: `at` is the tile the sprite's bottom-centre stands on; `footprint` (tiles, centred on at.x, ending at at.y) blocks more than one cell */
+  decor?: { at: Vec2; tex: TexKey; solid?: boolean; interact?: 'vending'; footprint?: { w: number; h: number } }[];
   spawnZones?: SpawnZoneDef[];
   portals: PortalDef[];
   spawnPoints: Record<string, Vec2>; // tile coords; must include 'default'

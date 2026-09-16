@@ -37,6 +37,8 @@ export interface Settings {
   bgmVolume: number;
   /** UI text scale: 1 = 보통, 1.15 = 크게 (applies to windows as they re-render) */
   uiScale: number;
+  /** rain overlay on dusk/night outdoor maps */
+  weatherOn: boolean;
 }
 
 export interface AssaultHud {
@@ -112,7 +114,7 @@ class GameState {
   status: StatusState = emptyStatus();
   consciousness: ConsciousnessState = { lastTriggeredAt: -Infinity };
   currentMapId: string = balance.death.respawnMap;
-  settings: Settings = { controlScheme: 'classic', showFps: false, showMinimap: true, touchControls: 'auto', soundVolume: 0.7, sfxOn: true, ambientOn: true, bgmOn: true, bgmVolume: 0.6, uiScale: 1 };
+  settings: Settings = { controlScheme: 'classic', showFps: false, showMinimap: true, touchControls: 'auto', soundVolume: 0.7, sfxOn: true, ambientOn: true, bgmOn: true, bgmVolume: 0.6, uiScale: 1, weatherOn: true };
   /** Set by the active world scene so the HUD can draw live minimap markers. */
   worldProvider: (() => WorldSnapshot) | null = null;
   /** Latest minimap texture info (the UI scene may start a frame after `mapChanged`). */

@@ -42,7 +42,13 @@ export function buildMap(def: MapDef): BuiltMap {
   for (const obj of def.objectives ?? []) {
     forRect({ x: obj.at.x, y: obj.at.y, w: obj.size.w, h: obj.size.h }, def, (x, y) => collision.setBlocked(x, y, true));
   }
-  for (const d of def.decor ?? []) if (d.solid) collision.setBlocked(d.at.x, d.at.y, true);
+  for (const d of def.decor ?? []) {
+    if (!d.solid) continue;
+    const fw = d.footprint?.w ?? 1;
+    const fh = d.footprint?.h ?? 1;
+    const x0 = d.at.x - Math.floor((fw - 1) / 2);
+    for (let y = d.at.y - fh + 1; y <= d.at.y; y++) for (let x = x0; x < x0 + fw; x++) if (x >= 0 && y >= 0 && x < def.width && y < def.height) collision.setBlocked(x, y, true);
+  }
   // border ring
   for (let x = 0; x < def.width; x++) {
     set(x, 0, def.borderTile, true);

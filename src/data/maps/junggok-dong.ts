@@ -30,6 +30,14 @@ const furniture = buildings.flatMap((b, i) => {
   if (i % 2 === 0) items.push({ at: { x: ring.x + ring.w - 1, y: ring.y + ring.h - 1 }, tex: TEX.deco_trash, solid: true });
   if (i % 4 === 2) items.push({ at: { x: ring.x + 5, y: ring.y }, tex: TEX.deco_sign });
   if (i % 4 === 3) items.push({ at: { x: ring.x + 9, y: ring.y + ring.h - 1 }, tex: TEX.deco_hydrant, solid: true });
+  // D2-3 clutter: utility poles on the NW/SE corners (wired together by the scene), a banner over
+  // the north pavement, kerbside garbage, the odd 노점 and a wall AC unit on the south face
+  items.push({ at: { x: ring.x, y: ring.y }, tex: TEX.deco_pole, solid: true });
+  items.push({ at: { x: ring.x + ring.w - 1, y: ring.y + ring.h - 1 }, tex: TEX.deco_pole, solid: true });
+  if (i % 2 === 0) items.push({ at: { x: ring.x + 7, y: ring.y }, tex: TEX.deco_banner });
+  if (i % 3 === 2) items.push({ at: { x: ring.x, y: ring.y + 9 }, tex: TEX.deco_trashbags });
+  if (i === 5 || i === 8) items.push({ at: { x: ring.x + 3, y: ring.y + ring.h - 1 }, tex: TEX.deco_stall, solid: true, footprint: { w: 2, h: 1 } });
+  if (i % 3 === 1) items.push({ at: { x: b.x + 10, y: b.y + BLOCK_H - 1 }, tex: TEX.deco_ac }); // on the shopfront wall
   return items;
 });
 
@@ -88,6 +96,16 @@ export const junggokDong: MapDef = {
     { at: { x: 58, y: 40 }, tex: TEX.deco_busstop, solid: true },
     { at: { x: 3, y: 70 }, tex: TEX.deco_lamp, solid: true },
     { at: { x: 9, y: 78 }, tex: TEX.deco_sign },
+    // wrecks on the arterials (blocked footprints), police line at the 구청 entrance, a dropped scooter
+    { at: { x: 27, y: 37 }, tex: TEX.deco_wreck_bus, solid: true, footprint: { w: 4, h: 2 } },
+    { at: { x: 49, y: 12 }, tex: TEX.deco_wreck_car, solid: true, footprint: { w: 2, h: 1 } },
+    { at: { x: 70, y: 58 }, tex: TEX.deco_wreck_car, solid: true, footprint: { w: 2, h: 1 } },
+    { at: { x: 3, y: 20 }, tex: TEX.deco_wreck_car, solid: true, footprint: { w: 2, h: 1 } },
+    { at: { x: 5, y: 69 }, tex: TEX.deco_barrier, solid: true },
+    { at: { x: 7, y: 69 }, tex: TEX.deco_barrier, solid: true },
+    { at: { x: 33, y: 50 }, tex: TEX.deco_scooter },
+    { at: { x: 92, y: 30 }, tex: TEX.deco_trashbags },
+    { at: { x: 61, y: 60 }, tex: TEX.deco_trashbags },
   ],
   spawnZones: [
     {

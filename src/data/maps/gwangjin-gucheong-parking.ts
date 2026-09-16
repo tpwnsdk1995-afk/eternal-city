@@ -44,6 +44,10 @@ export const gwangjinParking: MapDef = {
     { at: { x: 5, y: 4 }, tex: TEX.deco_trash, solid: true },
     { at: { x: 36, y: 12 }, tex: TEX.deco_sign },
     { at: { x: 2, y: 20 }, tex: TEX.deco_phone, solid: true },
+    // ceiling fluorescents (drawn flat on the floor plane; the scene adds a cold glow pool under each)
+    ...[6, 12, 18, 24, 30].flatMap((x) => [6, 11, 18].map((y) => ({ at: { x, y }, tex: TEX.deco_fluorescent }))),
+    { at: { x: 30, y: 21 }, tex: TEX.deco_barrier, solid: true },
+    { at: { x: 6, y: 23 }, tex: TEX.deco_trashbags },
   ],
   portals: [
     { id: 'toField', rect: { x: 37, y: 13, w: 2, h: 4 }, toMap: 'junggok-dong', toSpawn: 'fromParking', label: '중곡동 거리로' },

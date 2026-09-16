@@ -26,6 +26,8 @@ import { bgmForScene } from '@core/audio/bgm';
 import { rollBreak } from '@core/inventory/death';
 import { hasBuff } from '@core/combat/buffs';
 import { gameRng } from '@core/rng';
+import { Rain } from '../ui/Rain';
+import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 
 /** World camera zoom: 32px tiles render at 48px, so characters read like the original's ~50px sprites. */
 export const WORLD_ZOOM = 1.5;
@@ -61,6 +63,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   pickups!: Phaser.Physics.Arcade.Group;
   protected combat: CombatBridge | null = null;
   private lightMask: Phaser.GameObjects.Graphics | null = null;
+  private rain: Rain | null = null;
   private vendings: { x: number; y: number }[] = [];
   private portalArmed = false;
   private transitioning = false;
@@ -72,6 +75,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     this.portalArmed = false;
     this.transitioning = false;
     this.lightMask = null;
+    this.rain = null;
   }
 
   create(): void {
@@ -99,6 +103,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
       this.add.image(bx, by, d.tex).setOrigin(0.5, 1).setDepth(depthForY(by));
       if (d.interact === 'vending') this.vendings.push({ x: bx, y: by - 20 });
     }
+    this.drawPowerLines();
 
     const w = this.def.width * this.def.tileSize;
     const h = this.def.height * this.def.tileSize;
@@ -131,13 +136,23 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     this.applyAmbient(w, h);
 
     this.mapper = new InputMapper(this, gameState.settings.controlScheme);
-    const offSettings = gameState.events.on('settings', (s) => this.mapper.setScheme(s.controlScheme));
+    const offSettings = gameState.events.on('settings', (s) => {
+      this.mapper.setScheme(s.controlScheme);
+      const outdoor = (this.def.ambient === 'dusk' || this.def.ambient === 'night') && !this.def.dark;
+      if (outdoor && s.weatherOn && !this.rain) this.startRain();
+      if (!s.weatherOn && this.rain) {
+        this.rain.destroy();
+        this.rain = null;
+      }
+    });
     const offTitle = gameState.events.on('goTitle', () => this.backToTitle());
     const offTravel = gameState.events.on('travel', ({ mapId, spawn }) => this.goToMap(mapId, spawn));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       offSettings();
       offTitle();
       offTravel();
+      this.rain?.destroy();
+      this.rain = null;
     });
 
     for (const n of this.def.npcs ?? []) {
@@ -172,12 +187,64 @@ export abstract class BaseWorldScene extends Phaser.Scene {
    * HUD, above sprites) plus warm additive glows on every street lamp. Skipped for `dark` maps,
    * which already carry the darkness/light-mask treatment.
    */
+  /** Camera-pinned rain streaks for dusk/night outdoor maps (settings.weatherOn). */
+  private startRain(): void {
+    // worldView is stale during create(), so size the streak field from the fixed viewport instead
+    const cam = this.cameras.main;
+    this.rain = new Rain(this, GAME_WIDTH / WORLD_ZOOM, GAME_HEIGHT / WORLD_ZOOM, 80, 31, 0.4);
+    this.rain.follow(cam);
+  }
+
+  /** Sagging wires between neighbouring utility poles (same row within 24 tiles, or same column within 16). */
+  private drawPowerLines(): void {
+    const poles = (this.def.decor ?? []).filter((d) => d.tex === TEX.deco_pole).map((d) => d.at);
+    if (poles.length < 2) return;
+    const ts = this.def.tileSize;
+    const g = this.add.graphics().setDepth(27);
+    g.lineStyle(1, 0x0d0f14, 0.75);
+    const top = (p: { x: number; y: number }) => ({ x: p.x * ts + ts / 2, y: (p.y + 1) * ts - 2 - 104 });
+    const wire = (a: { x: number; y: number }, b: { x: number; y: number }, dy: number) => {
+      const A = top(a);
+      const B = top(b);
+      const mx = (A.x + B.x) / 2;
+      const my = (A.y + B.y) / 2 + 10 + dy;
+      const c = new Phaser.Curves.QuadraticBezier(new Phaser.Math.Vector2(A.x - 8, A.y + dy), new Phaser.Math.Vector2(mx, my), new Phaser.Math.Vector2(B.x - 8, B.y + dy));
+      c.draw(g, 16);
+    };
+    for (const p of poles) {
+      let right: { x: number; y: number } | null = null;
+      let down: { x: number; y: number } | null = null;
+      for (const q of poles) {
+        if (q === p) continue;
+        if (q.x > p.x && Math.abs(q.y - p.y) <= 2 && q.x - p.x <= 24 && (!right || q.x < right.x)) right = q;
+        if (q.y > p.y && Math.abs(q.x - p.x) <= 2 && q.y - p.y <= 16 && (!down || q.y < down.y)) down = q;
+      }
+      if (right) {
+        wire(p, right, 0);
+        wire(p, right, 3);
+      }
+      if (down) {
+        wire(p, down, 0);
+        wire(p, down, 3);
+      }
+    }
+  }
+
   private applyAmbient(w: number, h: number): void {
     const a = this.def.ambient;
     if (!a || this.def.dark) return;
     const wash = a === 'night' ? { color: 0x0a1220, alpha: 0.34 } : a === 'dusk' ? { color: 0x0c1526, alpha: 0.2 } : { color: 0x101418, alpha: 0.1 };
     this.add.rectangle(0, 0, w, h, wash.color, wash.alpha).setOrigin(0, 0).setDepth(28);
-    if (a === 'indoor') return;
+    if (a === 'indoor') {
+      // cold fluorescent pools under the ceiling fixtures
+      for (const d of this.def.decor ?? []) {
+        if (d.tex !== TEX.deco_fluorescent) continue;
+        const ts = this.def.tileSize;
+        this.add.image(d.at.x * ts + ts / 2, (d.at.y + 1) * ts + 10, TEX.lamp_glow).setDepth(9).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.28).setScale(1.7, 1.0).setTint(0xcfe4ff);
+      }
+      return;
+    }
+    if (gameState.settings.weatherOn) this.startRain();
     for (const d of this.def.decor ?? []) {
       if (d.tex !== TEX.deco_lamp) continue;
       const ts = this.def.tileSize;
@@ -192,6 +259,10 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     if (this.transitioning) return;
     const intent = this.mapper.update();
     this.lastIntent = intent;
+    if (this.rain) {
+      this.rain.follow(this.cameras.main);
+      this.rain.update(delta);
+    }
 
     if (this.lightMask) {
       this.lightMask.clear();

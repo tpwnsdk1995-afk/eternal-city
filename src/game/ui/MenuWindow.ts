@@ -48,6 +48,7 @@ export class MenuWindow extends Window {
     this.button(222, y, '−', () => gameState.setSettings({ soundVolume: Math.max(0, Math.round((s.soundVolume - 0.1) * 10) / 10) }), theme.colors.brass, 13);
     this.label(252, y + 3, `볼륨 ${vol}%`, theme.colors.text, 12);
     this.button(330, y, '+', () => gameState.setSettings({ soundVolume: Math.min(1, Math.round((s.soundVolume + 0.1) * 10) / 10) }), theme.colors.brass, 13);
+    this.button(362, y, `비: ${s.weatherOn ? '켬' : '끔'}`, () => gameState.setSettings({ weatherOn: !s.weatherOn }), s.weatherOn ? theme.colors.good : theme.colors.muted, 13);
     y += 32;
     const bvol = Math.round(s.bgmVolume * 100);
     this.button(20, y, `배경음악: ${s.bgmOn ? '켬' : '끔'}`, () => gameState.setSettings({ bgmOn: !s.bgmOn }), s.bgmOn ? theme.colors.good : theme.colors.muted, 13);

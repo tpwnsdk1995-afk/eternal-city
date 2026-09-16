@@ -23,6 +23,8 @@ export interface SaveSettings {
   bgmOn?: boolean;
   bgmVolume?: number;
   uiScale?: number;
+  /** rain on dusk/night outdoor maps (D2-3); optional so older saves need no migration */
+  weatherOn?: boolean;
 }
 
 interface SaveCommon {
