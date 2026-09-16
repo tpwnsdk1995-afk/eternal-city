@@ -3,6 +3,21 @@ import { TILE } from '@data/textureKeys';
 type Ctx = CanvasRenderingContext2D;
 const T = 32;
 
+/** Original-client ground samples (tools/ec-tiles.py → public/art/tiles.png): 32px cells in this order. */
+export const TILE_SWATCHES = { url: 'art/tiles.png', names: ['asphalt', 'sidewalk', 'concrete', 'dirt', 'grass'] as const };
+type Swatch = (typeof TILE_SWATCHES.names)[number];
+let swatchImg: CanvasImageSource | null = null;
+/** Set before the atlas is drawn; null keeps every procedural base. */
+export function setTileSwatches(img: CanvasImageSource | null): void {
+  swatchImg = img;
+}
+/** Paints the sampled material as the tile base; false → the caller draws its procedural base instead. */
+function swatch(ctx: Ctx, x: number, name: Swatch): boolean {
+  if (!swatchImg) return false;
+  ctx.drawImage(swatchImg, TILE_SWATCHES.names.indexOf(name) * T, 0, T, T, x, 0, T, T);
+  return true;
+}
+
 // ---------------------------------------------------------------------------------------------
 // helpers (deterministic — draw code never touches the game RNG)
 // ---------------------------------------------------------------------------------------------
@@ -72,6 +87,7 @@ function bricks(ctx: Ctx, x: number, y0: number, h: number, bw: number, bh: numb
 const ASPHALT = '#37383a';
 
 const asphalt = (ctx: Ctx, x: number, seed = 11) => {
+  if (swatch(ctx, x, 'asphalt')) return;
   fill(ctx, x, 0, T, T, ASPHALT);
   grain(ctx, x, 0, T, T, '#44474e', 90, seed);
   grain(ctx, x, 0, T, T, '#2c2c2e', 60, seed + 12);
@@ -89,6 +105,7 @@ const asphaltWet = (ctx: Ctx, x: number) => {
 
 /** 보도블록: interlocking pavers, 16×8 courses. */
 const sidewalk = (ctx: Ctx, x: number, seed = 5) => {
+  if (swatch(ctx, x, 'sidewalk')) return;
   bricks(ctx, x, 0, T, 16, 8, '#8d897f', '#6a675f', seed, ['#948f85', '#857f75', '#9a958b']);
   grain(ctx, x, 0, T, T, '#7e7a70', 24, seed + 3);
   grain(ctx, x, 0, T, T, '#a09b90', 14, seed + 9);
@@ -96,6 +113,7 @@ const sidewalk = (ctx: Ctx, x: number, seed = 5) => {
 
 /** alternate paver: 8×8 squares */
 const sidewalkBlock = (ctx: Ctx, x: number) => {
+  if (swatch(ctx, x, 'sidewalk')) return;
   fill(ctx, x, 0, T, T, '#6a675f');
   const r = rng(77);
   for (let y = 0; y < T; y += 8)
@@ -143,6 +161,10 @@ function curb(ctx: Ctx, x: number, side: 'N' | 'S' | 'E' | 'W'): void {
 }
 
 const parkingFloor = (ctx: Ctx, x: number, seed = 17) => {
+  if (swatch(ctx, x, 'concrete')) {
+    fill(ctx, x, 0, T, T, 'rgba(0,0,0,0.3)'); // underground: same concrete, less light
+    return;
+  }
   fill(ctx, x, 0, T, T, '#5b5855');
   grain(ctx, x, 0, T, T, '#666360', 50, seed);
   grain(ctx, x, 0, T, T, '#4d4a47', 40, seed + 12);
@@ -159,6 +181,7 @@ const roof = (ctx: Ctx, x: number, seed = 3) => {
 };
 
 const grass = (ctx: Ctx, x: number) => {
+  if (swatch(ctx, x, 'grass')) return;
   fill(ctx, x, 0, T, T, '#4a6636');
   grain(ctx, x, 0, T, T, '#5b7a41', 70, 7);
   grain(ctx, x, 0, T, T, '#3b532b', 40, 19);
@@ -521,6 +544,7 @@ const tileDrawers: Record<number, (ctx: Ctx, x: number) => void> = {
     fill(ctx, x + 2, 15, T - 4, 1, '#d84a4c');
   },
   [TILE.dirt]: (ctx, x) => {
+    if (swatch(ctx, x, 'dirt')) return;
     fill(ctx, x, 0, T, T, '#6b5a44');
     grain(ctx, x, 0, T, T, '#7a6850', 50, 31);
     grain(ctx, x, 0, T, T, '#5a4a37', 40, 37);

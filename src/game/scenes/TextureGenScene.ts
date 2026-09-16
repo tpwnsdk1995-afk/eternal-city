@@ -3,6 +3,9 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 import { ART_OVERRIDES, type ArtOverride } from '@data/artOverrides';
 import type { TexKey } from '@data/textureKeys';
 import { generateAllTextures } from '../textures/generateAll';
+import { setTileSwatches, TILE_SWATCHES } from '../textures/draw/tiles';
+
+const SWATCH_KEY = 'tile_swatches';
 
 /**
  * Loads the real-art overrides first (see `data/artOverrides`), then draws every remaining manifest
@@ -27,6 +30,7 @@ export class TextureGenScene extends Phaser.Scene {
       // pre-rendered figure sheet: frames are numbered left-to-right, top-to-bottom, matching figureFrame()
       else this.load.spritesheet(key, art.url, { frameWidth: art.frameW, frameHeight: art.frameH });
     }
+    this.load.image(SWATCH_KEY, TILE_SWATCHES.url); // ground samples the tile atlas draws its bases from
     this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => {
       console.warn(`[art] ${file.key}: could not load ${file.url}; using the drawn version`);
     });
@@ -35,6 +39,7 @@ export class TextureGenScene extends Phaser.Scene {
   create(): void {
     // defer one tick so the text paints before the (synchronous) generation
     this.time.delayedCall(0, () => {
+      setTileSwatches(this.textures.exists(SWATCH_KEY) ? (this.textures.get(SWATCH_KEY).getSourceImage() as HTMLImageElement) : null);
       generateAllTextures(this);
       // Drain the texture uploads now. The ~190 generated canvases (≈9.5M texels) are queued to the GPU
       // process asynchronously; without this the first world scene stalls for many seconds on software
