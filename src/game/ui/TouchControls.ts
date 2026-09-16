@@ -73,8 +73,8 @@ export class TouchControls extends Phaser.GameObjects.Container {
     this.action(ax + 40, ay - 130, '서브\n연사', () => (touchState.pending.subFire = true));
 
     // --- top strip: windows --------------------------------------------------------------------
-    const tabs: [string, Hotkey | 'fullscreen'][] = [['인벤', 'inventory'], ['상태', 'status'], ['스킬', 'skills'], ['퀘스트', 'quest'], ['지도', 'minimap'], ['메뉴', 'menu'], ['⛶', 'fullscreen']];
-    let tx = GAME_WIDTH / 2 - (tabs.length * 68) / 2;
+    const tabs: [string, Hotkey | 'fullscreen'][] = [['인벤', 'inventory'], ['상태', 'status'], ['스킬', 'skills'], ['퀘스트', 'quest'], ['지도', 'minimap'], ['귀환', 'home'], ['메뉴', 'menu'], ['⛶', 'fullscreen']];
+    let tx = GAME_HEIGHT < 720 ? 240 : GAME_WIDTH / 2 - (tabs.length * 68) / 2; // phone: right of the top-left minimap
     for (const [label, hk] of tabs) {
       this.tab(tx, 8, 64, 30, label, () => {
         if (hk === 'fullscreen') {

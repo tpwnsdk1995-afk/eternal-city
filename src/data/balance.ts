@@ -23,7 +23,7 @@ export const balance = {
     apBase: 50,
     apPerInt: 4,
     intPerTechGrade: 10,
-    moveSpeedBase: 130,
+    moveSpeedBase: 150,
     moveSpeedPerSpd: 0.6,
     runMult: 1.6,
     crouchMult: 0.5,
@@ -132,6 +132,9 @@ export const balance = {
     regenDelayMs: 3000,
   },
   loot: {
+    /** multipliers over each monster's own ₩ range and drop chances (2026-09-17: drops felt too stingy on phones) */
+    wonMult: 10,
+    dropChanceMult: 4,
     /** chance an armor drop rolls a 접두 (checked in order: 전설 first) */
     prefixChance: { 전설: 0.03, 고대: 0.1 } as Record<'고대' | '전설', number>,
   },

@@ -27,10 +27,10 @@ export function rollPrefix(rng: Rng): ArmorPrefix | undefined {
 
 /** Rolls ₩ and item drops for a kill. Each drop entry is an independent chance; armour may gain a 접두. */
 export function rollLoot(def: MonsterDef, rng: Rng, lookup?: (id: string) => ItemDef): Loot {
-  const won = rng.int(def.wonMin, def.wonMax);
+  const won = rng.int(def.wonMin, def.wonMax) * balance.loot.wonMult;
   const items: LootItem[] = [];
   for (const d of def.drops) {
-    if (!rng.chance(d.chance)) continue;
+    if (!rng.chance(Math.min(1, d.chance * balance.loot.dropChanceMult))) continue;
     const item: LootItem = { itemId: d.itemId, qty: rng.int(d.qtyMin, d.qtyMax) };
     if (lookup && lookup(d.itemId).kind === 'armor') {
       const prefix = rollPrefix(rng);

@@ -31,9 +31,9 @@ SPRITES = {
     # player: customizable male model 00046 (body, silver hair, blue jacket, jeans, sneakers); 0-11 idle, 12-23 walk,
     # 36-41 fall back and lie (walk 12 is skipped: its hair frame is corrupt facing up), 72-75 one-hand (pistol) fire, 76-90 two-hand (long gun) fire, 24-25 arm swing.
     # ponytail: weapons are separate 3-5px layers (parts 7/9/14/16) and are left out; one cell for all three so swaps keep the frame size
-    'player': dict(file='00046.dat', rid=5478, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=74, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
-    'player_long': dict(file='00046.dat', rid=5478, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=80, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
-    'player_melee': dict(file='00046.dat', rid=5478, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=25, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
+    'player': dict(file='00046.dat', rid=5478, cw=True, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=74, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
+    'player_long': dict(file='00046.dat', rid=5478, cw=True, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=80, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
+    'player_melee': dict(file='00046.dat', rid=5478, cw=True, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=25, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
     # NPCs stand still (Npc.ts shows the S idle frame only), so every column is frame 0 and the sheet dedups to one pose per direction.
     # 03xxx/04xxx single-part figures (part 1 is the 1-frame preview); 00012 is a 3-part model (body, coat, hair).
     'npc_elia': dict(file='03960.dat', rid=6593, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # white blouse, grey skirt
@@ -194,7 +194,7 @@ def build(key, data, strip=False):
     cell = auto_cell(blob, parts, s['parts'], range(8), s.get('cell', cols)); cw, ch = cell[0], cell[1]
     sheet = Image.new('RGBA', (cw * 6, ch * 8))
     for d in range(8):
-        block = (6 - d) % 8
+        block = (d + 2) % 8 if s.get('cw') else (6 - d) % 8  # player model 00046 stores blocks clockwise (N NE E ...): its E/W rows came out mirrored
         for c, fr in enumerate(cols):
             sheet.alpha_composite(compose(blob, pix_base, parts, s['parts'], block, fr, cell), (c * cw, d * ch))
     # idle head height above the frame centre (S block): Enemy hangs the name label / hp bar there instead of at the cell top

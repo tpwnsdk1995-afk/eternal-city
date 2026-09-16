@@ -42,6 +42,11 @@ export class MenuWindow extends Window {
     this.button(20, y, `FPS 표시: ${s.showFps ? '켬' : '끔'}`, () => gameState.setSettings({ showFps: !s.showFps }), theme.colors.brass, 13);
     this.button(130, y, '⛶ 전체화면 켜기/끄기', () => this.scene.scale.toggleFullscreen(), theme.colors.brass, 13);
     y += 34;
+    this.button(20, y, '🏠 마을로 귀환 (H)', () => {
+      this.emit('close');
+      gameState.events.emit('hotkey', 'home');
+    }, theme.colors.good, 13);
+    y += 34;
     // sound
     const vol = Math.round(s.soundVolume * 100);
     this.button(20, y, `효과음: ${s.sfxOn ? '켬' : '끔'}`, () => gameState.setSettings({ sfxOn: !s.sfxOn }), s.sfxOn ? theme.colors.good : theme.colors.muted, 13);

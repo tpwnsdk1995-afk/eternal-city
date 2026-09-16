@@ -5,6 +5,7 @@ import { pickSpawnTile, pickWeighted, zoneOnDeath, zoneTick, initialZoneRuntime 
 import { rollLoot } from '@core/world/loot';
 import { enemyHitChance, playerDamageTaken } from '@core/combat/enemyAttack';
 import { registry } from '@data/registry';
+import { balance } from '@data/balance';
 
 const rng = createRng(7);
 const home = { x: 500, y: 500 };
@@ -153,8 +154,8 @@ describe('loot + enemy attack maths', () => {
   it('rolls won within range and only known items', () => {
     const def = registry.monster('zombie_lord');
     const l = rollLoot(def, createRng(1));
-    expect(l.won).toBeGreaterThanOrEqual(def.wonMin);
-    expect(l.won).toBeLessThanOrEqual(def.wonMax);
+    expect(l.won).toBeGreaterThanOrEqual(def.wonMin * balance.loot.wonMult);
+    expect(l.won).toBeLessThanOrEqual(def.wonMax * balance.loot.wonMult);
     expect(l.items.some((i) => i.itemId === 'ammo_9mm_incendiary')).toBe(true); // chance 1
     for (const it of l.items) expect(() => registry.item(it.itemId)).not.toThrow();
   });

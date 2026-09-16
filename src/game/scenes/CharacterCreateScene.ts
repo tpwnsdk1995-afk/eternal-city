@@ -52,7 +52,8 @@ export class CharacterCreateScene extends Phaser.Scene {
     this.race = 'human';
     this.raceButtons.clear();
     this.cameras.main.setBackgroundColor('#05070a');
-    this.add.image(0, 0, TEX.title_bg).setOrigin(0, 0).setDisplaySize(GAME_WIDTH, GAME_HEIGHT).setAlpha(0.55);
+    const bg = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, TEX.title_bg).setAlpha(0.55);
+    bg.setScale(Math.max(GAME_WIDTH / bg.width, GAME_HEIGHT / bg.height));
 
     const cx = GAME_WIDTH / 2;
     this.add.nineslice(cx, 40, TEX.ui_panel, 0, 640, GAME_HEIGHT - 80, 8, 8, 8, 8).setOrigin(0.5, 0).setAlpha(0.94);

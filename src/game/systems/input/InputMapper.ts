@@ -4,7 +4,7 @@ import type { ControlScheme } from '@data/schema/enums';
 import { gameState } from '../../state/GameState';
 import { takePending, touchState } from './touchState';
 
-export type Hotkey = 'inventory' | 'status' | 'skills' | 'quest' | 'minimap' | 'menu' | `quick${number}`;
+export type Hotkey = 'inventory' | 'status' | 'skills' | 'quest' | 'minimap' | 'menu' | 'home' | `quick${number}`;
 
 export interface InputIntent {
   /** classic: world position of the latest LMB press (null when none this frame) */
@@ -174,6 +174,8 @@ export class InputMapper {
         return 'minimap';
       case 'Escape':
         return 'menu';
+      case 'KeyH':
+        return 'home';
       case 'KeyC':
         return this.scheme === 'classic' ? 'status' : null;
       case 'KeyV':

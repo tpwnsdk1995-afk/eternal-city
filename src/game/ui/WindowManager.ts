@@ -4,6 +4,7 @@ import type { NpcDef } from '@data/schema/npc';
 import { gameState, type AssaultResult } from '../state/GameState';
 import { balance } from '@data/balance';
 import { canRebirth } from '@core/stats/rebirth';
+import { hubForYear } from '@core/world/parallel';
 import { statCap } from '@core/stats/levelCurve';
 import { actions } from '../state/actions';
 import { ResultWindow } from './ResultWindow';
@@ -181,6 +182,14 @@ export class WindowManager {
         return gameState.setSettings({ showMinimap: !gameState.settings.showMinimap });
       case 'menu':
         if (!this.closeTop()) this.open('menu');
+        return;
+      case 'home': // back to the current year's town (free; H key, touch tab, Esc menu)
+        if (this.windows.get('menu')!.scene.scene.isActive('Assault')) {
+          gameState.events.emit('message', { text: '어설트 중에는 귀환할 수 없습니다', tone: 'bad' });
+          return;
+        }
+        gameState.events.emit('message', { text: '마을로 귀환합니다', tone: 'system' });
+        gameState.events.emit('travel', { mapId: hubForYear(registry.map(gameState.currentMapId).year), spawn: balance.death.respawnPoint });
         return;
     }
     const quick = /^quick([1-9])$/.exec(key);

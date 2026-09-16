@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { GAME_HEIGHT } from '../../config/gameConfig';
 import { TEX } from '@data/textureKeys';
 import { registry } from '@data/registry';
 import type { ItemStack } from '@data/schema/item';
@@ -38,6 +39,10 @@ export abstract class Window extends Phaser.GameObjects.Container {
     this.content = scene.add.container(0, 40);
     this.add([panel, body, inner, titleBand, emblem, emblemDot, this.titleText, closeBtn, closeX, rule, this.content]);
     this.setDepth(100);
+    // phone canvas is shorter than the tallest windows: shrink to fit and pull up so the whole window stays on screen
+    const fit = Math.min(1, GAME_HEIGHT / h);
+    this.setScale(fit);
+    if (y + h * fit > GAME_HEIGHT) this.y = Math.max(0, GAME_HEIGHT - h * fit);
     scene.add.existing(this);
   }
 
@@ -47,7 +52,7 @@ export abstract class Window extends Phaser.GameObjects.Container {
 
   /** Screen-space hit test used to block world input under the window. */
   contains(sx: number, sy: number): boolean {
-    return this.visible && sx >= this.x && sx < this.x + this.w && sy >= this.y && sy < this.y + this.h;
+    return this.visible && sx >= this.x && sx < this.x + this.w * this.scaleX && sy >= this.y && sy < this.y + this.h * this.scaleY;
   }
 
   /** Rebuild contents from current state. */

@@ -35,7 +35,8 @@ export class TitleScene extends Phaser.Scene {
     this.busy = false;
     audio.ambient('rain');
     audio.bgm('title');
-    this.add.image(0, 0, TEX.title_bg).setOrigin(0, 0).setDisplaySize(GAME_WIDTH, GAME_HEIGHT); // real art may be a smaller file
+    const bg = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, TEX.title_bg); // real art may be a smaller file; cover the canvas (phones are wider than 16:9)
+    bg.setScale(Math.max(GAME_WIDTH / bg.width, GAME_HEIGHT / bg.height));
     // darken the painted street so the logo, slot panel and footer stay readable on top of it
     this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x05070a, 0.42).setOrigin(0, 0);
     this.add.rectangle(0, GAME_HEIGHT - 120, GAME_WIDTH, 120, 0x05070a, 0.55).setOrigin(0, 0);

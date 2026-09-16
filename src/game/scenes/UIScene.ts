@@ -133,7 +133,9 @@ export class UIScene extends Phaser.Scene {
     }
 
     // --- minimap (top-right) -----------------------------------------------------------------
-    this.minimapPanel = this.add.container(GAME_WIDTH - MINIMAP_MAX_W - 24, 12).setDepth(40);
+    // phone canvas: the touch action buttons sit where the minimap was, so minimap goes top-left and the quest tracker top-right
+    const phone = GAME_HEIGHT < 720;
+    this.minimapPanel = this.add.container(phone ? 12 : GAME_WIDTH - MINIMAP_MAX_W - 24, 12).setDepth(40);
     const mmBg = this.add.nineslice(0, 0, TEX.ui_panel, 0, MINIMAP_MAX_W + 12, MINIMAP_MAX_H + 30, 8, 8, 8, 8).setOrigin(0, 0);
     const mmTitle = this.add.text(6, 5, '지도 (Tab)', theme.textStyle(11, theme.colors.brass));
     this.minimapDots = this.add.graphics();
@@ -141,7 +143,7 @@ export class UIScene extends Phaser.Scene {
     this.minimapPanel.setVisible(gameState.settings.showMinimap);
 
     // quest tracker under the minimap
-    this.questTracker = this.add.text(GAME_WIDTH - 16, 12 + MINIMAP_MAX_H + 40, '', theme.textStyle(12, '#ffd166', { stroke: '#000', strokeThickness: 3, align: 'right' })).setOrigin(1, 0).setDepth(40);
+    this.questTracker = this.add.text(GAME_WIDTH - 16, phone ? 12 : 12 + MINIMAP_MAX_H + 40, '', theme.textStyle(12, '#ffd166', { stroke: '#000', strokeThickness: 3, align: 'right' })).setOrigin(1, 0).setDepth(40);
     this.permitText = this.add.text(GAME_WIDTH - 14, GAME_HEIGHT - 14, '', theme.textStyle(9, '#6b7280')).setOrigin(1, 1);
     // active 사이버샵 buffs, bottom-right above the HUD, refreshed every second
     this.buffText = this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - HUD_BAR_H - 8, '', theme.textStyle(11, theme.colors.good, { stroke: '#000', strokeThickness: 3, align: 'right' })).setOrigin(1, 1).setDepth(40);

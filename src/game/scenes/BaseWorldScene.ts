@@ -27,10 +27,10 @@ import { rollBreak } from '@core/inventory/death';
 import { hasBuff } from '@core/combat/buffs';
 import { gameRng } from '@core/rng';
 import { Rain } from '../ui/Rain';
-import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
+import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameSize'; // not gameConfig: WORLD_ZOOM reads it at load time and gameConfig imports this scene
 
 /** World camera zoom: 32px tiles render at 48px, so characters read like the original's ~50px sprites. */
-export const WORLD_ZOOM = 1.5;
+export const WORLD_ZOOM = 1.5 * (GAME_HEIGHT / 720); // phones: keep the same world view on the smaller canvas
 
 export interface WorldSceneData {
   mapId?: string;

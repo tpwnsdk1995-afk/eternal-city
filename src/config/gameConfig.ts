@@ -7,9 +7,9 @@ import { SafeZoneScene } from '../game/scenes/SafeZoneScene';
 import { FieldScene } from '../game/scenes/FieldScene';
 import { AssaultScene } from '../game/scenes/AssaultScene';
 import { UIScene } from '../game/scenes/UIScene';
+import { GAME_HEIGHT, GAME_WIDTH } from './gameSize';
 
-export const GAME_WIDTH = 1280;
-export const GAME_HEIGHT = 720;
+export { GAME_WIDTH, GAME_HEIGHT } from './gameSize';
 
 const params = new URLSearchParams(window.location.search);
 const forceCanvas = params.get('renderer') === 'canvas';
