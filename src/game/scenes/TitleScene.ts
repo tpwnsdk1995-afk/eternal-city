@@ -77,8 +77,15 @@ export class TitleScene extends Phaser.Scene {
     void saveService.peekAll().then((rows) => {
       if (!this.scene.isActive()) return;
       this.rows = rows;
+      this.rowsLoaded = true;
       if (this.selected < 0) this.selected = this.defaultSelection();
       this.renderSlots();
+      // a key pressed before the slots were known is replayed now, so an early Enter never starts a
+      // new game over a slot that turns out to hold a save
+      const queued = this.queuedKey;
+      this.queuedKey = null;
+      if (queued === 'enter') this.pressEnter();
+      else if (queued === 'continue') this.pressContinue();
     });
     this.cloudReady = cloudSave
       .reconcileAll(SLOTS)
@@ -95,15 +102,8 @@ export class TitleScene extends Phaser.Scene {
     kb?.on('keydown-ONE', () => this.select(0));
     kb?.on('keydown-TWO', () => this.select(1));
     kb?.on('keydown-THREE', () => this.select(2));
-    kb?.on('keydown-ENTER', () => {
-      const i = this.selected < 0 ? this.defaultSelection() : this.selected;
-      if (this.rows[i]) void this.continueGame(i + 1);
-      else this.newGame(i + 1);
-    });
-    kb?.on('keydown-C', () => {
-      const i = this.mostRecent();
-      if (i >= 0) void this.continueGame(i + 1);
-    });
+    kb?.on('keydown-ENTER', () => this.pressEnter());
+    kb?.on('keydown-C', () => this.pressContinue());
     kb?.on('keydown-DELETE', () => {
       const i = this.selected < 0 ? this.defaultSelection() : this.selected;
       void this.deleteSlot(i + 1);
@@ -135,6 +135,30 @@ export class TitleScene extends Phaser.Scene {
 
   update(_t: number, dt: number): void {
     this.rain.update(dt);
+  }
+
+  private rowsLoaded = false;
+  private queuedKey: 'enter' | 'continue' | null = null;
+
+  /** Enter: continue the selected slot when it holds a save, otherwise start a new game there. */
+  private pressEnter(): void {
+    if (!this.rowsLoaded) {
+      this.queuedKey = 'enter';
+      return;
+    }
+    const i = this.selected < 0 ? this.defaultSelection() : this.selected;
+    if (this.rows[i]) void this.continueGame(i + 1);
+    else this.newGame(i + 1);
+  }
+
+  /** C: continue the most recently played slot. */
+  private pressContinue(): void {
+    if (!this.rowsLoaded) {
+      this.queuedKey = 'continue';
+      return;
+    }
+    const i = this.mostRecent();
+    if (i >= 0) void this.continueGame(i + 1);
   }
 
   /** First empty slot, else the most recently played one, else slot 1. */
