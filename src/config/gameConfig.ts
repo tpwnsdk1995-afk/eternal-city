@@ -22,7 +22,9 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
   backgroundColor: '#05070a',
   pixelArt: true,
   roundPixels: true,
-  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+  // the page's flex container centres the canvas; Phaser's own centring would add its margins on top
+  // and push the canvas to the bottom of tall (portrait phone) viewports
+  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.NO_CENTER },
   physics: { default: 'arcade', arcade: { gravity: { x: 0, y: 0 }, debug: params.has('debug') } },
   fps: { target: 60 },
   dom: { createContainer: true },

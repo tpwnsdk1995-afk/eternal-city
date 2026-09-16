@@ -11,11 +11,20 @@
     <style>
       html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; overscroll-behavior: none; }
       #game { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; touch-action: none; }
-      canvas { image-rendering: pixelated; outline: none; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+      canvas { image-rendering: pixelated; outline: none; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; margin: 0 !important; max-width: 100%; max-height: 100%; }
+      /* portrait phones: the 16:9 game is unplayable sideways-less, ask for landscape (the game keeps loading underneath) */
+      #rotate { display: none; position: fixed; inset: 0; z-index: 10; background: rgba(5,7,10,0.92); color: #d6d9e0; text-align: center;
+        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; padding: 0 24px; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+      #rotate b { color: #c9a227; font-size: 20px; }
+      #rotate span { font-size: 14px; color: #9aa0a6; line-height: 1.5; }
+      #rotate i { font-style: normal; font-size: 56px; display: block; animation: tilt 1.6s ease-in-out infinite; }
+      @keyframes tilt { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } }
+      @media (orientation: portrait) and (max-width: 900px) { #rotate { display: flex; } }
     </style>
   </head>
   <body>
     <div id="game"></div>
+    <div id="rotate"><i>📱</i><b>가로로 돌려 주세요</b><span>이터널시티는 가로 화면(1280×720) 게임입니다.<br />휴대폰을 돌리면 이 안내가 사라지고 게임이 화면을 채웁니다.</span></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
