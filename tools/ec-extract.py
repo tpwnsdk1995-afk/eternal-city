@@ -34,6 +34,19 @@ SPRITES = {
     'player': dict(file='00046.dat', rid=5478, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=74, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
     'player_long': dict(file='00046.dat', rid=5478, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=80, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
     'player_melee': dict(file='00046.dat', rid=5478, parts=[0, 4, 5, 6, 17], frames=dict(idle=0, walk=[14, 18, 22], aim=25, death=41), cell=[0, 14, 18, 22, 41, 74, 80, 25]),
+    # NPCs stand still (Npc.ts shows the S idle frame only), so every column is frame 0 and the sheet dedups to one pose per direction.
+    # 03xxx/04xxx single-part figures (part 1 is the 1-frame preview); 00012 is a 3-part model (body, coat, hair).
+    'npc_elia': dict(file='03960.dat', rid=6593, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # white blouse, grey skirt
+    'npc_shop': dict(file='03880.dat', rid=6296, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # apron, hands on hips
+    'npc_tech': dict(file='03990.dat', rid=6635, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # green jacket
+    'npc_blackmarket': dict(file='03950.dat', rid=6579, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # all black
+    'npc_storage': dict(file='04056.dat', rid=17094, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # hat, striped top
+    'npc_mainstream': dict(file='03770.dat', rid=6122, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # white shirt, tie
+    'npc_parallel': dict(file='04070.dat', rid=6687, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # white suit
+    'npc_cyber': dict(file='04062.dat', rid=17536, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # blue bodysuit
+    'npc_kimhun': dict(file='00061.dat', rid=5482, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # camo soldier at ease (03780 6125 is a crouched gunner)
+    'npc_taxi': dict(file='04040.dat', rid=6664, parts=[0], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # blue uniform, cap
+    'npc_assault': dict(file='00012.dat', rid=4305, parts=[0, 2, 1], frames=dict(idle=0, walk=[0, 0, 0], aim=0, death=0)),  # red coat, blonde
 }
 
 u16 = lambda b, o: struct.unpack_from('<H', b, o)[0]

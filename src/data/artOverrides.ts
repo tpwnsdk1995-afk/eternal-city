@@ -57,6 +57,18 @@ export const ART_OVERRIDES: Partial<Record<TexKey, ArtOverride>> = {
   // player: one model (00046) in three firing poses; the six long-gun classes share a sheet, so weapon swaps keep the frame size
   [TEX.player]: { url: 'art/player.png', frameW: 150, frameH: 156, scale: 0.6 },
   [TEX.player_melee]: { url: 'art/player_melee.png', frameW: 150, frameH: 156, scale: 0.6 },
+  // NPCs: single-pose figures from the original client (03xxx/04xxx, 00012, 00061); Npc.ts shows the S idle frame only
+  [TEX.npc_elia]: { url: 'art/npc_elia.png', frameW: 30, frameH: 82, scale: 0.6 },
+  [TEX.npc_shop]: { url: 'art/npc_shop.png', frameW: 38, frameH: 88, scale: 0.6 },
+  [TEX.npc_tech]: { url: 'art/npc_tech.png', frameW: 34, frameH: 82, scale: 0.6 },
+  [TEX.npc_blackmarket]: { url: 'art/npc_blackmarket.png', frameW: 42, frameH: 88, scale: 0.6 },
+  [TEX.npc_storage]: { url: 'art/npc_storage.png', frameW: 60, frameH: 96, scale: 0.6 },
+  [TEX.npc_mainstream]: { url: 'art/npc_mainstream.png', frameW: 38, frameH: 86, scale: 0.6 },
+  [TEX.npc_parallel]: { url: 'art/npc_parallel.png', frameW: 40, frameH: 88, scale: 0.6 },
+  [TEX.npc_cyber]: { url: 'art/npc_cyber.png', frameW: 46, frameH: 94, scale: 0.6 },
+  [TEX.npc_kimhun]: { url: 'art/npc_kimhun.png', frameW: 58, frameH: 92, scale: 0.6 },
+  [TEX.npc_taxi]: { url: 'art/npc_taxi.png', frameW: 64, frameH: 88, scale: 0.6 },
+  [TEX.npc_assault]: { url: 'art/npc_assault.png', frameW: 34, frameH: 82, scale: 0.6 },
   [TEX.player_smg]: { url: 'art/player_long.png', frameW: 150, frameH: 156, scale: 0.6 },
   [TEX.player_rifle]: { url: 'art/player_long.png', frameW: 150, frameH: 156, scale: 0.6 },
   [TEX.player_shotgun]: { url: 'art/player_long.png', frameW: 150, frameH: 156, scale: 0.6 },

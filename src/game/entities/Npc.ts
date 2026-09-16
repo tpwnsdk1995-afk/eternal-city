@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { NpcDef } from '@data/schema/npc';
+import { artScale } from '@data/artOverrides';
 import { theme } from '../ui/theme';
 import { DIR_S, depthForY, figureFrame } from '../systems/facing';
 
@@ -17,9 +18,9 @@ export class Npc extends Phaser.GameObjects.Container {
     readonly def: NpcDef,
   ) {
     super(scene, x, y);
-    this.sprite = scene.add.sprite(0, -4, def.tex, figureFrame(DIR_S, 0));
+    this.sprite = scene.add.sprite(0, -4, def.tex, figureFrame(DIR_S, 0)).setScale(artScale(def.tex));
     this.label = scene.add
-      .text(0, -34, def.name, theme.textStyle(12, theme.colors.brass, { stroke: '#000', strokeThickness: 3 }))
+      .text(0, -10 - this.sprite.displayHeight / 2, def.name, theme.textStyle(12, theme.colors.brass, { stroke: '#000', strokeThickness: 3 }))
       .setOrigin(0.5);
     this.add([this.sprite, this.label]);
     this.setDepth(depthForY(y));
