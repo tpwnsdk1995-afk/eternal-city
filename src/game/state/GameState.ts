@@ -69,6 +69,7 @@ export interface GameEvents extends Record<string, unknown> {
   achievements: AchievementState;
   buffs: BuffState;
   guild: GuildState;
+  storage: Inventory;
   flags: Record<string, boolean | number>;
   message: { text: string; tone?: 'info' | 'good' | 'bad' | 'system' };
   mapChanged: { mapId: string; name: string; minimap: MinimapInfo | null };
@@ -102,6 +103,8 @@ class GameState {
   achievements: AchievementState = emptyAchievements();
   buffs: BuffState = emptyBuffs();
   guild: GuildState = emptyGuild();
+  /** 광진구청 보관함 — stored stacks never count toward carried weight */
+  storage: Inventory = createInventory();
   status: StatusState = emptyStatus();
   consciousness: ConsciousnessState = { lastTriggeredAt: -Infinity };
   currentMapId: string = balance.death.respawnMap;
@@ -135,6 +138,7 @@ class GameState {
     this.achievements = emptyAchievements();
     this.buffs = emptyBuffs();
     this.guild = emptyGuild();
+    this.storage = createInventory();
     this.status = emptyStatus();
     this.consciousness = { lastTriggeredAt: -Infinity };
     this.currentMapId = balance.death.respawnMap;
@@ -178,6 +182,11 @@ class GameState {
     this.guild = g;
     this.events.emit('guild', g);
     this.setVitals({}); // max HP perk may have changed
+  }
+
+  setStorage(inv: Inventory): void {
+    this.storage = inv;
+    this.events.emit('storage', inv);
   }
 
   /** Drops expired buffs; returns the names that just ran out. */

@@ -10,15 +10,17 @@ import { actions } from '../state/actions';
 import { Window } from './Window';
 import { ListView, type ListRow } from './ListView';
 import { theme } from './theme';
-
-const KIND_ORDER = { weapon: 0, armor: 1, ammo: 2, consumable: 3, misc: 4 } as const;
+import { FILTERS, FILTER_LABEL, SORT_LABEL, filterStacks, nextSortMode, sortStacks, type InventoryFilter, type SortMode } from '@core/inventory/sortFilter';
 
 export class InventoryWindow extends Window {
   private rows: ListView;
+  /** view state only — the inventory itself is never reordered */
+  filter: InventoryFilter = 'all';
+  sortMode: SortMode = 'kind';
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, 'inventory', x, y, 400, 500, '인벤토리 (I)');
-    this.rows = new ListView(scene, 12, 30, this.w - 24, 42, 9);
+    this.rows = new ListView(scene, 12, 52, this.w - 24, 42, 8);
     this.content.add(this.rows);
     this.refresh();
   }
@@ -35,11 +37,28 @@ export class InventoryWindow extends Window {
     this.label(12, 4, `무게 ${kg.toFixed(1)} / ${d.maxWeightKg.toFixed(1)} kg${over ? '  ⚠ 과적' : ''}`, over ? theme.colors.bad : theme.colors.muted, 12);
     this.label(this.w - 12, 4, `₩ ${gameState.character.won.toLocaleString('ko-KR')}`, theme.colors.brass, 12).setOrigin(1, 0);
 
+    // filter tabs + sort toggle
+    let bx = 12;
+    for (const f of FILTERS) {
+      const n = f === 'all' ? inv.items.length : filterStacks(inv.items, registry.item, f).length;
+      const b = this.button(bx, 24, FILTER_LABEL[f], () => {
+        this.filter = f;
+        this.refresh();
+      }, f === this.filter ? '#ffffff' : n === 0 ? '#4b5563' : theme.colors.muted, 11);
+      if (f === this.filter) b.setStyle({ backgroundColor: '#3a4048' });
+      bx += b.width + 4;
+    }
+    const sortBtn = this.button(this.w - 12, 24, `정렬: ${SORT_LABEL[this.sortMode]}`, () => {
+      this.sortMode = nextSortMode(this.sortMode);
+      this.refresh();
+    }, theme.colors.brass, 11);
+    sortBtn.setX(this.w - 12 - sortBtn.width);
+
     const eq = gameState.equipment;
     const w = gameState.weapon();
-    const rows: ListRow[] = [...inv.items]
-      .sort((a, b) => KIND_ORDER[registry.item(a.itemId).kind] - KIND_ORDER[registry.item(b.itemId).kind] || a.uid.localeCompare(b.uid))
-      .map((s) => this.row(s, eq.weaponUid === s.uid || Object.values(eq.armor).includes(s.uid), w));
+    const rows: ListRow[] = sortStacks(filterStacks(inv.items, registry.item, this.filter), registry.item, this.sortMode).map((s) =>
+      this.row(s, eq.weaponUid === s.uid || Object.values(eq.armor).includes(s.uid), w),
+    );
     this.rows.setRows(rows);
 
     this.label(12, this.h - 62, '클릭 — 무기/방어구: 장착·해제 · 소모품: 사용 · 탄약: 탄종 선택', theme.colors.muted, 11);

@@ -105,6 +105,7 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.face_tech]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_tech, w, h), 64),
   [TEX.face_blackmarket]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_blackmarket, w, h), 64),
   [TEX.face_mainstream]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_mainstream, w, h), 64),
+  [TEX.face_storage]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_storage, w, h), 64),
   [TEX.face_parallel]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_parallel, w, h), 64),
   [TEX.face_kimhun]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_kimhun, w, h), 64),
   [TEX.face_trainer]: single((ctx, _f, w, h) => drawPortrait(ctx, FIGURE_STYLES.npc_assault, w, h), 64),
@@ -160,6 +161,7 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.npc_tech]: figure('npc_tech'),
   [TEX.npc_blackmarket]: figure('npc_blackmarket'),
   [TEX.npc_mainstream]: figure('npc_mainstream'),
+  [TEX.npc_storage]: figure('npc_storage'),
   [TEX.wito_soldier]: figure('wito_soldier'),
 
   [TEX.deco_lamp]: single(drawLamp, 32, 80),

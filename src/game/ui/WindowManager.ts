@@ -14,6 +14,7 @@ import { TuningWindow } from './TuningWindow';
 import { AssaultWindow } from './AssaultWindow';
 import { ParallelWindow } from './ParallelWindow';
 import { GuildWindow } from './GuildWindow';
+import { StorageWindow } from './StorageWindow';
 import { questService } from '../state/questService';
 import type { Window } from './Window';
 import { InventoryWindow } from './InventoryWindow';
@@ -24,7 +25,7 @@ import { DialogBox } from './DialogBox';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config/gameConfig';
 import { audio } from '../audio/AudioManager';
 
-export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu' | 'quest' | 'taxi' | 'tuning' | 'assault' | 'parallel' | 'guild';
+export type WindowKey = 'inventory' | 'status' | 'skills' | 'shop' | 'dialog' | 'result' | 'menu' | 'quest' | 'taxi' | 'tuning' | 'assault' | 'parallel' | 'guild' | 'storage';
 
 const HUD_H = 108;
 
@@ -47,7 +48,8 @@ export class WindowManager {
     const assault = new AssaultWindow(scene, (GAME_WIDTH - 760) / 2, 50);
     const parallel = new ParallelWindow(scene, (GAME_WIDTH - 560) / 2, 30);
     const guild = new GuildWindow(scene, (GAME_WIDTH - 620) / 2, 60);
-    for (const w of [inv, status, skills, shop, dialog, result, menu, quest, taxiW, tuning, assault, parallel, guild]) {
+    const storage = new StorageWindow(scene, (GAME_WIDTH - 780) / 2, 40);
+    for (const w of [inv, status, skills, shop, dialog, result, menu, quest, taxiW, tuning, assault, parallel, guild, storage]) {
       this.windows.set(w.key as WindowKey, w);
       w.setVisible(false);
       w.on('close', () => this.close(w.key as WindowKey));
@@ -249,6 +251,18 @@ export class WindowManager {
               onPick: () => {
                 this.close('dialog');
                 this.open('parallel');
+              },
+            },
+            closeOpt,
+          ];
+        case 'storage':
+          return [
+            {
+              label: `보관함 열기 (${gameState.storage.items.length}/${balance.storage.slots}칸)`,
+              color: '#ffd166',
+              onPick: () => {
+                this.close('dialog');
+                this.open('storage');
               },
             },
             closeOpt,

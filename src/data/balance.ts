@@ -86,6 +86,8 @@ export const balance = {
     perVit: 0.25,
     perEnd: 0.25,
   },
+  /** 광진구청 보관함: stacks it can hold (weight is never counted while stored) */
+  storage: { slots: 40 },
   death: {
     wonLossPct: 0.05,
     xpLossPct: 0,

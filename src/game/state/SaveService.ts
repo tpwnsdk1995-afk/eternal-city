@@ -40,6 +40,7 @@ export function takeSnapshot(): SaveGame {
     achievements: gameState.achievements,
     buffs: gameState.buffs,
     guild: gameState.guild,
+    storage: gameState.storage,
     location: saveLocation(gameState.currentMapId),
     flags: { ...gameState.flags, god: false },
     settings: { ...gameState.settings },
@@ -59,6 +60,7 @@ export function applySnapshot(save: SaveGame): void {
   gameState.achievements = save.achievements;
   gameState.buffs = save.buffs;
   gameState.guild = save.guild ?? { name: null, contributed: 0, foundedAt: 0 };
+  gameState.storage = save.storage ?? { items: [], nextUid: 1 };
   gameState.pruneBuffs();
   gameState.status = emptyStatus();
   gameState.consciousness = { lastTriggeredAt: -Infinity };

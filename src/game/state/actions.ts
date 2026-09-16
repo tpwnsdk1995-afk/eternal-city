@@ -4,6 +4,7 @@ import { RACE_NAME, type StatKey } from '@data/schema/enums';
 import { allocateStat } from '@core/stats/allocation';
 import { statCap } from '@core/stats/levelCurve';
 import { getStack, removeQty, removeStack, replaceStack, totalRounds } from '@core/inventory/inventory';
+import { moveStack } from '@core/inventory/storage';
 import { installPart, plusUp, tryEnhance, tryUnique, weaponLabel, type TuneFail, armorLabel } from '@core/tuning/tuning';
 import type { PartId } from '@data/schema/tuning';
 import { PARTS, UNIQUES } from '@data/tuning';
@@ -196,6 +197,40 @@ export const actions = {
     audio.play('travel');
     gameState.events.emit('travel', { mapId: to.id, spawn: 'taxi' });
     return { ok: true };
+  },
+
+  // --- 구청 보관함 ---------------------------------------------------------------------------
+
+  /** Inventory → 보관함. Equipped gear must be taken off first; stored stacks carry no weight. */
+  deposit(uid: string): ActionResult {
+    const stack = getStack(gameState.inventory, uid);
+    if (!stack) return fail('아이템을 찾을 수 없습니다.');
+    if (gameState.equipment.weaponUid === uid || Object.values(gameState.equipment.armor).includes(uid)) return fail('장착 중인 장비는 먼저 해제하세요.');
+    const def = registry.item(stack.itemId);
+    if (def.kind === 'misc' && def.quest) return fail('퀘스트 아이템은 보관할 수 없습니다.');
+    const r = moveStack(gameState.inventory, gameState.storage, uid, registry.item, balance.storage.slots);
+    if (!r.ok) return fail(r.reason === 'full' ? `보관함이 가득 찼습니다 (${balance.storage.slots}칸).` : '아이템을 찾을 수 없습니다.');
+    gameState.setInventory(r.from);
+    gameState.setStorage(r.to);
+    // stored the last box of the selected ammo kind → fall back to 일반탄
+    const w = gameState.weapon();
+    if (def.kind === 'ammo' && w && gameState.fire.ammoKind === def.ammoKind && totalRounds(r.from, registry.item, w.def.caliber, def.ammoKind) === 0) {
+      gameState.setFire(selectAmmoKind(gameState.fire, '일반탄'));
+    }
+    return done(`${def.name} 보관 (${r.to.items.length}/${balance.storage.slots}칸)`);
+  },
+
+  /** 보관함 → inventory, subject to the carry-weight limit. */
+  withdraw(uid: string): ActionResult {
+    const stack = getStack(gameState.storage, uid);
+    if (!stack) return fail('보관함에 그 아이템이 없습니다.');
+    const def = registry.item(stack.itemId);
+    const r = moveStack(gameState.storage, gameState.inventory, uid, registry.item);
+    if (!r.ok) return fail('보관함에 그 아이템이 없습니다.');
+    if (totalWeightKg(r.to, registry.item) > gameState.derived().maxWeightKg) return fail('무게 한도를 초과합니다. 다른 물건을 먼저 맡기세요.');
+    gameState.setStorage(r.from);
+    gameState.setInventory(r.to);
+    return done(`${def.name} 꺼냄`);
   },
 
   // --- 길드 (광진구청 과장) ------------------------------------------------------------------

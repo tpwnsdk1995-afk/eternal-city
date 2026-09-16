@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import { registry } from '@data/registry';
 import { addItem, totalRounds } from '@core/inventory/inventory';
+import { totalWeightKg } from '@core/inventory/weight';
 import { questService } from '../game/state/questService';
 import { gameState } from '../game/state/GameState';
 import { BaseWorldScene } from '../game/scenes/BaseWorldScene';
@@ -27,6 +28,7 @@ export interface HudSnapshot {
   level: number;
   xp: number;
   won: number;
+  weightKg: number;
   weaponName: string | null;
   weaponLabel: string | null;
   ammo: number;
@@ -166,6 +168,7 @@ export function exposeDebug(game: Phaser.Game): void {
         level: gameState.character.level,
         xp: gameState.character.xp,
         won: gameState.character.won,
+        weightKg: totalWeightKg(gameState.inventory, registry.item),
         weaponName: w?.def.name ?? null,
         weaponLabel: w ? weaponLabel(w.def, w.stack) : null,
         ammo: w ? totalRounds(gameState.inventory, registry.item, w.def.caliber, gameState.fire.ammoKind) : 0,

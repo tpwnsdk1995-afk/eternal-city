@@ -100,6 +100,14 @@ export const NPCS: NpcDef[] = [
     stock: ['tec9', 'sawed_off', 'ammo_9mm_ap', 'ammo_45_ap', 'ammo_12ga_slug', 'ammo_556_ap', 'ammo_762_ap'],
   },
   {
+    id: 'npc_storage',
+    name: '구청 보관소 한수진',
+    role: 'storage',
+    tex: TEX.npc_storage,
+    face: TEX.face_storage,
+    lines: ['구청 지하 보관소입니다. 맡긴 물건은 무게로 안 잡히니 무거운 총은 여기 두고 다니세요.', '칸은 40개까지. 소모품은 한 칸에 겹쳐 둘 수 있어요.', '장착 중인 건 벗어서 가져오셔야 받아요.'],
+  },
+  {
     id: 'npc_mainstream',
     name: '광진구청 과장 오민석',
     role: 'quest',

@@ -1,6 +1,6 @@
 import type { TexKey } from '../textureKeys';
 
-export type NpcRole = 'skills' | 'shop' | 'assault' | 'dialog' | 'quest' | 'taxi' | 'tech' | 'parallel';
+export type NpcRole = 'skills' | 'shop' | 'assault' | 'dialog' | 'quest' | 'taxi' | 'tech' | 'parallel' | 'storage';
 
 export interface NpcDef {
   id: string;
