@@ -79,7 +79,7 @@ export class UIScene extends Phaser.Scene {
     // thin stacked bars, a row of black key slots) with the world visible above it. HUD_H stays the
     // layout reserve for windows/touch controls; the visible bar is HUD_BAR_H tall.
     const y0 = GAME_HEIGHT - HUD_BAR_H;
-    this.add.nineslice(0, y0, TEX.ui_panel, 0, GAME_WIDTH, HUD_BAR_H, 6, 6, 6, 6).setOrigin(0, 0);
+    this.add.nineslice(0, y0, TEX.ui_panel, 0, GAME_WIDTH, HUD_BAR_H, 8, 8, 8, 8).setOrigin(0, 0);
 
     // --- left: portrait + thin bars (red/blue/green like the original) -----------------------
     this.add.nineslice(8, y0 + 8, TEX.ui_slot, 0, 62, 62, 3, 3, 3, 3).setOrigin(0, 0);

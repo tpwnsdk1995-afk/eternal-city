@@ -42,6 +42,9 @@ export const ART_OVERRIDES: Partial<Record<TexKey, ArtOverride>> = {
   [TEX.face_taxi]: 'art/face_taxi.webp',
   [TEX.face_assault]: 'art/face_assault.webp',
   [TEX.title_bg]: 'art/title_bg.webp',
+  // HUD chrome cut from the original client's window frame / 닫기 button (tools/ec-ui.py); 9-sliced 8px (panel) and 3px (button)
+  [TEX.ui_panel]: 'art/ui_panel.png',
+  [TEX.ui_button]: 'art/ui_button.png',
   // weapon icons: 64×64 lossless, chroma-keyed to transparency; every UI draws them via setDisplaySize
   [TEX.icon_glock17]: 'art/icon_glock17.webp',
   [TEX.icon_m1911]: 'art/icon_m1911.webp',
