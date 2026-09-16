@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { MonsterDef } from '@data/schema/monster';
 import { ANIM, TEX } from '@data/textureKeys';
+import { artScale } from '@data/artOverrides';
 import { angleTo, type Vec2 } from '@core/math/vec';
 import { initialBrain, type BrainOutput, type BrainState } from '@core/ai/enemyBrain';
 import { emptyStatus, type StatusState } from '@core/combat/statusEffects';
@@ -45,12 +46,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    const s = def.scale ?? 1;
+    const s = (def.scale ?? 1) * artScale(def.tex);
     this.setScale(s);
-    const frame = this.width; // unscaled frame size
     const r = def.bodyRadius / s;
-    // circle around the lower body (figures stand with feet near the frame bottom)
-    this.setCircle(r, frame / 2 - r, frame * 0.6 - r);
+    // circle around the lower body (figures stand with feet near the frame bottom); frame size is unscaled
+    this.setCircle(r, this.width / 2 - r, this.height * 0.6 - r);
     this.setDepth(depthForY(y));
     this.setCollideWorldBounds(true);
     this.setImmovable(true);

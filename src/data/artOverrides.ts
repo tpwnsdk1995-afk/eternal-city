@@ -13,7 +13,13 @@ import { TEX, type TexKey } from './textureKeys';
  * layout is fixed by `systems/facing` — see `tools/render-sprites.mjs`, which pre-renders 3D models
  * into that layout the way the original game did.
  */
-export type ArtOverride = string | { url: string; frameW: number; frameH: number };
+export type ArtOverride = string | { url: string; frameW: number; frameH: number; scale?: number };
+
+/** Display scale a figure sheet needs so its native pixels match the drawn 48px figures' world size. */
+export const artScale = (key: TexKey): number => {
+  const art = ART_OVERRIDES[key];
+  return typeof art === 'object' ? (art.scale ?? 1) : 1;
+};
 
 export const ART_OVERRIDES: Partial<Record<TexKey, ArtOverride>> = {
   [TEX.portrait_player]: 'art/portrait_player.webp',
@@ -47,5 +53,6 @@ export const ART_OVERRIDES: Partial<Record<TexKey, ArtOverride>> = {
   [TEX.icon_tentacle]: 'art/icon_tentacle.webp',
   [TEX.icon_acid]: 'art/icon_acid.webp',
   [TEX.icon_bone]: 'art/icon_bone.webp',
-  // pre-rendered 3D figure sheets (8 dirs × 6 frames, 48px) can be dropped in here — see tools/render-sprites.mjs
+  // original-client sprites extracted with tools/ec-extract.py (8 dirs × 6 frames, native ~62px figures)
+  [TEX.zombie_casual_f]: { url: 'art/zombie_casual_f.png', frameW: 98, frameH: 133, scale: 0.6 },
 };
