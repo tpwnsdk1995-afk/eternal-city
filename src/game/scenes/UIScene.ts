@@ -317,7 +317,8 @@ export class UIScene extends Phaser.Scene {
       this.subFireText.setText('');
       return;
     }
-    this.weaponIcon.setVisible(true).setTexture(w.def.iconTex);
+    // re-apply the display size: setTexture keeps the old scale, and real-art icons are 64px while drawn ones are 32px
+    this.weaponIcon.setVisible(true).setTexture(w.def.iconTex).setDisplaySize(40, 40);
     this.weaponText.setText(weaponLabel(w.def, w.stack));
     this.subFireText.setText(gameState.fire.subFire ? '서브연사 ON (Ctrl)' : '');
     if (w.def.class === '근접무기') this.ammoText.setText('근접');
@@ -351,7 +352,7 @@ export class UIScene extends Phaser.Scene {
         this.quickCounts[i].setText('');
         continue;
       }
-      this.quickIcons[i].setVisible(true).setTexture(registry.item(s.itemId).iconTex);
+      this.quickIcons[i].setVisible(true).setTexture(registry.item(s.itemId).iconTex).setDisplaySize(22, 22);
       this.quickCounts[i].setText(`${s.qty}`);
     }
   }
