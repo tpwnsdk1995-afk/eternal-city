@@ -10,7 +10,7 @@ import { actions } from '../state/actions';
 import { Window } from './Window';
 import { ListView, type ListRow } from './ListView';
 import { theme } from './theme';
-import { FILTERS, FILTER_LABEL, SORT_LABEL, filterStacks, nextSortMode, sortStacks, type InventoryFilter, type SortMode } from '@core/inventory/sortFilter';
+import { filterStacks, sortStacks, type InventoryFilter, type SortMode } from '@core/inventory/sortFilter';
 
 export class InventoryWindow extends Window {
   private rows: ListView;
@@ -37,22 +37,7 @@ export class InventoryWindow extends Window {
     this.label(12, 4, `무게 ${kg.toFixed(1)} / ${d.maxWeightKg.toFixed(1)} kg${over ? '  ⚠ 과적' : ''}`, over ? theme.colors.bad : theme.colors.muted, 12);
     this.label(this.w - 12, 4, `₩ ${gameState.character.won.toLocaleString('ko-KR')}`, theme.colors.brass, 12).setOrigin(1, 0);
 
-    // filter tabs + sort toggle
-    let bx = 12;
-    for (const f of FILTERS) {
-      const n = f === 'all' ? inv.items.length : filterStacks(inv.items, registry.item, f).length;
-      const b = this.button(bx, 24, FILTER_LABEL[f], () => {
-        this.filter = f;
-        this.refresh();
-      }, f === this.filter ? '#ffffff' : n === 0 ? '#4b5563' : theme.colors.muted, 11);
-      if (f === this.filter) b.setStyle({ backgroundColor: '#3a4048' });
-      bx += b.width + 4;
-    }
-    const sortBtn = this.button(this.w - 12, 24, `정렬: ${SORT_LABEL[this.sortMode]}`, () => {
-      this.sortMode = nextSortMode(this.sortMode);
-      this.refresh();
-    }, theme.colors.brass, 11);
-    sortBtn.setX(this.w - 12 - sortBtn.width);
+    this.filterSortBar(24, inv.items, this, () => this.refresh());
 
     const eq = gameState.equipment;
     const w = gameState.weapon();

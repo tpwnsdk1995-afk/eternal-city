@@ -32,6 +32,8 @@ export function condProgress(c: AchievementCond, ctx: ProgressCtx): { cur: numbe
       return { cur: ctx.level, target: c.level };
     case 'assaultClears':
       return { cur: c.assaultId ? assaultClears(s, c.assaultId) : totalAssaultClears(s), target: c.count };
+    case 'assaultGrade':
+      return { cur: Object.values(s.assaultBest ?? {}).filter((b) => b.grade === c.grade).length, target: c.count };
     case 'questsCompleted':
       return { cur: s.questsCompleted, target: c.count };
     case 'enhance':

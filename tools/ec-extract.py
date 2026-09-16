@@ -23,6 +23,11 @@ from PIL import Image
 SPRITES = {
     # 중곡동 zombies: 05020-05060.dat ids 13500-13504 (part 0 = sprite, part 1 = big preview)
     'zombie_casual_f': dict(file='05020.dat', rid=13500, parts=[0], frames=dict(idle=16, walk=[2, 4, 6], aim=11, death=34)),
+    'zombie_suit_m': dict(file='05060.dat', rid=13504, parts=[0], frames=dict(idle=20, walk=[2, 4, 6], aim=11, death=35)),
+    'zombie_stripe': dict(file='05040.dat', rid=13502, parts=[0], frames=dict(idle=18, walk=[2, 4, 6], aim=11, death=32)),
+    'zombie_banshee': dict(file='05770.dat', rid=16246, parts=[0], frames=dict(idle=18, walk=[17, 20, 23], aim=10, death=35)),  # no walk cycle: glides with the idle sway (0-8 is a somersault leap)
+    'zombie_office': dict(file='05030.dat', rid=13501, parts=[0], frames=dict(idle=20, walk=[2, 5, 8], aim=12, death=35)),
+    'zombie_worker': dict(file='05050.dat', rid=13503, parts=[0], frames=dict(idle=14, walk=[1, 3, 5], aim=8, death=31)),
 }
 
 u16 = lambda b, o: struct.unpack_from('<H', b, o)[0]

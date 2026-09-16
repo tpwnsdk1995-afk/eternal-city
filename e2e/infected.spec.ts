@@ -52,6 +52,8 @@ test.describe('감염체 캐릭터', () => {
     expect(await page.evaluate((u) => window.__ec!.actions.equipToggle(u).ok, acid)).toBe(true);
     hud = await page.evaluate(() => window.__ec!.hud());
     expect(hud.weaponName).toBe('산성 토사');
+    // the claw fight's fire cooldown carries over (acid rpm 40 = 1.5s); a late lob lands behind the approaching zombie
+    await page.waitForTimeout(1600);
     const zid2 = await page.evaluate(() => window.__ec!.spawn('zombie_suit_m', 180, 0));
     await page.waitForTimeout(150);
     const p2 = await page.evaluate(() => window.__ec!.player()!);

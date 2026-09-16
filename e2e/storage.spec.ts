@@ -14,6 +14,8 @@ test.describe('구청 보관함 · 인벤토리 정렬/필터', () => {
     await page.evaluate(() => window.__ec!.state.events.emit('npcInteract', { npcId: 'npc_storage' }));
     await page.waitForFunction(() => window.__ec!.windows().includes('dialog'));
     await page.keyboard.press('Escape');
+    // Esc is applied on the next frame as closeTop(); open the 보관함 only after the dialog is gone
+    await page.waitForFunction(() => !window.__ec!.windows().includes('dialog'));
     await page.evaluate(() => window.__ec!.openWindow('storage'));
     await page.waitForFunction(() => window.__ec!.windows().includes('storage'));
 
@@ -69,6 +71,27 @@ test.describe('구청 보관함 · 인벤토리 정렬/필터', () => {
     await clickAt(page, await page.evaluate(() => window.__ec!.buttonPos('inventory', '탄약')));
     await page.waitForTimeout(150);
     expect(await page.evaluate(() => window.__ec!.windows())).toEqual(['inventory']);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
+  test('storage filter tabs and the sort toggle apply to both lists', async ({ page }) => {
+    const errors = await newGame(page);
+    await page.evaluate(() => {
+      window.__ec!.give('m60', 1);
+      window.__ec!.give('bandage', 5);
+    });
+    await page.evaluate(() => window.__ec!.openWindow('storage'));
+    await page.waitForFunction(() => window.__ec!.windows().includes('storage'));
+    await clickAt(page, await page.evaluate(() => window.__ec!.buttonPos('storage', '소모품')));
+    await page.waitForTimeout(150);
+    const bandage = await page.evaluate(() => window.__ec!.state.inventory.items.find((s) => s.itemId === 'bandage')!.uid);
+    expect(await page.evaluate((u) => window.__ec!.actions.deposit(u).ok, bandage)).toBe(true);
+    await page.evaluate(() => window.__ec!.openWindow('storage'));
+    await page.waitForTimeout(150);
+    await clickAt(page, await page.evaluate(() => window.__ec!.buttonPos('storage', '정렬')));
+    await page.waitForTimeout(150);
+    expect(await page.evaluate(() => window.__ec!.buttonPos('storage', '정렬: 이름'))).not.toBeNull();
+    await page.screenshot({ path: 'e2e/out/storage-filter.png' });
     expect(errors, errors.join('\n')).toEqual([]);
   });
 });

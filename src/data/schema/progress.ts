@@ -9,6 +9,7 @@ export type AchievementCond =
   | { kind: 'bossKills'; count: number }
   | { kind: 'level'; level: number }
   | { kind: 'assaultClears'; count: number; assaultId?: string }
+  | { kind: 'assaultGrade'; grade: string; count: number }
   | { kind: 'questsCompleted'; count: number }
   | { kind: 'enhance'; level: number }
   | { kind: 'wonEarned'; amount: number }

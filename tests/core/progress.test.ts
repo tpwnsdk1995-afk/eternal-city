@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ACHIEVEMENTS, CAMPAIGNS, registry } from '@data/registry';
-import { emptyStats, recordAssault, recordEnhance, recordKill, recordWon, totalAssaultClears } from '@core/world/stats';
+import { emptyStats, recordAssault, recordAssaultBest, recordEnhance, recordKill, recordWon, totalAssaultClears } from '@core/world/stats';
 import { condProgress, emptyAchievements, newlyUnlocked, unlock } from '@core/progress/achievements';
 import { chapterFlag, chapterStatus, claimChapter, claimedCount, requirementsMet } from '@core/progress/campaign';
 import { accept, canAccept, complete, dailyFlag, dayKey, doneToday, emptyQuestState, onKill } from '@core/quest/questState';
@@ -54,6 +54,20 @@ describe('achievements', () => {
     expect(condProgress(registry.achievement('ach_zombie_1000').cond, ctx())).toEqual({ cur: 100, target: 1000 });
     expect(condProgress(registry.achievement('ach_permit').cond, { ...ctx(), flags: { parallelPermit: true } })).toEqual({ cur: 1, target: 1 });
     expect(condProgress(registry.achievement('ach_level_10').cond, { ...ctx(), level: 12 })).toEqual({ cur: 12, target: 10 });
+  });
+
+  it('assaultGrade counts distinct assaults whose best run is that grade', () => {
+    const run = (score: number, grade: string) => ({ score, grade, timeSec: 60, kills: 10, at: 0 });
+    let stats = emptyStats();
+    const ctx = () => ({ stats, level: 1, flags: {} });
+    stats = recordAssaultBest(stats, 'assault-a', run(50, 'A')).stats;
+    expect(condProgress(registry.achievement('ach_assault_s').cond, ctx())).toEqual({ cur: 0, target: 1 });
+    stats = recordAssaultBest(stats, 'assault-a', run(100, 'S')).stats;
+    stats = recordAssaultBest(stats, 'assault-b', run(100, 'S')).stats;
+    expect(condProgress(registry.achievement('ach_assault_s_6').cond, ctx())).toEqual({ cur: 2, target: 6 });
+    const fresh = newlyUnlocked(ACHIEVEMENTS, emptyAchievements(), ctx()).map((a) => a.id);
+    expect(fresh).toContain('ach_assault_s');
+    expect(fresh).not.toContain('ach_assault_s_6');
   });
 });
 

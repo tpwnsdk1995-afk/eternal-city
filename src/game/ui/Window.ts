@@ -1,5 +1,8 @@
 import Phaser from 'phaser';
 import { TEX } from '@data/textureKeys';
+import { registry } from '@data/registry';
+import type { ItemStack } from '@data/schema/item';
+import { FILTERS, FILTER_LABEL, SORT_LABEL, filterStacks, nextSortMode, type InventoryFilter, type SortMode } from '@core/inventory/sortFilter';
 import { theme } from './theme';
 
 /** Draggable-free fixed panel with a title bar and close button. Subclasses fill `body`. */
@@ -75,6 +78,25 @@ export abstract class Window extends Phaser.GameObjects.Container {
     this.content.add(t);
     this.buttons.push(t);
     return t;
+  }
+
+  /** Filter tabs (left) + sort toggle (right) for an item list; mutates `view` and calls `onChange` to re-render. */
+  protected filterSortBar(y: number, items: ItemStack[], view: { filter: InventoryFilter; sortMode: SortMode }, onChange: () => void): void {
+    let bx = 12;
+    for (const f of FILTERS) {
+      const n = f === 'all' ? items.length : filterStacks(items, registry.item, f).length;
+      const b = this.button(bx, y, FILTER_LABEL[f], () => {
+        view.filter = f;
+        onChange();
+      }, f === view.filter ? '#ffffff' : n === 0 ? '#4b5563' : theme.colors.muted, 11);
+      if (f === view.filter) b.setStyle({ backgroundColor: '#3a4048' });
+      bx += b.width + 4;
+    }
+    const sortBtn = this.button(this.w - 12, y, `정렬: ${SORT_LABEL[view.sortMode]}`, () => {
+      view.sortMode = nextSortMode(view.sortMode);
+      onChange();
+    }, theme.colors.brass, 11);
+    sortBtn.setX(this.w - 12 - sortBtn.width);
   }
 
   protected label(x: number, y: number, text: string, color = theme.colors.text, size = 13, extra: Partial<Phaser.Types.GameObjects.Text.TextStyle> = {}): Phaser.GameObjects.Text {
