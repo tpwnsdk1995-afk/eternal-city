@@ -142,4 +142,5 @@ export const junggokDong: MapDef = {
     { id: 'npc_taxi', at: { x: 8, y: 77 } },
   ],
   safeZone: false,
+  ambient: 'dusk',
 };

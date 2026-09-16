@@ -102,4 +102,5 @@ export const junggokStation: MapDef = {
   },
   npcs: [{ id: 'npc_taxi', at: { x: 6, y: 25 } }],
   safeZone: false,
+  ambient: 'dusk',
 };

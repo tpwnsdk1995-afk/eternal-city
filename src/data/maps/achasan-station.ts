@@ -94,4 +94,5 @@ export const achasanStation: MapDef = {
     { id: 'npc_blackmarket', at: { x: 47, y: 42 } },
   ],
   safeZone: false,
+  ambient: 'dusk',
 };

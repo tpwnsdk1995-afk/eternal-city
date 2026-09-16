@@ -105,4 +105,5 @@ export const yonggokMiddleSchool: MapDef = {
   },
   npcs: [{ id: 'npc_taxi', at: { x: 26, y: 15 } }],
   safeZone: false,
+  ambient: 'dusk',
 };

@@ -76,4 +76,5 @@ export const junggokBlockade: MapDef = {
     boss_adds: { x: 80, y: 6 },
   },
   safeZone: false,
+  ambient: 'dusk',
 };

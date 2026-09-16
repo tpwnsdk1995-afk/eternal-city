@@ -65,43 +65,76 @@ export function cellHash(x: number, y: number, salt = 0): number {
   return ((h ^ (h >>> 16)) >>> 0) % 1000;
 }
 
+const ROAD_TILES = new Set<number>([TILE.asphalt, TILE.roadLine, TILE.crosswalk, TILE.roadDash, TILE.asphaltCrack, TILE.manhole, TILE.asphaltWet, TILE.car, TILE.parkingFloor]);
+const CAR_SETS: number[][] = [
+  [TILE.car, TILE.carL, TILE.carR, TILE.carT, TILE.carB],
+  [TILE.car2, TILE.car2L, TILE.car2R, TILE.car2T, TILE.car2B],
+  [TILE.car3, TILE.car3L, TILE.car3R, TILE.car3T, TILE.car3B],
+  [TILE.car4, TILE.car4L, TILE.car4R, TILE.car4T, TILE.car4B],
+];
+const SHOP_TILES = [TILE.wallShop1, TILE.wallShop2, TILE.wallShop3, TILE.wallShop4, TILE.wallShop5, TILE.wallShop6];
+
 /**
- * Visual-only pass: swaps base tiles for variants (cracks, manholes, oil stains), turns the
- * street-facing row of a building into a facade, and splits multi-tile cars into halves.
- * Collision is untouched; new solid ids are appended for the tilemap layer.
+ * Visual-only pass: swaps base tiles for variants (cracks, manholes, puddles, oil stains), gives
+ * sidewalks a kerb where they meet the road and tactile pavers by crossings, turns the
+ * street-facing row of a building into shopfronts with brick corner piers, sprinkles rooftop
+ * details, and splits multi-tile cars into coloured halves. Collision is untouched; new solid ids
+ * are appended for the tilemap layer.
  */
 export function decorateTiles(built: BuiltMap): void {
   const { def, tiles } = built;
   const W = def.width;
   const H = def.height;
   const at = (x: number, y: number): number => (x < 0 || y < 0 || x >= W || y >= H ? -1 : tiles[y * W + x]);
+  const road = (x: number, y: number): boolean => ROAD_TILES.has(at(x, y));
   const out = new Uint16Array(tiles);
   const solid = new Set(built.solidTileIds);
+  const setSolid = (i: number, v: number) => {
+    out[i] = v;
+    solid.add(v);
+  };
 
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      const t = tiles[y * W + x];
+      const i = y * W + x;
+      const t = tiles[i];
       const h = cellHash(x, y);
       switch (t) {
         case TILE.asphalt:
-          if (h < 60) out[y * W + x] = TILE.asphaltCrack;
-          else if (h < 66) out[y * W + x] = TILE.manhole;
+          if (h < 60) out[i] = TILE.asphaltCrack;
+          else if (h < 66) out[i] = TILE.manhole;
+          else if (h < 105) out[i] = TILE.asphaltWet;
           break;
-        case TILE.sidewalk:
-          if (h < 80) out[y * W + x] = TILE.sidewalkCrack;
+        case TILE.sidewalk: {
+          // kerb toward the road (south first: the visible drop), tactile pavers beside crossings
+          if (road(x, y + 1)) out[i] = TILE.curbS;
+          else if (road(x, y - 1)) out[i] = TILE.curbN;
+          else if (road(x + 1, y)) out[i] = TILE.curbE;
+          else if (road(x - 1, y)) out[i] = TILE.curbW;
+          else if ([at(x, y - 1), at(x, y + 1), at(x - 1, y), at(x + 1, y)].includes(TILE.crosswalk)) out[i] = TILE.tactile;
+          else if (h < 80) out[i] = TILE.sidewalkCrack;
+          else if (h < 260) out[i] = TILE.sidewalkBlock;
           break;
+        }
         case TILE.parkingFloor:
-          if (h < 18) out[y * W + x] = TILE.oilStain;
+          if (h < 18) out[i] = TILE.oilStain;
           break;
         case TILE.buildingRoof: {
           const below = at(x, y + 1);
           const above = at(x, y - 1);
           if (below !== TILE.buildingRoof && below !== -1) {
-            out[y * W + x] = TILE.buildingWall;
-            solid.add(TILE.buildingWall);
+            const endL = at(x - 1, y) !== TILE.buildingRoof;
+            const endR = at(x + 1, y) !== TILE.buildingRoof;
+            if (endL || endR) setSolid(i, TILE.wallCorner);
+            else if (cellHash(x, y, 3) < 700) setSolid(i, SHOP_TILES[cellHash(x, y, 5) % SHOP_TILES.length]);
+            else setSolid(i, TILE.buildingWall);
           } else if (above !== TILE.buildingRoof && above !== -1) {
-            out[y * W + x] = TILE.roofEdge;
-            solid.add(TILE.roofEdge);
+            setSolid(i, TILE.roofEdge);
+          } else if (at(x, y + 2) === TILE.buildingRoof) {
+            const r = cellHash(x, y, 9);
+            if (r < 10) setSolid(i, TILE.roofTank);
+            else if (r < 28) setSolid(i, TILE.roofAc);
+            else if (r < 34) setSolid(i, TILE.roofHatch);
           }
           break;
         }
@@ -110,13 +143,18 @@ export function decorateTiles(built: BuiltMap): void {
           const r = at(x + 1, y) === TILE.car;
           const u = at(x, y - 1) === TILE.car;
           const d = at(x, y + 1) === TILE.car;
-          let v = TILE.car as number;
-          if (r && !l) v = TILE.carL;
-          else if (l && !r) v = TILE.carR;
-          else if (d && !u) v = TILE.carT;
-          else if (u && !d) v = TILE.carB;
-          out[y * W + x] = v;
-          solid.add(v);
+          // colour from the car's top-left cell so both halves match
+          let ox = x;
+          let oy = y;
+          while (at(ox - 1, oy) === TILE.car) ox--;
+          while (at(ox, oy - 1) === TILE.car) oy--;
+          const set = CAR_SETS[cellHash(ox, oy, 11) % CAR_SETS.length];
+          let v = set[0];
+          if (r && !l) v = set[1];
+          else if (l && !r) v = set[2];
+          else if (d && !u) v = set[3];
+          else if (u && !d) v = set[4];
+          setSolid(i, v);
           break;
         }
       }

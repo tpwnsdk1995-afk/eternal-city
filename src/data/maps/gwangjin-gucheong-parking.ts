@@ -65,4 +65,5 @@ export const gwangjinParking: MapDef = {
     { id: 'npc_taxi', at: { x: 35, y: 21 } },
   ],
   safeZone: true,
+  ambient: 'indoor',
 };

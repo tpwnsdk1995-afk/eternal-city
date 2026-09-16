@@ -94,4 +94,5 @@ export const hangangPark: MapDef = {
   },
   npcs: [{ id: 'npc_taxi', at: { x: 52, y: 6 } }],
   safeZone: false,
+  ambient: 'dusk',
 };

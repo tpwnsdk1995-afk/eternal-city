@@ -87,4 +87,5 @@ export const junggokStationDefense: MapDef = {
     boss: { x: 66, y: 23 },
   },
   safeZone: false,
+  ambient: 'dusk',
 };

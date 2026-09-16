@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { MapDef } from '@data/schema/map';
 import { ASSAULTS, registry } from '@data/registry';
 import type { MonsterDef } from '@data/schema/monster';
-import { TILE } from '@data/textureKeys';
+import { TEX, TILE } from '@data/textureKeys';
 import { buildMap, pointInRect, tileCenter, type BuiltMap } from '@core/map/mapBuild';
 import { dist } from '@core/math/vec';
 import { buildTilemap, type BuiltTilemap } from '../systems/TilemapBuilder';
@@ -128,6 +128,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
       dark.setMask(mask);
     }
     this.cameras.main.setBackgroundColor('#05070a');
+    this.applyAmbient(w, h);
 
     this.mapper = new InputMapper(this, gameState.settings.controlScheme);
     const offSettings = gameState.events.on('settings', (s) => this.mapper.setScheme(s.controlScheme));
@@ -164,6 +165,27 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     audio.ambient(ambientForMap({ safe: this.scene.key === 'SafeZone', dark: this.def.dark }));
     audio.bgm(bgmForScene(this.scene.key));
     this.onCreateWorld();
+  }
+
+  /**
+   * Colour grade for the map's time of day: a cold translucent wash over the world (under the
+   * HUD, above sprites) plus warm additive glows on every street lamp. Skipped for `dark` maps,
+   * which already carry the darkness/light-mask treatment.
+   */
+  private applyAmbient(w: number, h: number): void {
+    const a = this.def.ambient;
+    if (!a || this.def.dark) return;
+    const wash = a === 'night' ? { color: 0x0a1220, alpha: 0.34 } : a === 'dusk' ? { color: 0x0c1526, alpha: 0.2 } : { color: 0x101418, alpha: 0.1 };
+    this.add.rectangle(0, 0, w, h, wash.color, wash.alpha).setOrigin(0, 0).setDepth(28);
+    if (a === 'indoor') return;
+    for (const d of this.def.decor ?? []) {
+      if (d.tex !== TEX.deco_lamp) continue;
+      const ts = this.def.tileSize;
+      const g = this.add.image(d.at.x * ts + ts / 2 + 14, (d.at.y + 1) * ts - 58, TEX.lamp_glow).setDepth(29).setBlendMode(Phaser.BlendModes.ADD).setAlpha(a === 'night' ? 0.95 : 0.75);
+      g.setScale(1.15);
+      // pool of light on the pavement under the lamp
+      this.add.image(d.at.x * ts + ts / 2 + 6, (d.at.y + 1) * ts + 6, TEX.lamp_glow).setDepth(9).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.45).setScale(1.3, 0.75);
+    }
   }
 
   update(_time: number, delta: number): void {

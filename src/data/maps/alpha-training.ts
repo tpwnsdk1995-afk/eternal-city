@@ -41,4 +41,5 @@ export const alphaTraining: MapDef = {
   spawnPoints: { default: { x: 6, y: 8 }, fromParking: { x: 6, y: 20 } },
   npcs: [{ id: 'npc_trainer', at: { x: 6, y: 11 } }],
   safeZone: false,
+  ambient: 'dusk',
 };

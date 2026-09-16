@@ -1,5 +1,5 @@
 import { ANIM, TEX, type AnimKey, type TexKey } from '@data/textureKeys';
-import { drawTilesAtlas, TILE_COUNT } from './draw/tiles';
+import { drawTilesAtlas, TILE_ATLAS_H, TILE_ATLAS_W } from './draw/tiles';
 import { FIGURE_STYLES, figureDrawer, drawPortrait, type FigureKey } from './draw/figures';
 import { FRAMES_PER_DIR } from '../systems/facing';
 import {
@@ -58,7 +58,7 @@ import {
   drawPickupWon,
 } from './draw/items';
 import { drawTitleBackground } from './draw/title';
-import { drawBlood, drawExplosion, drawFire, drawJumpMarker, drawMuzzle, drawRocket, drawScorch, drawShellGrenade, drawSmokePuff, drawTracer } from './draw/fx';
+import { drawBlood, drawExplosion, drawFire, drawJumpMarker, drawMuzzle, drawRocket, drawScorch, drawShellGrenade, drawLampGlow, drawSmokePuff, drawTracer } from './draw/fx';
 import { drawBench, drawBusStop, drawFlagpole, drawGoal, drawHydrant, drawLamp, drawPhone, drawPillar, drawSign, drawTrash, drawTree, drawVending } from './draw/decor';
 import { drawCrosshair, drawUiPanel, drawUiSlot } from './draw/ui';
 
@@ -90,7 +90,7 @@ const single = (draw: DrawFn, w: number, h = w): TextureSpec => ({ frameW: w, fr
  * its `draw` with a spritesheet load — no game code references how a key was produced.
  */
 export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
-  [TEX.tiles]: { frameW: 32 * TILE_COUNT, frameH: 32, frames: 1, draw: (ctx) => drawTilesAtlas(ctx) },
+  [TEX.tiles]: { frameW: TILE_ATLAS_W, frameH: TILE_ATLAS_H, frames: 1, draw: (ctx) => drawTilesAtlas(ctx) },
 
   [TEX.player]: figure('player'),
   [TEX.player_infected]: figure('player_infected'),
@@ -197,6 +197,7 @@ export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
   [TEX.explosion]: { frameW: 96, frameH: 96, frames: 6, draw: drawExplosion, anim: { key: ANIM.explosion_blast, frameRate: 18, repeat: 0 } },
   [TEX.scorch]: single(drawScorch, 64),
   [TEX.smoke_puff]: single(drawSmokePuff, 16),
+  [TEX.lamp_glow]: single(drawLampGlow, 160),
 
   [TEX.ui_panel]: single(drawUiPanel, 48),
   [TEX.ui_slot]: single(drawUiSlot, 48),

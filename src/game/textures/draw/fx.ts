@@ -188,3 +188,13 @@ export function drawSmokePuff(ctx: Ctx, _f: number, w: number, h: number): void 
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
 }
+
+/** Warm street-lamp glow (ADD-blended over the scene at dusk). */
+export function drawLampGlow(ctx: CanvasRenderingContext2D, _f: number, w: number, h: number): void {
+  const g = ctx.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w / 2);
+  g.addColorStop(0, 'rgba(255,214,140,0.55)');
+  g.addColorStop(0.35, 'rgba(255,190,110,0.22)');
+  g.addColorStop(1, 'rgba(255,170,90,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+}

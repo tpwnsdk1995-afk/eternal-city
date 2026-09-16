@@ -102,4 +102,5 @@ export const pyeongchangDong: MapDef = {
   },
   npcs: [{ id: 'npc_taxi', at: { x: 42, y: 55 } }],
   safeZone: false,
+  ambient: 'dusk',
 };

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { TEX } from '@data/textureKeys';
 import type { BuiltMap } from '@core/map/mapBuild';
+import { TILE_PAD } from '../textures/draw/tiles';
 
 export interface BuiltTilemap {
   map: Phaser.Tilemaps.Tilemap;
@@ -11,7 +12,8 @@ export interface BuiltTilemap {
 export function buildTilemap(scene: Phaser.Scene, built: BuiltMap): BuiltTilemap {
   const { def } = built;
   const map = scene.make.tilemap({ tileWidth: def.tileSize, tileHeight: def.tileSize, width: def.width, height: def.height });
-  const tileset = map.addTilesetImage(TEX.tiles, TEX.tiles, def.tileSize, def.tileSize, 0, 0, 0);
+  // the atlas is extruded: 1px margin, 2px between cells (see drawTilesAtlas)
+  const tileset = map.addTilesetImage(TEX.tiles, TEX.tiles, def.tileSize, def.tileSize, TILE_PAD, TILE_PAD * 2, 0);
   if (!tileset) throw new Error('tiles texture missing — run generateAllTextures first');
   const layer = map.createBlankLayer('ground', tileset, 0, 0);
   if (!layer) throw new Error('failed to create tilemap layer');

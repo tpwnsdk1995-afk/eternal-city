@@ -72,6 +72,8 @@ export interface MapDef {
   safeZone: boolean;
   /** Underground / night map: darkness overlay with a light radius around the player. */
   dark?: boolean;
+  /** Colour grade: dusk = cold blue evening with lamp glows (2002 streets), night = darker, indoor = fluorescent hub. */
+  ambient?: 'dusk' | 'night' | 'indoor';
   /** Recommended level band shown on portals and in the map list. */
   levelRange?: [number, number];
 }
