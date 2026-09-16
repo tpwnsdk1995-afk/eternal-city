@@ -54,5 +54,10 @@ export const ART_OVERRIDES: Partial<Record<TexKey, ArtOverride>> = {
   [TEX.icon_acid]: 'art/icon_acid.webp',
   [TEX.icon_bone]: 'art/icon_bone.webp',
   // original-client sprites extracted with tools/ec-extract.py (8 dirs × 6 frames, native ~62px figures)
-  [TEX.zombie_casual_f]: { url: 'art/zombie_casual_f.png', frameW: 98, frameH: 133, scale: 0.6 },
+  [TEX.zombie_casual_f]: { url: 'art/zombie_casual_f.png', frameW: 98, frameH: 152, scale: 0.6 },
+  [TEX.zombie_suit_m]: { url: 'art/zombie_suit_m.png', frameW: 146, frameH: 144, scale: 0.6 },
+  [TEX.zombie_stripe]: { url: 'art/zombie_stripe.png', frameW: 174, frameH: 150, scale: 0.6 },
+  [TEX.zombie_banshee]: { url: 'art/zombie_banshee.png', frameW: 158, frameH: 152, scale: 0.6 },
+  [TEX.zombie_office]: { url: 'art/zombie_office.png', frameW: 192, frameH: 150, scale: 0.6 },
+  [TEX.zombie_worker]: { url: 'art/zombie_worker.png', frameW: 202, frameH: 172, scale: 0.6 },
 };

@@ -88,8 +88,11 @@ def layer_boxes(blob, fo):
     return out
 
 
+FEET = 36  # origin (feet) row below the cell centre: matches the drawn 48px figures (feet ~22 world px under the entity at scale 0.6)
+
+
 def auto_cell(blob, parts, part_ids, blocks, frames):
-    """smallest even cell (w, h, anchor_y) holding every used frame with the origin at bottom-center"""
+    """smallest even cell (w, h, anchor_y) holding every used frame, origin at bottom-centre, centre-to-feet fixed"""
     half = up = down = 0
     for pi in part_ids:
         for b in blocks:
@@ -97,7 +100,8 @@ def auto_cell(blob, parts, part_ids, blocks, frames):
                 if f < len(parts[pi][b]):
                     for w, h, ox, oy in layer_boxes(blob, parts[pi][b][f]):
                         half, up, down = max(half, ox, w - ox), max(up, oy), max(down, h - oy)
-    return (2 * half + 4, up + down + 4, up + 2)
+    ay = max(up + 2, down + 2 + 2 * FEET)
+    return (2 * half + 4, 2 * (ay - FEET), ay)  # feet sit FEET px below the cell centre in every sheet
 
 
 def compose(blob, pix_base, parts, part_ids, block, frame, cell):
@@ -138,10 +142,7 @@ def build(key, data, strip=False):
             sheet.alpha_composite(compose(blob, pix_base, parts, s['parts'], block, fr, cell), (c * cw, d * ch))
     out = os.path.join(os.path.dirname(__file__), '..', 'public', 'art', f'{key}.png')
     sheet.save(out); print(f'wrote {os.path.normpath(out)} frameW={cw} frameH={ch}  -> data/artOverrides.ts')
-    return
-    if False:
-        os.makedirs(os.path.join(os.path.dirname(__file__), 'out'), exist_ok=True)
-        sp = os.path.join(os.path.dirname(__file__), 'out', f'{key}_strip.png'); st.save(sp); print('wrote', os.path.normpath(sp), n, 'frames')
+
 
 
 if __name__ == '__main__':
