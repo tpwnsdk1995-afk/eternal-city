@@ -12,6 +12,7 @@ export default defineConfig({
     },
   },
   server: { port: 5173 },
+  base: './', // relative asset URLs: works at / (preview, e2e), under /eternal-city/ (GitHub Pages) and inside the artifact
   build: { target: 'es2020', sourcemap: false },
   test: {
     environment: 'node',
