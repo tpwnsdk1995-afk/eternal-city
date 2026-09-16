@@ -2,6 +2,7 @@ import type { WeaponClass } from '@data/schema/enums';
 import { GUN_PROFILES, SFX_MIN_GAP_MS, spatialGain, subFireProfile, type AmbientKind, type GunProfile, type SfxName } from '@core/audio/sfx';
 import { BGM, midiHz, stepSeconds, type BgmKind } from '@core/audio/bgm';
 import { gameState } from '../state/GameState';
+import { SFX_OVERRIDES } from '@data/artOverrides';
 
 const RECENT_CAP = 60;
 const NOISE_SECONDS = 2;
@@ -44,6 +45,7 @@ class AudioManager {
   private bgmNextAt = 0;
   private bgmNodes: { stop(): void }[] = [];
   private noiseBuf: AudioBuffer | null = null;
+  private samples = new Map<string, AudioBuffer>();
   private ambientNodes: { stop(): void }[] = [];
   private ambientTimer: ReturnType<typeof setInterval> | null = null;
   ambientKind: AmbientKind = 'none';
@@ -107,6 +109,9 @@ class AudioManager {
     const data = buf.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
     this.noiseBuf = buf;
+    for (const [name, url] of Object.entries(SFX_OVERRIDES)) {
+      fetch(url).then((r) => r.arrayBuffer()).then((b) => ctx.decodeAudioData(b)).then((s) => this.samples.set(name, s)).catch(() => undefined);
+    }
     this.applySettings();
     return ctx;
   }
@@ -212,12 +217,27 @@ class AudioManager {
 
   // --- one-shots -----------------------------------------------------------------------------
 
+  /** An original-client sample for `name`, if one was declared and has decoded; false keeps the synth recipe. */
+  private sample(name: string, gain: number): boolean {
+    const buf = this.samples.get(name);
+    if (!buf || !this.ctx || !this.sfxBus) return false;
+    const src = this.ctx.createBufferSource();
+    const g = this.ctx.createGain();
+    src.buffer = buf;
+    g.gain.value = gain;
+    src.connect(g);
+    g.connect(this.sfxBus);
+    src.start();
+    return true;
+  }
+
   /** Play a named effect. `gain` scales it (spatial attenuation, sub-fire). */
   play(name: SfxName, gain = 1): void {
     if (!this.gate(name)) return;
     this.record(name);
     if (!this.ctx || !gameState.settings.sfxOn) return;
     const v = Math.max(0, Math.min(1.5, gain));
+    if (this.sample(name, v)) return;
     switch (name) {
       case 'shot':
         this.gunFromProfile(GUN_PROFILES['권총'], v);
@@ -331,6 +351,7 @@ class AudioManager {
     if (!this.gate('shot')) return;
     this.record(`shot:${cls}`);
     if (!this.ctx || !gameState.settings.sfxOn) return;
+    if (this.sample(`shot:${cls}`, subFire ? 0.6 : 1) || this.sample('shot', subFire ? 0.6 : 1)) return;
     switch (p.kind) {
       case 'gun':
         this.gunFromProfile(p, 1);

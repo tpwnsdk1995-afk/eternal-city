@@ -1,4 +1,6 @@
 import { TEX, type TexKey } from './textureKeys';
+import type { SfxName } from '@core/audio/sfx';
+import type { WeaponClass } from './schema/enums';
 
 /**
  * Real art that replaces a procedurally drawn texture. Paths are relative to the page (served from
@@ -148,3 +150,10 @@ export const ART_OVERRIDES: Partial<Record<TexKey, ArtOverride>> = {
   [TEX.parasite_horror]: { url: 'art/parasite_horror.png', frameW: 332, frameH: 304, scale: 0.6, top: 82 },
   [TEX.the_wise_one]: { url: 'art/the_wise_one.png', frameW: 280, frameH: 192, scale: 0.6, top: 60 },
 };
+
+/**
+ * Original-client sound effects (s0/s1 .dat WAVs copied by tools/ec-sounds.py) that replace the synth
+ * recipe of the same name; `shot:<WeaponClass>` overrides one gun's report. Empty until the ids are
+ * assigned by ear (the client has no name table) — an unlisted or failing file leaves the synth playing.
+ */
+export const SFX_OVERRIDES: Partial<Record<SfxName | `shot:${WeaponClass}`, string>> = {};
