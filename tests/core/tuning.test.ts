@@ -85,18 +85,18 @@ describe('유니크 개조', () => {
 });
 
 describe('플러스업 / 방어구', () => {
-  it('raises defense 10% per level up to +5 and applies 접두', () => {
+  it('raises defense 10% per level up to maxPlusUp and applies 접두', () => {
     let s: ItemStack = { uid: 'a1', itemId: top.id, qty: 1 };
     const base = armorDefense(top, s);
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < balance.tuning.maxPlusUp; i++) {
       const r = plusUp(top, s);
       expect(r.ok).toBe(true);
       if (r.ok) s = r.stack;
     }
-    expect(s.plusUp).toBe(5);
+    expect(s.plusUp).toBe(balance.tuning.maxPlusUp);
     expect(plusUp(top, s)).toEqual({ ok: false, reason: 'maxed' });
-    expect(armorDefense(top, s)).toBeCloseTo(base * 1.5);
-    expect(armorDefense(top, { ...s, prefix: '전설' })).toBeCloseTo(base * 1.5 * balance.tuning.prefixDefenseMult['전설']);
-    expect(armorLabel(top, { ...s, prefix: '고대' })).toBe(`고대 ${top.name} +5`);
+    expect(armorDefense(top, s)).toBeCloseTo(base * (1 + balance.tuning.maxPlusUp * 0.1));
+    expect(armorDefense(top, { ...s, prefix: '전설' })).toBeCloseTo(base * (1 + balance.tuning.maxPlusUp * 0.1) * balance.tuning.prefixDefenseMult['전설']);
+    expect(armorLabel(top, { ...s, prefix: '고대' })).toBe(`고대 ${top.name} +${balance.tuning.maxPlusUp}`);
   });
 });

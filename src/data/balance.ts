@@ -150,7 +150,7 @@ export const balance = {
     enhanceCostPerLevel: 0.45,
     /** failure drops one level (never breaks); below this level a failure costs nothing but ₩ */
     enhanceSafeBelow: 1,
-    maxPlusUp: 5,
+    maxPlusUp: 20, // 2026-09-17: +5 → +20
     plusUpDefensePerLevel: 0.1,
     plusUpCostBase: 0.25,
     plusUpCostPerLevel: 0.5,

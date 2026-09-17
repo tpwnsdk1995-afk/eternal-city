@@ -44,9 +44,9 @@ test.describe('기술상 (tuning)', () => {
     // plus-up on a bought top
     expect(await page.evaluate(() => window.__ec!.actions.buy('armor_top_basic').ok)).toBe(true);
     const top = await page.evaluate(() => window.__ec!.state.inventory.items.find((s) => s.itemId === 'armor_top_basic')!.uid);
-    for (let i = 0; i < 5; i++) expect(await page.evaluate((u) => window.__ec!.actions.plusUp(u).ok, top)).toBe(true);
+    for (let i = 0; i < 20; i++) expect(await page.evaluate((u) => window.__ec!.actions.plusUp(u).ok, top)).toBe(true);
     expect(await page.evaluate((u) => window.__ec!.actions.plusUp(u).ok, top)).toBe(false);
-    expect(await page.evaluate((u) => window.__ec!.state.inventory.items.find((s) => s.uid === u)!.plusUp, top)).toBe(5);
+    expect(await page.evaluate((u) => window.__ec!.state.inventory.items.find((s) => s.uid === u)!.plusUp, top)).toBe(20);
 
     // the tech NPC opens the tuning window; a save round-trips the tune state
     await page.evaluate(() => window.__ec!.state.events.emit('npcInteract', { npcId: 'npc_tech' }));
