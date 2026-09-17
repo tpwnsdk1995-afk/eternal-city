@@ -26,10 +26,10 @@ describe('fireController', () => {
   it('reports noAmmo with an empty inventory and chains to the next box', () => {
     expect(tryFire(initialFireState(), 0, glock, 1, createInventory(), lookup)).toEqual({ ok: false, reason: 'noAmmo' });
 
-    let inv = addItem(createInventory(), lookup('ammo_9mm_normal'), 1);
-    inv = addItem(inv, lookup('ammo_9mm_normal'), 5);
-    const small = inv.items[0].uid;
-    const big = inv.items[1].uid;
+    // two separate boxes (addItem would merge them now) — old saves can still hold several
+    let inv = { items: [{ uid: 'a', itemId: 'ammo_9mm_normal', qty: 1 }, { uid: 'b', itemId: 'ammo_9mm_normal', qty: 5 }], nextUid: 3 };
+    const small = 'a';
+    const big = 'b';
     const a = tryFire(initialFireState(), 0, glock, 1, inv, lookup);
     expect(a.ok && a.boxUid).toBe(small);
     inv = consumeRound(inv, small);

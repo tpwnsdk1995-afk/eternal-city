@@ -78,6 +78,6 @@ export const assaultD: AssaultDef = {
       ],
     },
   ],
-  rewards: { won: 60_000, xp: 9_000, items: [{ itemId: 'armor_top_tactical_cl', chance: 0.5, qty: 1 }, { itemId: 'ammo_50_ap', chance: 1, qty: 40 }, { itemId: 'premium_coupon', chance: 0.2, qty: 1 }] },
+  rewards: { won: 3_000_000, xp: 450_000, items: [{ itemId: 'armor_top_tactical_cl', chance: 0.5, qty: 5 }, { itemId: 'ammo_50_ap', chance: 1, qty: 200 }, { itemId: 'premium_coupon', chance: 0.2, qty: 5 }] },
   failPenalty: { won: 5_000 },
 };

@@ -80,6 +80,6 @@ export const assaultA: AssaultDef = {
       ],
     },
   ],
-  rewards: { won: 5_000, xp: 600, items: [{ itemId: 'ammo_9mm_incendiary', chance: 1, qty: 60 }] },
+  rewards: { won: 250_000, xp: 30_000, items: [{ itemId: 'ammo_9mm_incendiary', chance: 1, qty: 300 }] },
   failPenalty: { won: 500 },
 };

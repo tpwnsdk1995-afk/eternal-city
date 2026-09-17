@@ -36,8 +36,9 @@ export class ParallelWindow extends Window {
         const b = this.button(0, y + 2, `${yd.year}년으로 이동`, () => actions.travelYear(yd.year), '#9be7ff', 13);
         b.setX(this.w - 18 - b.width);
       } else {
-        const why = { same: '', permit: '허가증 필요', milestone: '조건 미달', unknown: '' }[r.reason];
-        this.label(this.w - 18, y + 4, why, theme.colors.bad, 12).setOrigin(1, 0);
+        const alt = [yd.unlock.level !== undefined ? `Lv.${yd.unlock.level}` : '', yd.unlock.orFlag ? `${yd.unlock.orFlag.split(':')[1]} 캠페인 완주` : ''].filter(Boolean).join(' 또는 ');
+        const why = { same: '', permit: '허가증 → 김훈 소대장 퀘스트 "위토군 배치문서 회수"', milestone: `${alt} 필요`, unknown: '' }[r.reason];
+        this.label(this.w - 18, y + 4, why, theme.colors.bad, 11).setOrigin(1, 0);
       }
       y += 66;
     }

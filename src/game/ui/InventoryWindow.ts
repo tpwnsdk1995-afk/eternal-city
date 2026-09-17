@@ -34,6 +34,8 @@ export class InventoryWindow extends Window {
     this.content.remove(this.rows);
     this.clearBody();
     this.content.add(this.rows);
+    this.rows.setVisible(!this.pending);
+    if (this.drawConfirm()) return;
 
     const inv = gameState.inventory;
     const d = gameState.derived();
@@ -145,6 +147,10 @@ export class InventoryWindow extends Window {
     if (action) {
       const b = this.button(12, y + 6, action, () => this.act(s.uid), ok ? theme.colors.brass : theme.colors.bad, 14);
       this.label(b.x + b.width + 12, y + 10, '(같은 줄을 다시 눌러도 됩니다)', theme.colors.muted, 12);
+    }
+    if (!(def.kind === 'misc' && def.quest)) {
+      const drop = this.button(0, y + 6, '버리기', () => this.confirm(`${title}${s.qty > 1 ? ` ×${s.qty}` : ''}\n버릴까요? (되돌릴 수 없습니다)`, () => actions.discard(s.uid)), theme.colors.bad, 14);
+      drop.setX(this.w - 12 - drop.width);
     }
   }
 

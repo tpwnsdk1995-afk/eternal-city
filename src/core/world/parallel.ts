@@ -33,10 +33,10 @@ export function canTravel(year: number, ctx: TravelCtx): { ok: true } | { ok: fa
 /** Human-readable unlock line for the year list. */
 export function unlockText(def: YearDef): string {
   const parts: string[] = [];
-  if (def.unlock.permit) parts.push('패러렐 시스템 허가증');
+  if (def.unlock.permit) parts.push('허가증');
   const alt: string[] = [];
   if (def.unlock.level !== undefined) alt.push(`Lv.${def.unlock.level}`);
-  if (def.unlock.orFlag) alt.push(`${def.unlock.orFlag.split(':')[1]} 캠페인 완주`);
+  if (def.unlock.orFlag) alt.push(`${def.unlock.orFlag.split(':')[1]} 캠페인 완주(퀘스트창 Q)`);
   if (alt.length) parts.push(alt.join(' 또는 '));
   return parts.length ? `해금 조건: ${parts.join(' + ')}` : '항상 이용 가능';
 }

@@ -442,9 +442,7 @@ export class CombatBridge {
     } else {
       const def = registry.item(pay.itemId);
       const next = addItem(gameState.inventory, def, pay.qty, { prefix: pay.prefix });
-      if (totalWeightKg(next, registry.item) > gameState.derived().maxWeightKg) {
-        return this.throttled('overweight', '무게 초과 — 더 이상 들 수 없습니다.', 'bad');
-      }
+      if (totalWeightKg(next, registry.item) > gameState.derived().maxWeightKg) this.throttled('overweight', '무게 초과 — 이동이 느려집니다. 버리거나 팔거나 보관함에 맡기세요.', 'bad');
       gameState.setInventory(next);
       gameState.message(`획득: ${pay.prefix ? `${pay.prefix} ` : ''}${def.name}${pay.qty > 1 ? ` ×${pay.qty}` : ''}`, pay.prefix ? 'system' : def.kind === 'misc' && def.quest ? 'system' : 'good');
       audio.play('pickup_item');

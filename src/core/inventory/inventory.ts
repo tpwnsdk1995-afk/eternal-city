@@ -15,7 +15,7 @@ export const createInventory = (): Inventory => ({ items: [], nextUid: 1 });
  * consumables merge into an existing stack of the same item.
  */
 export function addItem(inv: Inventory, def: ItemDef, qty = 1, opts: { prefix?: ItemStack['prefix'] } = {}): Inventory {
-  if (def.kind === 'consumable' || def.kind === 'misc') {
+  if (def.kind === 'consumable' || def.kind === 'misc' || def.kind === 'ammo') {
     const existing = inv.items.find((s) => s.itemId === def.id);
     if (existing) {
       return { ...inv, items: inv.items.map((s) => (s.uid === existing.uid ? { ...s, qty: s.qty + qty } : s)) };

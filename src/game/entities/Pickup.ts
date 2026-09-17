@@ -17,7 +17,8 @@ export class Pickup extends Phaser.Physics.Arcade.Sprite {
     this.payload = payload;
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    this.setCircle(8);
+    const reach = 28; // wide body so a pass-by scoops it up
+    this.setCircle(reach, this.width / 2 - reach, this.height / 2 - reach);
     this.setDepth(5);
     const prefix = payload.kind === 'item' && payload.prefix ? `${payload.prefix} ` : '';
     const text = payload.kind === 'won' ? `₩${payload.amount}` : `${prefix}${registry.item(payload.itemId).name}${payload.qty > 1 ? ` ×${payload.qty}` : ''}`;

@@ -55,6 +55,6 @@ export const assaultC: AssaultDef = {
     },
     { kind: 'moveTo', label: '동쪽 비상 사다리로 탈출 (90초)', toZone: 'exit', timeLimitSec: 90 },
   ],
-  rewards: { won: 30_000, xp: 4_200, items: [{ itemId: 'ammo_762_ap', chance: 1, qty: 60 }, { itemId: 'armor_coat_kevlar', chance: 0.4, qty: 1 }, { itemId: 'ammo_rocket', chance: 0.5, qty: 3 }] },
+  rewards: { won: 1_500_000, xp: 210_000, items: [{ itemId: 'ammo_762_ap', chance: 1, qty: 300 }, { itemId: 'armor_coat_kevlar', chance: 0.4, qty: 5 }, { itemId: 'ammo_rocket', chance: 0.5, qty: 15 }] },
   failPenalty: { won: 2_500 },
 };

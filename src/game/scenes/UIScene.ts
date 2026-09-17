@@ -374,7 +374,7 @@ export class UIScene extends Phaser.Scene {
     }
     this.questTracker.setText(lines.join('\n'));
     const yr = registry.map(gameState.currentMapId).year;
-    this.permitText.setText(gameState.flags.parallelPermit ? `${yr} · 패러렐 허가증 보유` : `${yr} · 패러렐 허가증 없음`);
+    this.permitText.setText(gameState.flags.parallelPermit ? `${yr} · 패러렐 허가증 보유` : `${yr} · 허가증 없음 → 김훈 소대장 퀘스트`);
     this.permitText.setColor(gameState.flags.parallelPermit ? theme.colors.good : '#6b7280');
   }
 

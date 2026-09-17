@@ -83,12 +83,12 @@ export const assaultF: AssaultDef = {
     },
   ],
   rewards: {
-    won: 400_000,
-    xp: 60_000,
+    won: 20_000_000,
+    xp: 3_000_000,
     items: [
-      { itemId: 'ammo_rocket', chance: 1, qty: 10 },
-      { itemId: 'armor_coat_kevlar_cl', chance: 0.4, qty: 1 },
-      { itemId: 'premium_coupon', chance: 0.3, qty: 1 },
+      { itemId: 'ammo_rocket', chance: 1, qty: 50 },
+      { itemId: 'armor_coat_kevlar_cl', chance: 0.4, qty: 5 },
+      { itemId: 'premium_coupon', chance: 0.3, qty: 5 },
     ],
   },
   failPenalty: { won: 40_000 },

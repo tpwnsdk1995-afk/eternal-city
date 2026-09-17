@@ -24,13 +24,13 @@ describe('inventory', () => {
   });
 
 
-  it('finds ammo boxes by caliber and kind, smallest first', () => {
+  it('finds ammo boxes by caliber and kind; same ammo merges into one stack', () => {
     let inv = addItem(createInventory(), lookup('ammo_9mm_normal'), 100);
-    inv = addItem(inv, lookup('ammo_9mm_normal'), 30);
+    inv = addItem(inv, lookup('ammo_9mm_normal'), 30); // merges (2026-09-17)
     inv = addItem(inv, lookup('ammo_45_normal'), 80);
     inv = addItem(inv, lookup('ammo_9mm_incendiary'), 60);
     const boxes = findAmmoBoxes(inv, lookup, '9mm', '일반탄');
-    expect(boxes.map((b) => b.qty)).toEqual([30, 100]);
+    expect(boxes.map((b) => b.qty)).toEqual([130]);
     expect(totalRounds(inv, lookup, '9mm', '일반탄')).toBe(130);
   });
 

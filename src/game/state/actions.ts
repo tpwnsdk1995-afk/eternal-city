@@ -152,6 +152,21 @@ export const actions = {
     return done(`${def.name} 판매 (+₩${r.gained.toLocaleString('ko-KR')})`, 'good');
   },
 
+  discard(uid: string): ActionResult {
+    const stack = getStack(gameState.inventory, uid);
+    if (!stack) return fail('아이템을 찾을 수 없습니다.');
+    const def = registry.item(stack.itemId);
+    if (def.kind === 'misc' && def.quest) return fail('퀘스트 아이템은 버릴 수 없습니다.');
+    const inv = removeStack(gameState.inventory, uid);
+    gameState.setInventory(inv);
+    gameState.setEquipment(pruneEquipment(gameState.equipment, inv));
+    const w = gameState.weapon();
+    if (def.kind === 'ammo' && w && gameState.fire.ammoKind === def.ammoKind && totalRounds(inv, registry.item, w.def.caliber, def.ammoKind) === 0) {
+      gameState.setFire(selectAmmoKind(gameState.fire, '일반탄'));
+    }
+    return done(`${def.name}${stack.qty > 1 ? ` ×${stack.qty}` : ''} 버림`, 'info');
+  },
+
   learnSkill(id: string): ActionResult {
     const def = registry.skill(id);
     if (def.race && def.race !== gameState.character.race) return fail(`${RACE_NAME[def.race]} 전용 스킬입니다.`);

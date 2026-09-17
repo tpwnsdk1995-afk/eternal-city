@@ -82,9 +82,9 @@ export const balance = {
     defaultSubFire: { rpm: 120, dmgMult: 0.5 },
   },
   weight: {
-    base: 70,
-    perVit: 0.5,
-    perEnd: 0.5,
+    base: 140,
+    perVit: 1,
+    perEnd: 1,
   },
   /** 광진구청 보관함: stacks it can hold (weight is never counted while stored) */
   storage: { slots: 100 },
@@ -108,6 +108,8 @@ export const balance = {
     entryLevelOverride: null as number | null,
     /** 고급 어설트 scaling */
     advanced: { levelOffset: 10, rewardMult: 2, hpMult: 1.7, defenseBonus: 8, dmgMult: 1.4, xpMult: 1.6, wonMult: 1.5 },
+    /** every assault (2026-09-17): tougher monsters to match the x50 clear rewards in src/data/assaults */
+    hard: { hpMult: 2, dmgMult: 1.5 },
     /** 점수 비례 보상: kills + clear + time bonus → grade band → reward multiplier */
     scoring: {
       killPts: { A: 60, B: 80, C: 100 } as Record<'A' | 'B' | 'C', number>,
