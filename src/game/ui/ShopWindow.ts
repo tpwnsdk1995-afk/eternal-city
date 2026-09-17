@@ -20,6 +20,8 @@ export class ShopWindow extends Window {
   private npc: NpcDef | null = null;
   /** uids ticked in the sell list — sold together by the 선택 판매 button */
   private picked = new Set<string>();
+  /** consumable being bought in bulk: the quantity screen replaces the lists until 구매/취소 */
+  private qtyBuy: { id: string; n: number } | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, 'shop', x, y, 800, 540, '무기상');
@@ -34,6 +36,7 @@ export class ShopWindow extends Window {
     this.npc = npc;
     this.pending = null;
     this.picked.clear();
+    this.qtyBuy = null;
     this.setTitle(`${npc.name} — 거래`);
     this.refresh();
   }
@@ -45,11 +48,11 @@ export class ShopWindow extends Window {
     const colW = (this.w - 36) / 2;
     this.label(12, 4, `₩ ${gameState.character.won.toLocaleString('ko-KR')}`, theme.colors.brass, 15, { fontStyle: 'bold' });
 
-    this.buyList.setVisible(!this.pending);
-    this.sellList.setVisible(!this.pending);
-    if (this.drawConfirm()) return;
+    this.buyList.setVisible(!this.pending && !this.qtyBuy);
+    this.sellList.setVisible(!this.pending && !this.qtyBuy);
+    if (this.drawConfirm() || this.drawQty()) return;
 
-    this.label(12, 26, '구매 (탭 → 확인)', theme.colors.muted, 12);
+    this.label(12, 26, '구매 (탭 → 확인, 소모품은 수량 선택)', theme.colors.muted, 12);
     this.label(24 + colW, 26, '판매 (탭=체크, 정가의 40%)', theme.colors.muted, 12);
 
     const level = gameState.character.level;
@@ -77,7 +80,11 @@ export class ShopWindow extends Window {
         right: won(price),
         rightColor: gameState.character.won >= price ? theme.colors.brass : theme.colors.bad,
         disabled: (def.kind === 'armor' || def.kind === 'weapon') && level < def.reqLevel,
-        onClick: () => this.confirm(`${def.name}\n${won(price)}에 구매할까요?`, () => actions.buy(id)),
+        onClick: () => {
+          if (def.kind !== 'consumable') return this.confirm(`${def.name}\n${won(price)}에 구매할까요?`, () => actions.buy(id));
+          this.qtyBuy = { id, n: 1 };
+          this.refresh();
+        },
       });
     }
     this.buyList.setRows(buyRows);
@@ -124,5 +131,51 @@ export class ShopWindow extends Window {
       });
     }, n ? theme.colors.brass : theme.colors.muted, 12);
     btn.setX(this.w - 12 - btn.width);
+  }
+
+  /** Quantity picker for consumables: steppers, 최대, typed 입력, then one 구매. */
+  private drawQty(): boolean {
+    const q = this.qtyBuy;
+    if (!q) return false;
+    const def = registry.item(q.id);
+    const price = buyPrice(def);
+    const max = Math.max(1, Math.min(999, Math.floor(gameState.character.won / price)));
+    q.n = Math.max(1, Math.min(max, q.n));
+    const set = (n: number): void => {
+      q.n = n;
+      this.refresh();
+    };
+    const cx = this.w / 2;
+    const cy = this.h / 2;
+    this.label(cx, cy - 120, def.name, '#ffffff', 18, { fontStyle: 'bold' }).setOrigin(0.5, 0.5);
+    this.label(cx, cy - 80, `${q.n}개 · ${won(price * q.n)}`, theme.colors.brass, 24, { fontStyle: 'bold' }).setOrigin(0.5, 0.5);
+    this.label(cx, cy - 50, `1개 ${won(price)} · 지금 돈으로 최대 ${max}개`, theme.colors.muted, 12).setOrigin(0.5, 0.5);
+    const steps: [string, () => void][] = [
+      ['-10', () => set(q.n - 10)],
+      ['-1', () => set(q.n - 1)],
+      ['+1', () => set(q.n + 1)],
+      ['+10', () => set(q.n + 10)],
+      ['최대', () => set(max)],
+      ['직접 입력', () => {
+        const n = Number.parseInt(window.prompt(`${def.name} 몇 개 살까요? (최대 ${max})`, String(q.n)) ?? '', 10);
+        if (n > 0) set(n);
+      }],
+    ];
+    const btns = steps.map(([label, run]) => this.button(0, cy - 20, label, run, undefined, 16));
+    let bx = cx - (btns.reduce((w, b) => w + b.width, 0) + 8 * (btns.length - 1)) / 2;
+    for (const b of btns) {
+      b.setX(bx);
+      bx += b.width + 8;
+    }
+    this.button(cx - 90, cy + 40, '구매', () => {
+      this.qtyBuy = null;
+      actions.buyMany(q.id, q.n);
+      this.refresh();
+    }, theme.colors.brass, 18);
+    this.button(cx + 30, cy + 40, '취소', () => {
+      this.qtyBuy = null;
+      this.refresh();
+    }, theme.colors.muted, 18);
+    return true;
   }
 }

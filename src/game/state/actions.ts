@@ -135,6 +135,28 @@ export const actions = {
     return done(`${def.name} 구매 (₩${r.cost.toLocaleString('ko-KR')})`, 'good');
   },
 
+  /** Buys `n` of one item in a single step; stops early at the first box the wallet or the weight limit can't take. */
+  buyMany(itemId: string, n: number): ActionResult {
+    const def = registry.item(itemId);
+    const max = gameState.derived().maxWeightKg;
+    let inv = gameState.inventory;
+    let wallet = gameState.character.won;
+    let bought = 0;
+    let why = '';
+    for (; bought < n; bought++) {
+      const r = buy(inv, wallet, def, registry.item);
+      if (!r.ok) { why = '₩ 부족'; break; }
+      if (totalWeightKg(r.inv, registry.item) > max) { why = '무게 한도'; break; }
+      inv = r.inv;
+      wallet = r.won;
+    }
+    if (!bought) return fail(why === '무게 한도' ? '무게 한도를 초과합니다.' : '₩이 부족합니다.');
+    const spent = gameState.character.won - wallet;
+    gameState.setInventory(inv);
+    gameState.setCharacter({ ...gameState.character, won: wallet });
+    return done(`${def.name} ×${bought} 구매 (₩${spent.toLocaleString('ko-KR')})${bought < n ? ` — ${why}로 ${n - bought}개는 못 샀습니다` : ''}`, 'good');
+  },
+
   sell(uid: string): ActionResult {
     const stack = getStack(gameState.inventory, uid);
     if (!stack) return fail('아이템을 찾을 수 없습니다.');
