@@ -25,7 +25,7 @@ export type AssaultPhase =
   | { kind: 'moveTo'; label: string; toZone: string; timeLimitSec: number }
   | { kind: 'defend'; label: string; boothId: string; waves: Wave[] };
 
-export type AssaultFailReason = 'death' | 'timeout' | 'booth';
+export type AssaultFailReason = 'death' | 'timeout' | 'booth' | 'retreat';
 
 export interface AssaultDef {
   id: string;

@@ -52,7 +52,7 @@ export interface AssaultHud {
 export interface AssaultResult {
   name: string;
   success: boolean;
-  reason?: 'death' | 'timeout' | 'booth';
+  reason?: 'death' | 'timeout' | 'booth' | 'retreat';
   won: number; // negative on failure penalty
   xp: number;
   items: { name: string; qty: number }[];
@@ -87,6 +87,8 @@ export interface GameEvents extends Record<string, unknown> {
   travel: { mapId: string; spawn: string };
   assault: AssaultHud | null;
   assaultResult: AssaultResult;
+  /** player gave up the running assault (귀환 pressed twice) */
+  assaultRetreat: undefined;
   menu: undefined;
   goTitle: undefined;
 }

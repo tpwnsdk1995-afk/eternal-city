@@ -23,6 +23,8 @@ export interface AssaultRuntime {
   pending: PendingSpawn[];
   aliveWave: number; // living wave/adds monsters of the current phase
   objectivesLeft: string[];
+  /** every objective destroyed so far this run, so one broken early is not asked for again when its phase starts */
+  destroyed: string[];
   bossSpawned: boolean;
   bossAlive: boolean;
   kills: number;
@@ -77,6 +79,7 @@ export function startAssault(def: AssaultDef, now: number): Step {
     pending: [],
     aliveWave: 0,
     objectivesLeft: [],
+    destroyed: [],
     bossSpawned: false,
     bossAlive: false,
     kills: 0,
@@ -99,7 +102,7 @@ function enterPhase(prev: AssaultRuntime, index: number, now: number): Step {
     waveSpawnedAt: null,
     pending: [],
     aliveWave: 0,
-    objectivesLeft: phase.kind === 'destroy' ? [...phase.objectiveIds] : [],
+    objectivesLeft: phase.kind === 'destroy' ? phase.objectiveIds.filter((id) => !prev.destroyed.includes(id)) : [],
     bossSpawned: false,
     bossAlive: false,
   };
@@ -194,7 +197,7 @@ export function onObjectiveDestroyed(rt: AssaultRuntime, objectiveId: string, ma
     const nowOpen = g.opensWhen.every((id) => id === objectiveId || destroyedSoFar.has(id));
     if (!wasOpen && nowOpen) events.push({ kind: 'openGate', gateId: g.id });
   }
-  return { rt: { ...rt, objectivesLeft }, events };
+  return { rt: { ...rt, objectivesLeft, destroyed: [...rt.destroyed, objectiveId] }, events };
 }
 
 export function onAssaultPlayerDied(rt: AssaultRuntime): Step {

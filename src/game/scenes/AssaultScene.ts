@@ -67,6 +67,12 @@ export class AssaultScene extends BaseWorldScene {
   protected onCreateWorld(): void {
     this.cameras.main.fadeIn(250, 0, 0, 0);
     this.adef = registry.assault(this.assaultId);
+    const offRetreat = gameState.events.on('assaultRetreat', () => {
+      if (this.finished) return;
+      this.rt = { ...this.rt, status: 'failed', failReason: 'retreat' };
+      this.finish(false, 'retreat');
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, offRetreat);
     this.objectives = (this.def.objectives ?? []).map((o) => new Objective(this, this.built, o));
     this.combat = new CombatBridge({
       scene: this,
@@ -265,7 +271,7 @@ export class AssaultScene extends BaseWorldScene {
       const penalty = Math.min(gameState.character.won, this.adef.failPenalty.won);
       result.won = -penalty;
       gameState.setCharacter({ ...gameState.character, won: gameState.character.won - penalty });
-      const why = reason === 'timeout' ? '시간 초과' : reason === 'booth' ? '부스 파괴' : '사망';
+      const why = reason === 'timeout' ? '시간 초과' : reason === 'booth' ? '부스 파괴' : reason === 'retreat' ? '포기' : '사망';
       gameState.message(`어설트 실패 (${why}) — ₩${penalty.toLocaleString('ko-KR')} 차감`, 'bad');
       if (reason !== 'death') this.time.delayedCall(3000, () => this.goToMap(hubForYear(this.def.year), balance.death.respawnPoint));
     }

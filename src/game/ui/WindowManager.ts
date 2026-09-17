@@ -32,6 +32,7 @@ const HUD_H = 108;
 
 /** Owns every in-game window: creation, toggling, hotkeys, NPC dialogs and pointer blocking. */
 export class WindowManager {
+  private retreatAskedAt = 0;
   private windows = new Map<WindowKey, Window>();
   private order: WindowKey[] = []; // open windows, last = top
 
@@ -185,7 +186,14 @@ export class WindowManager {
         return;
       case 'home': // back to the current year's town (free; H key, touch tab, Esc menu)
         if (this.windows.get('menu')!.scene.scene.isActive('Assault')) {
-          gameState.events.emit('message', { text: '어설트 중에는 귀환할 수 없습니다', tone: 'bad' });
+          // second press within 4 s gives the mission up (fails it with the usual penalty) and heads home
+          if (Date.now() - this.retreatAskedAt < 4000) {
+            this.retreatAskedAt = 0;
+            gameState.events.emit('assaultRetreat', undefined);
+          } else {
+            this.retreatAskedAt = Date.now();
+            gameState.events.emit('message', { text: '한 번 더 누르면 어설트를 포기하고 귀환합니다 (실패 처리 · 벌금)', tone: 'bad' });
+          }
           return;
         }
         gameState.events.emit('message', { text: '마을로 귀환합니다', tone: 'system' });

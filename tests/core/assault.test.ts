@@ -68,6 +68,20 @@ describe('assaultMachine — 중곡동 봉쇄선 돌파', () => {
     expect(rt.kills).toBeGreaterThan(10);
   });
 
+  it('objectives broken before their destroy phase starts are already counted', () => {
+    let rt = startAssault(def, 0).rt;
+    const early = def.phases.find((p) => p.kind === 'destroy')!;
+    if (early.kind !== 'destroy') throw new Error('assault-a has a destroy phase');
+    for (const id of early.objectiveIds) rt = onObjectiveDestroyed(rt, id, map, new Set(rt.destroyed)).rt;
+    expect(rt.phaseIndex).toBe(0); // still in the opening clear phase
+    rt = { ...rt, waveIndex: 99 }; // pretend the clear phase's waves are done
+    const r = tickAssault(rt, { now: 1, playerInZone: () => false });
+    expect(currentPhase(r.rt)?.kind).toBe('destroy');
+    expect(r.rt.objectivesLeft).toEqual([]);
+    const next = tickAssault(r.rt, { now: 2, playerInZone: () => false });
+    expect(next.rt.phaseIndex).toBe(r.rt.phaseIndex + 1);
+  });
+
   it('gate only opens once every listed barricade is down', () => {
     let rt = startAssault(def, 0).rt;
     rt = { ...rt, phaseIndex: 1, objectivesLeft: ['barricade_1', 'barricade_2', 'barricade_3'] };
