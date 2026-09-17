@@ -16,9 +16,9 @@ const rng = (roll: number): Rng => ({ chance: (p: number) => roll < p, range: (l
 const stack = (def: WeaponDef, extra: Partial<ItemStack> = {}): ItemStack => ({ uid: 'w1', itemId: def.id, qty: 1, ...extra });
 
 describe('강화', () => {
-  it('follows the 50→10% table and caps at +9', () => {
+  it('follows the 100→80% table and caps at +9', () => {
     let s = stack(m16);
-    expect(enhanceChancePct(s)).toBe(50);
+    expect(enhanceChancePct(s)).toBe(100);
     for (let i = 0; i < 9; i++) {
       const r = tryEnhance(m16, s, rng(0.01));
       expect(r.ok && r.success).toBe(true);
@@ -30,10 +30,12 @@ describe('강화', () => {
   });
 
   it('failure drops one level, never breaks, never below 0', () => {
-    const r = tryEnhance(m16, stack(m16, { enhance: 4 }), rng(0.99));
-    expect(r.ok && !r.success && r.stack.enhance === 3).toBe(true);
-    const r0 = tryEnhance(m16, stack(m16), rng(0.99));
-    expect(r0.ok && r0.stack.enhance === 0).toBe(true);
+    const r = tryEnhance(m16, stack(m16, { enhance: 8 }), rng(0.99)); // +8 is 80%: a 0.99 roll fails
+    expect(r.ok && !r.success && r.stack.enhance === 7).toBe(true);
+    // +0..+4 are 100% so they never fail; a roll of 1.0 forces the failure branch to prove +0 stays at 0
+    const r0 = tryEnhance(m16, stack(m16), rng(1));
+    expect(r0.ok && !r0.success && r0.stack.enhance === 0).toBe(true);
+    expect(tryEnhance(m16, stack(m16, { enhance: 4 }), rng(0.99))).toMatchObject({ ok: true, success: true });
   });
 
   it('cost scales with price and level; +N raises damage enhanceDmgPerLevel per level', () => {

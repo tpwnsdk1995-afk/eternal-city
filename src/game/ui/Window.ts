@@ -61,10 +61,27 @@ export abstract class Window extends Phaser.GameObjects.Container {
   abstract refresh(): void;
 
   private buttons: Phaser.GameObjects.Text[] = [];
+  /** A tapped action waits here until 확인/취소 — one stray tap must not spend ₩ or a stat point. */
+  protected pending: { text: string; run: () => void } | null = null;
 
   protected clearBody(): void {
     this.content.removeAll(true);
     this.buttons = [];
+  }
+
+  protected confirm(text: string, run: () => void): void {
+    this.pending = { text, run };
+    this.refresh();
+  }
+
+  /** Draws the pending question with 확인/취소 in the middle of the body; returns true when it did (caller skips its normal body). */
+  protected drawConfirm(): boolean {
+    const p = this.pending;
+    if (!p) return false;
+    this.label(this.w / 2, this.h / 2 - 60, p.text, '#ffffff', 18, { fontStyle: 'bold', align: 'center' }).setOrigin(0.5, 0.5);
+    this.button(this.w / 2 - 90, this.h / 2, '확인', () => { this.pending = null; p.run(); this.refresh(); }, theme.colors.brass, 16);
+    this.button(this.w / 2 + 30, this.h / 2, '취소', () => { this.pending = null; this.refresh(); }, theme.colors.muted, 16);
+    return true;
   }
 
   /** Screen-space centre of the first button whose label starts with `label` (debug/e2e). */

@@ -27,6 +27,7 @@ export class StatusWindow extends Window {
 
   refresh(): void {
     this.clearBody();
+    if (this.drawConfirm()) return;
     const c = gameState.character;
     const d = gameState.derived();
     const v = gameState.vitals;
@@ -43,8 +44,9 @@ export class StatusWindow extends Window {
       this.label(74, y + 2, STAT_DESC[k], theme.colors.muted, 12);
       this.label(268, y, `${c.base[k]}`, theme.colors.brass, 14).setOrigin(1, 0);
       if (c.unspentPoints > 0) {
-        this.button(282, y - 1, '+1', () => actions.allocate(k, 1), undefined, 14);
-        this.button(318, y - 1, '+5', () => actions.allocate(k, Math.min(5, gameState.character.unspentPoints)), undefined, 14);
+        const ask = (n: number) => this.confirm(`${k} +${n}\n확정할까요? (되돌릴 수 없습니다)`, () => actions.allocate(k, n));
+        this.button(282, y - 1, '+1', () => ask(1), undefined, 14);
+        this.button(318, y - 1, '+5', () => ask(Math.min(5, gameState.character.unspentPoints)), undefined, 14);
       }
       y += 30;
     }

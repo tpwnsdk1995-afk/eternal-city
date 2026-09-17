@@ -36,7 +36,7 @@ test.describe('save slots', () => {
     // second character in slot 2
     await createIn(page, '2', '둘째');
     expect(await page.evaluate(() => window.__ec!.currentSlot())).toBe(2);
-    expect(await page.evaluate(() => window.__ec!.hud().won)).toBe(5_000); // fresh kit, not 첫째's money
+    expect(await page.evaluate(() => window.__ec!.hud().won)).toBe(50_000); // fresh kit, not 첫째's money
     await page.evaluate(() => window.__ec!.save());
     await page.evaluate(() => window.__ec!.state.events.emit('goTitle', undefined));
     await page.waitForFunction(() => window.__ec?.scene() === 'Title');

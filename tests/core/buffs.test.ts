@@ -49,12 +49,12 @@ describe('buffs', () => {
   it('특수 강화권 adds to the success chance for one attempt', () => {
     const m16 = WEAPONS.find((w) => w.id === 'm16a2')!;
     const stack = { uid: 'w', itemId: m16.id, qty: 1, enhance: 8 };
-    expect(enhanceChancePct(stack)).toBe(10);
-    expect(enhanceChancePct(stack, 20)).toBe(30);
-    expect(enhanceChancePct({ ...stack, enhance: 0 }, 60)).toBe(100);
-    // a roll of 0.25 fails at 10% but passes at 30%
+    expect(enhanceChancePct(stack)).toBe(80);
+    expect(enhanceChancePct(stack, 15)).toBe(95);
+    expect(enhanceChancePct(stack, 60)).toBe(100); // capped
+    // a roll of 0.9 fails at 80% but passes at 95%
     const roll = (v: number): Rng => ({ chance: (p: number) => v < p, range: (lo: number) => lo, int: (lo: number) => lo, pick: <T>(xs: readonly T[]) => xs[0], next: () => v });
-    expect(tryEnhance(m16, stack, roll(0.25))).toMatchObject({ ok: true, success: false });
-    expect(tryEnhance(m16, stack, roll(0.25), 20)).toMatchObject({ ok: true, success: true });
+    expect(tryEnhance(m16, stack, roll(0.9))).toMatchObject({ ok: true, success: false });
+    expect(tryEnhance(m16, stack, roll(0.9), 15)).toMatchObject({ ok: true, success: true });
   });
 });

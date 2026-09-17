@@ -15,9 +15,9 @@ test.describe('smoke', () => {
     expect(hud.level).toBe(1);
     expect(hud.hp).toBeGreaterThan(0);
     expect(hud.hp).toBe(hud.hpMax);
-    expect(hud.won).toBe(5000);
+    expect(hud.won).toBe(50_000);
     expect(hud.weaponName).toBe('Glock 17');
-    expect(hud.ammo).toBe(100);
+    expect(hud.ammo).toBe(1000);
 
     await page.screenshot({ path: 'e2e/out/safezone.png' });
 

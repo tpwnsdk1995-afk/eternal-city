@@ -22,7 +22,7 @@ test.describe('launchers (투척/중화기)', () => {
     expect(await page.evaluate((u) => window.__ec!.actions.equipToggle(u).ok, uid)).toBe(true);
     let hud = await page.evaluate(() => window.__ec!.hud());
     expect(hud.weaponName).toBe('M79 유탄발사기');
-    expect(hud.ammo).toBe(6);
+    expect(hud.ammo).toBe(30);
 
     // three zombies standing together 170px to the right
     const ids = await page.evaluate(() => [window.__ec!.spawn('zombie_casual_f', 170, 0), window.__ec!.spawn('zombie_casual_f', 190, 24), window.__ec!.spawn('zombie_casual_f', 150, -22)]);
@@ -32,7 +32,7 @@ test.describe('launchers (투척/중화기)', () => {
     await page.mouse.move(aim.x, aim.y);
     await page.mouse.down();
     // hold until the round leaves (headless frames can be >100ms apart); rpm 30 keeps it to one shot
-    await page.waitForFunction(() => window.__ec!.hud().ammo === 5, undefined, { timeout: 5000 });
+    await page.waitForFunction(() => window.__ec!.hud().ammo === 29, undefined, { timeout: 5000 });
     await page.mouse.up();
     // shell needs ~0.4s to land, then everything in the radius takes damage
     await page.waitForFunction(
@@ -48,7 +48,7 @@ test.describe('launchers (투척/중화기)', () => {
     );
     await page.screenshot({ path: 'e2e/out/grenade.png' });
     hud = await page.evaluate(() => window.__ec!.hud());
-    expect(hud.ammo).toBe(5);
+    expect(hud.ammo).toBe(29);
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
@@ -71,7 +71,7 @@ test.describe('launchers (투척/중화기)', () => {
     const aim = await page.evaluate((pp) => window.__ec!.toScreen(pp.x + 400, pp.y)!, p);
     await page.mouse.move(aim.x, aim.y);
     await page.mouse.down();
-    await page.waitForFunction(() => window.__ec!.hud().ammo === 2, undefined, { timeout: 5000 });
+    await page.waitForFunction(() => window.__ec!.hud().ammo === 11, undefined, { timeout: 5000 });
     await page.mouse.up();
     expect((await page.evaluate(() => window.__ec!.projectiles())).length).toBe(1);
     await page.waitForFunction((id) => {

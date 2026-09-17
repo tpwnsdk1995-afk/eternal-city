@@ -59,7 +59,7 @@ test.describe('combat', () => {
     expect(hud.hp).toBeGreaterThan(0);
     // respawn at 50% (+ a tick or two of safe-zone regen)
     expect(hud.hp).toBeLessThanOrEqual(hud.hpMax / 2 + 3);
-    expect(hud.won).toBeLessThan(5000);
+    expect(hud.won).toBeLessThan(50_000); // death costs 5% of the ₩50,000 start
     expect(errors, errors.join('\n')).toEqual([]);
   });
 });

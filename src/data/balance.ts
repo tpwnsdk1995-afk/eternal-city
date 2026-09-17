@@ -82,12 +82,12 @@ export const balance = {
     defaultSubFire: { rpm: 120, dmgMult: 0.5 },
   },
   weight: {
-    base: 30,
-    perVit: 0.25,
-    perEnd: 0.25,
+    base: 70,
+    perVit: 0.5,
+    perEnd: 0.5,
   },
   /** 광진구청 보관함: stacks it can hold (weight is never counted while stored) */
-  storage: { slots: 40 },
+  storage: { slots: 100 },
   death: {
     wonLossPct: 0.05,
     xpLossPct: 0,
@@ -139,8 +139,8 @@ export const balance = {
     prefixChance: { 전설: 0.03, 고대: 0.1 } as Record<'고대' | '전설', number>,
   },
   tuning: {
-    /** chance (%) that +n → +n+1 succeeds, n = 0..8 */
-    enhanceSuccessPct: [50, 45, 40, 35, 30, 25, 20, 15, 10] as readonly number[],
+    /** chance (%) that +n → +n+1 succeeds, n = 0..8 (2026-09-17: +5 is guaranteed, the rest nearly so) */
+    enhanceSuccessPct: [100, 100, 100, 100, 100, 95, 90, 85, 80] as readonly number[],
     maxEnhance: 9,
     enhanceDmgPerLevel: 0.15,
     /** cost = weapon price × base × (1 + level × perLevel) */

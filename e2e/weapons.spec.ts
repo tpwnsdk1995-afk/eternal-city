@@ -18,7 +18,7 @@ test.describe('weapon classes', () => {
     expect(await page.evaluate((u) => window.__ec!.actions.equipToggle(u).ok, uid)).toBe(true);
     let hud = await page.evaluate(() => window.__ec!.hud());
     expect(hud.weaponName).toBe('Remington 870');
-    expect(hud.ammo).toBe(40);
+    expect(hud.ammo).toBe(200);
 
     const zid = await page.evaluate(() => window.__ec!.spawn('zombie_suit_m', 100, 0));
     await page.waitForTimeout(150);
@@ -31,8 +31,8 @@ test.describe('weapon classes', () => {
     await page.waitForFunction((id) => !window.__ec!.enemies().some((x) => x.uid === id), zid, { timeout: 20000 });
     await page.mouse.up();
     hud = await page.evaluate(() => window.__ec!.hud());
-    expect(hud.ammo).toBeLessThan(40);
-    expect(hud.ammo).toBeGreaterThan(30); // 8 pellets per shell, one round per shot
+    expect(hud.ammo).toBeLessThan(200);
+    expect(hud.ammo).toBeGreaterThan(190); // 8 pellets per shell, one round per shot
 
     // melee: baton, no ammo line, enemy in reach takes damage
     expect(await page.evaluate(() => window.__ec!.actions.buy('baton').ok)).toBe(true);
@@ -79,7 +79,7 @@ test.describe('weapon classes', () => {
     await page.evaluate(() => window.__ec!.state.events.emit('npcInteract', { npcId: 'npc_shop' }));
     await page.evaluate(() => window.__ec!.openWindow('shop'));
     await page.waitForFunction(() => window.__ec!.windows().includes('shop'));
-    expect(await page.evaluate(() => window.__ec!.actions.buy('m16a2').ok)).toBe(false); // level 1 < 8 → equip would fail; buy itself is allowed but money isn't
+    expect(await page.evaluate(() => window.__ec!.actions.buy('m24').ok)).toBe(false); // ₩65,000 > ₩50,000 start; level 1 < 10 → equip would fail; buy itself is allowed but money isn't
     await page.evaluate(() => window.__ec!.state.setCharacter({ ...window.__ec!.state.character, level: 20, won: 1_000_000 }));
     expect(await page.evaluate(() => window.__ec!.actions.buy('m24').ok)).toBe(true);
     expect(await page.evaluate(() => window.__ec!.state.inventory.items.some((s) => s.itemId === 'm24'))).toBe(true);

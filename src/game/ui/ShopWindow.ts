@@ -18,8 +18,6 @@ export class ShopWindow extends Window {
   private buyList: ListView;
   private sellList: ListView;
   private npc: NpcDef | null = null;
-  /** A tapped row waits here until 확인/취소 — one stray tap must not empty the wallet or sell the gun. */
-  private pending: { text: string; run: () => void } | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, 'shop', x, y, 800, 540, '무기상');
@@ -37,11 +35,6 @@ export class ShopWindow extends Window {
     this.refresh();
   }
 
-  private confirm(text: string, run: () => void): void {
-    this.pending = { text, run };
-    this.refresh();
-  }
-
   refresh(): void {
     this.content.remove([this.buyList, this.sellList]);
     this.clearBody();
@@ -49,15 +42,9 @@ export class ShopWindow extends Window {
     const colW = (this.w - 36) / 2;
     this.label(12, 4, `₩ ${gameState.character.won.toLocaleString('ko-KR')}`, theme.colors.brass, 15, { fontStyle: 'bold' });
 
-    const p = this.pending;
-    this.buyList.setVisible(!p);
-    this.sellList.setVisible(!p);
-    if (p) {
-      this.label(this.w / 2, this.h / 2 - 60, p.text, '#ffffff', 18, { fontStyle: 'bold', align: 'center' }).setOrigin(0.5, 0.5);
-      this.button(this.w / 2 - 90, this.h / 2, '확인', () => { this.pending = null; p.run(); this.refresh(); }, theme.colors.brass, 16);
-      this.button(this.w / 2 + 30, this.h / 2, '취소', () => { this.pending = null; this.refresh(); }, theme.colors.muted, 16);
-      return;
-    }
+    this.buyList.setVisible(!this.pending);
+    this.sellList.setVisible(!this.pending);
+    if (this.drawConfirm()) return;
 
     this.label(12, 26, '구매 (탭 → 확인)', theme.colors.muted, 12);
     this.label(24 + colW, 26, '판매 — 내 인벤토리 (탭 → 확인, 정가의 40%)', theme.colors.muted, 12);
