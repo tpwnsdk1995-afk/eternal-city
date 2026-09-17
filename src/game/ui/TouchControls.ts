@@ -10,9 +10,9 @@ const STICK_R = 72; // base radius
 const KNOB_R = 30;
 const STICK_MAX = 58; // knob travel
 const RUN_AT = 0.85; // fraction of travel that switches to running
-const FIRE_R = 58;
+const FIRE_R = 66;
 const AIM_MIN = 14; // drag distance before the fire button becomes an aim stick
-const BTN_R = 30;
+const BTN_R = 38;
 
 interface RoundButton {
   x: number;
@@ -75,16 +75,16 @@ export class TouchControls extends Phaser.GameObjects.Container {
 
     // --- top strip: windows --------------------------------------------------------------------
     const tabs: [string, Hotkey | 'fullscreen' | 'pause'][] = [['인벤', 'inventory'], ['상태', 'status'], ['스킬', 'skills'], ['퀘스트', 'quest'], ['지도', 'minimap'], ['귀환', 'home'], ['메뉴', 'menu'], ['⏸ 정지', 'pause'], ['⛶', 'fullscreen']];
-    let tx = GAME_HEIGHT < 720 ? 240 : GAME_WIDTH / 2 - (tabs.length * 68) / 2; // phone: right of the top-left minimap
+    let tx = GAME_HEIGHT < 720 ? 240 : GAME_WIDTH / 2 - (tabs.length * 78) / 2; // phone: right of the top-left minimap
     for (const [label, hk] of tabs) {
-      this.tab(tx, 8, 64, 30, label, () => {
+      this.tab(tx, 8, 74, 38, label, () => {
         if (hk === 'fullscreen') {
           if (scene.scale.isFullscreen) scene.scale.stopFullscreen();
           else if (scene.scale.fullscreen.available) scene.scale.startFullscreen();
         } else if (hk === 'pause') gameState.events.emit('hotkey', 'pause'); // straight to the UI scene: the world scene is frozen while paused
         else touchState.pending.hotkey = hk;
       });
-      tx += 68;
+      tx += 78;
     }
 
     // portrait phones: ask for landscape (the FIT scaler letterboxes heavily otherwise)
@@ -258,7 +258,7 @@ export class TouchControls extends Phaser.GameObjects.Container {
 
   private round(x: number, y: number, r: number, label: string, color: number): RoundButton {
     const gfx = this.scene.add.circle(x, y, r, color, 0.55).setStrokeStyle(2, 0xffffff, 0.45);
-    const text = this.scene.add.text(x, y, label, theme.textStyle(r > 40 ? 18 : 12, '#ffffff', { fontStyle: 'bold', align: 'center', stroke: '#000', strokeThickness: 3 })).setOrigin(0.5);
+    const text = this.scene.add.text(x, y, label, theme.textStyle(r > 40 ? 20 : 15, '#ffffff', { fontStyle: 'bold', align: 'center', stroke: '#000', strokeThickness: 3 })).setOrigin(0.5);
     this.add([gfx, text]);
     return { x, y, r, label, gfx, text };
   }
@@ -272,7 +272,7 @@ export class TouchControls extends Phaser.GameObjects.Container {
 
   private tab(x: number, y: number, w: number, h: number, label: string, onTap: () => void): void {
     const bg = this.scene.add.rectangle(x, y, w, h, 0x0b0e14, 0.6).setOrigin(0, 0).setStrokeStyle(1, 0xc9a227, 0.5).setInteractive({ useHandCursor: true });
-    const t = this.scene.add.text(x + w / 2, y + h / 2, label, theme.textStyle(13, theme.colors.brass, { fontStyle: 'bold' })).setOrigin(0.5);
+    const t = this.scene.add.text(x + w / 2, y + h / 2, label, theme.textStyle(16, theme.colors.brass, { fontStyle: 'bold' })).setOrigin(0.5);
     bg.on('pointerdown', () => bg.setFillStyle(0x2a3038, 0.9));
     // fire on release: on phones touchstart/pointerdown is not a user activation, so requestFullscreen would be refused
     bg.on('pointerup', () => {

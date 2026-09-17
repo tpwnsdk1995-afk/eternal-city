@@ -91,10 +91,10 @@ export abstract class Window extends Phaser.GameObjects.Container {
     return { x: this.x + this.content.x + b.x + b.width / 2, y: this.y + this.content.y + b.y + b.height / 2 };
   }
 
-  /** Small clickable text button. */
+  /** Clickable text button (drawn 4px larger than `size`, 2026-09-17: 버튼 크게). */
   protected button(x: number, y: number, label: string, onClick: (p: Phaser.Input.Pointer) => void, color = theme.colors.brass, size = 12): Phaser.GameObjects.Text {
     const t = this.scene.add
-      .text(x, y, label, theme.textStyle(size, color, { backgroundColor: '#1a1e24', padding: { left: 6, right: 6, top: 2, bottom: 2 } }))
+      .text(x, y, label, theme.textStyle(size + 4, color, { backgroundColor: '#1a1e24', padding: { left: 10, right: 10, top: 5, bottom: 5 } }))
       .setInteractive({ useHandCursor: true });
     t.on('pointerover', () => t.setStyle({ backgroundColor: '#2a3038' }));
     t.on('pointerout', () => t.setStyle({ backgroundColor: '#1a1e24' }));

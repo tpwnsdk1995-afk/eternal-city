@@ -12,8 +12,9 @@ export const PARTS: Record<PartId, PartDef> = {
 
 /** 유니크 개조 — +7 이상에서 시도, 성공 시 접미 하나가 붙는다. */
 export const UNIQUES: Record<UniqueId, UniqueDef> = {
-  precision: { id: 'precision', name: '정밀', desc: '치명타 확률 +5%', critPct: 0.05 },
-  destruction: { id: 'destruction', name: '파괴', desc: '공격력 +8%', dmgPct: 0.08 },
-  swiftness: { id: 'swiftness', name: '신속', desc: '연사속도 +8%', rpmPct: 0.08 },
-  endurance: { id: 'endurance', name: '장거리', desc: '사거리 +12%', rangePct: 0.12 },
+  // 2026-09-17: 유니크 성공은 대폭 강화 — 전부 공격력 +50% 이상, 특기는 그 위에
+  precision: { id: 'precision', name: '정밀', desc: '공격력 +50% · 치명타 확률 +25%', dmgPct: 0.5, critPct: 0.25 },
+  destruction: { id: 'destruction', name: '파괴', desc: '공격력 +120%', dmgPct: 1.2 },
+  swiftness: { id: 'swiftness', name: '신속', desc: '공격력 +50% · 연사속도 +40%', dmgPct: 0.5, rpmPct: 0.4 },
+  endurance: { id: 'endurance', name: '장거리', desc: '공격력 +50% · 사거리 +40%', dmgPct: 0.5, rangePct: 0.4 },
 };

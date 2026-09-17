@@ -16,15 +16,15 @@ const rng = (roll: number): Rng => ({ chance: (p: number) => roll < p, range: (l
 const stack = (def: WeaponDef, extra: Partial<ItemStack> = {}): ItemStack => ({ uid: 'w1', itemId: def.id, qty: 1, ...extra });
 
 describe('강화', () => {
-  it('follows the 100→80% table and caps at +9', () => {
+  it('follows the success table and caps at maxEnhance', () => {
     let s = stack(m16);
     expect(enhanceChancePct(s)).toBe(100);
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < balance.tuning.maxEnhance; i++) {
       const r = tryEnhance(m16, s, rng(0.01));
       expect(r.ok && r.success).toBe(true);
       if (r.ok) s = r.stack;
     }
-    expect(s.enhance).toBe(9);
+    expect(s.enhance).toBe(balance.tuning.maxEnhance);
     expect(enhanceChancePct(s)).toBeNull();
     expect(tryEnhance(m16, s, rng(0.01))).toEqual({ ok: false, reason: 'maxed' });
   });
@@ -78,7 +78,7 @@ describe('유니크 개조', () => {
     const win = tryUnique(m16, stack(m16, { enhance: 7 }), rng(0.01));
     expect(win.ok && win.success && win.stack.unique === 'precision').toBe(true);
     if (!win.ok) return;
-    expect(effectiveWeapon(m16, win.stack).critPct).toBeCloseTo(0.05);
+    expect(effectiveWeapon(m16, win.stack).critPct).toBeCloseTo(0.25);
     expect(tryUnique(m16, win.stack, rng(0.01))).toEqual({ ok: false, reason: 'hasUnique' });
     expect(weaponLabel(m16, win.stack)).toBe('M16A2 +7 [정밀]');
   });

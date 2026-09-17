@@ -141,9 +141,9 @@ export const balance = {
     prefixChance: { 전설: 0.03, 고대: 0.1 } as Record<'고대' | '전설', number>,
   },
   tuning: {
-    /** chance (%) that +n → +n+1 succeeds, n = 0..8 (2026-09-17: +5 is guaranteed, the rest nearly so) */
-    enhanceSuccessPct: [100, 100, 100, 100, 100, 95, 90, 85, 80] as readonly number[],
-    maxEnhance: 9,
+    /** chance (%) that +n → +n+1 succeeds, n = 0..19 (2026-09-17: cap raised +9 → +20) */
+    enhanceSuccessPct: [100, 100, 100, 100, 100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25] as readonly number[],
+    maxEnhance: 20,
     enhanceDmgPerLevel: 0.15,
     /** cost = weapon price × base × (1 + level × perLevel) */
     enhanceCostBase: 0.12,

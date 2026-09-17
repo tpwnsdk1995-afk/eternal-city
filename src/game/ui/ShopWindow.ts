@@ -20,7 +20,7 @@ export class ShopWindow extends Window {
   private npc: NpcDef | null = null;
   /** uids ticked in the sell list — sold together by the 선택 판매 button */
   private picked = new Set<string>();
-  /** consumable being bought in bulk: the quantity screen replaces the lists until 구매/취소 */
+  /** item being bought in bulk: the quantity screen replaces the lists until 구매/취소 */
   private qtyBuy: { id: string; n: number } | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -52,7 +52,7 @@ export class ShopWindow extends Window {
     this.sellList.setVisible(!this.pending && !this.qtyBuy);
     if (this.drawConfirm() || this.drawQty()) return;
 
-    this.label(12, 26, '구매 (탭 → 확인, 소모품은 수량 선택)', theme.colors.muted, 12);
+    this.label(12, 26, '구매 (탭 → 수량 선택)', theme.colors.muted, 12);
     this.label(24 + colW, 26, '판매 (탭=체크, 정가의 40%)', theme.colors.muted, 12);
 
     const level = gameState.character.level;
@@ -81,7 +81,6 @@ export class ShopWindow extends Window {
         rightColor: gameState.character.won >= price ? theme.colors.brass : theme.colors.bad,
         disabled: (def.kind === 'armor' || def.kind === 'weapon') && level < def.reqLevel,
         onClick: () => {
-          if (def.kind !== 'consumable') return this.confirm(`${def.name}\n${won(price)}에 구매할까요?`, () => actions.buy(id));
           this.qtyBuy = { id, n: 1 };
           this.refresh();
         },
@@ -133,7 +132,7 @@ export class ShopWindow extends Window {
     btn.setX(this.w - 12 - btn.width);
   }
 
-  /** Quantity picker for consumables: steppers, 최대, typed 입력, then one 구매. */
+  /** Quantity picker for every item: steppers, 최대, typed 입력, then one 구매. */
   private drawQty(): boolean {
     const q = this.qtyBuy;
     if (!q) return false;

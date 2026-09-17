@@ -87,7 +87,7 @@ export class TuningWindow extends Window {
       this.label(X, y, '파손됨 — 공격력 −20%. 수리하면 원래대로 돌아옵니다.', theme.colors.bad, 12);
       const rb = this.button(0, y - 2, `수리 ${won(repairCost(def, s))}`, () => actions.repair(s.uid), theme.colors.good);
       rb.setX(this.w - 16 - rb.width);
-      y += 28;
+      y += 36;
     }
     // 강화
     this.label(X, y, '강화', theme.colors.brass, 14, { fontStyle: 'bold' });
@@ -95,10 +95,10 @@ export class TuningWindow extends Window {
     const bonus = Number(gameState.flags.enhanceBonus ?? 0);
     const chance = enhanceChancePct(s, bonus);
     this.label(X + 60, y + 1, chance === null ? `+${lv} (최대)` : `+${lv} → +${lv + 1}  ·  성공 ${chance}%${bonus ? ` (특수 강화권 +${bonus}%)` : ''}`, bonus ? theme.colors.good : theme.colors.text, 13);
-    this.label(X, y + 22, `실패 시 −1 (파손 없음) · 공격력 +${T.enhanceDmgPerLevel * 100}%/강 · 비용은 무기 가격과 강화 단계에 비례`, '#6b7280', 11);
+    this.label(X, y + 32, `실패 시 −1 (파손 없음) · 공격력 +${T.enhanceDmgPerLevel * 100}%/강 · 비용은 무기 가격과 강화 단계에 비례`, '#6b7280', 11);
     if (chance !== null) this.button(this.w - 16 - 150, y - 2, `강화 ${won(enhanceCost(def, s))}`, () => actions.enhance(s.uid), '#9be7ff').setX(this.w - 16 - this.lastW());
     else this.label(this.w - 16, y, '최대 강화', theme.colors.good, 12).setOrigin(1, 0);
-    y += 52;
+    y += 60;
     this.content.add(this.scene.add.rectangle(X, y, this.w - X - 12, 1, 0xc9a227, 0.25).setOrigin(0, 0));
     y += 10;
 
@@ -117,7 +117,7 @@ export class TuningWindow extends Window {
         const b = this.button(0, y - 2, `장착 ${won(partCost(def, s, id))}`, () => actions.installPart(s.uid, id), '#9be7ff');
         b.setX(this.w - 16 - b.width);
       }
-      y += 26;
+      y += 34;
     }
     y += 6;
     this.content.add(this.scene.add.rectangle(X, y, this.w - X - 12, 1, 0xc9a227, 0.25).setOrigin(0, 0));
@@ -133,9 +133,9 @@ export class TuningWindow extends Window {
       const ok = lv >= T.uniqueMinEnhance;
       this.label(X, y, `+${T.uniqueMinEnhance} 이상 무기에 접미 부여 · 성공 ${T.uniqueSuccessPct}% · 실패 시 비용만 소모`, ok ? theme.colors.text : theme.colors.muted, 12);
       const us = Object.values(UNIQUES);
-      this.label(X, y + 18, us.slice(0, 2).map((u) => `[${u.name}] ${u.desc}`).join('   '), '#6b7280', 11);
-      this.label(X, y + 34, us.slice(2).map((u) => `[${u.name}] ${u.desc}`).join('   '), '#6b7280', 11);
-      const b = this.button(0, y - 2, `개조 시도 ${won(uniqueCost(def, s))}`, () => actions.uniqueTune(s.uid), ok ? '#e0a0ff' : '#6b7280');
+      this.label(X, y + 32, us.slice(0, 2).map((u) => `[${u.name}] ${u.desc}`).join('   '), '#6b7280', 11);
+      this.label(X, y + 48, us.slice(2).map((u) => `[${u.name}] ${u.desc}`).join('   '), '#6b7280', 11);
+      const b = this.button(0, y - 28, `개조 시도 ${won(uniqueCost(def, s))}`, () => actions.uniqueTune(s.uid), ok ? '#e0a0ff' : '#6b7280');
       b.setX(this.w - 16 - b.width);
     }
   }
@@ -151,7 +151,7 @@ export class TuningWindow extends Window {
       this.label(X, y, '파손됨 — 방어 −25%. 수리하면 원래대로 돌아옵니다.', theme.colors.bad, 12);
       const rb = this.button(0, y - 2, `수리 ${won(repairCost(def, s))}`, () => actions.repair(s.uid), theme.colors.good);
       rb.setX(this.w - 16 - rb.width);
-      y += 28;
+      y += 36;
     }
     this.label(X, y, '플러스업', theme.colors.brass, 14, { fontStyle: 'bold' });
     const lv = plusUpLevel(s);
@@ -178,7 +178,7 @@ export class TuningWindow extends Window {
         this.label(X, cy + 2, `재료: ${armorLabel(def, m)}`, theme.colors.text, 12);
         const b = this.button(0, cy - 2, `조합 ${won(combineCost(def, s))}`, () => actions.combineArmor(s.uid, m.uid), '#e0a0ff');
         b.setX(this.w - 16 - b.width);
-        cy += 26;
+        cy += 34;
       }
     }
     this.label(X, this.h - 84, '고대/전설 접두는 필드 드랍 또는 조합으로 얻습니다. CL 방어구는 방어 ×1.5.', '#6b7280', 11);
