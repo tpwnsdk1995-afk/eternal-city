@@ -45,8 +45,11 @@ export class StatusWindow extends Window {
       this.label(268, y, `${c.base[k]}`, theme.colors.brass, 14).setOrigin(1, 0);
       if (c.unspentPoints > 0) {
         const ask = (n: number) => this.confirm(`${k} +${n}\n확정할까요? (되돌릴 수 없습니다)`, () => actions.allocate(k, n));
-        this.button(282, y - 1, '+1', () => ask(1), undefined, 14);
-        this.button(318, y - 1, '+5', () => ask(Math.min(5, gameState.character.unspentPoints)), undefined, 14);
+        const room = Math.min(c.unspentPoints, statCap(c.rebirth) - c.base[k]);
+        let bx = 272;
+        for (const [label, n] of [['+1', 1], ['+5', Math.min(5, room)], ['전부', room]] as const) {
+          bx += this.button(bx, y - 1, label, () => (n > 0 ? ask(n) : actions.allocate(k, 1)), undefined, 13).width + 3;
+        }
       }
       y += 30;
     }
