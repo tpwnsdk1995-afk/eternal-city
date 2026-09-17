@@ -165,4 +165,20 @@ test.describe('assault E · F', () => {
     expect(await page.evaluate(() => window.__ec!.state.inventory.items.some((s) => s.itemId === 'omega_rail'))).toBe(true);
     expect(errors, errors.join('\n')).toEqual([]);
   });
+
+  test('레이드: 보스방에서 바로 시작, 종말의 군주 한 마리뿐, ₩30억', async ({ page }) => {
+    test.setTimeout(120_000);
+    const errors = await newGame(page, '레이드');
+    await page.evaluate(() => window.__ec!.god(true));
+    await page.evaluate(() => window.__ec!.startAssault('assault-raid'));
+    await page.waitForFunction(() => window.__ec!.assault()?.phaseKind === 'boss', null, { timeout: 20000 });
+    await page.waitForFunction(() => window.__ec!.enemies().some((e) => e.id === 'omega_overlord'), null, { timeout: 15000 });
+    await page.waitForTimeout(3000);
+    expect((await page.evaluate(() => window.__ec!.enemies())).map((e) => e.id)).toEqual(['omega_overlord']); // no adds
+    await page.screenshot({ path: 'e2e/out/assault-raid-boss.png' });
+    const before = await page.evaluate(() => window.__ec!.hud());
+    await page.waitForFunction(() => { window.__ec!.killAll(); return window.__ec!.assault()?.status === 'success'; }, null, { timeout: 30000, polling: 250 });
+    expect((await page.evaluate(() => window.__ec!.hud())).won).toBeGreaterThanOrEqual(before.won + 3_000_000_000);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
 });

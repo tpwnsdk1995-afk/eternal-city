@@ -17,6 +17,7 @@ export const coexUnderground: MapDef = {
   levelRange: [60, 100],
   objectives: (junggokBlockade.objectives ?? []).map((o, i) => ({ ...o, id: `vent_${i + 1}`, hp: 900, label: `환기구 ${i + 1}` })),
   gates: (junggokBlockade.gates ?? []).map((g) => ({ ...g, opensWhen: ['vent_1', 'vent_2', 'vent_3'] })),
+  spawnPoints: { ...junggokBlockade.spawnPoints, raidEntry: { x: 76, y: 20 } }, // 레이드: 격벽 너머 보스방에서 바로 시작
 };
 
 /** 어설트 F — 광화문 부스 방어: plaza with the 조합 부스 in the middle, lanes on three sides. */

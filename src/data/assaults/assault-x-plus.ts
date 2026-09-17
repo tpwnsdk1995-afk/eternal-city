@@ -114,3 +114,22 @@ export const assaultX4: AssaultDef = {
   },
   failPenalty: { won: 2_000_000 },
 };
+
+/** 레이드 (2026-09-17 요청: "아무것도 없이 아주 강력한 보스 한마리만"): 보스방에서 바로 시작, 잡몹 없음. */
+export const assaultRaid: AssaultDef = {
+  id: 'assault-raid',
+  name: '코엑스 지하 — 종말의 군주 (레이드)',
+  tier: 'C',
+  advanced: true,
+  power: 4,
+  levelRange: [150, 200],
+  mapId: 'coex-underground',
+  entrySpawn: 'raidEntry',
+  phases: [{ kind: 'boss', label: '레이드 보스 — 종말의 군주', monsterId: 'omega_overlord', spawnPoint: 'bossSpawn' }],
+  rewards: {
+    won: 3_000_000_000,
+    xp: 500_000_000,
+    items: [...gear(1, 'armor_top_omega_cl', 'armor_coat_omega_cl', 'omega_mlrs', 'omega_rail', 'omega_blade', 'omega_minigun'), { itemId: 'premium_coupon', chance: 1, qty: 100 }],
+  },
+  failPenalty: { won: 5_000_000 },
+};

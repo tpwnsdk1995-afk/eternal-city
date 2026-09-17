@@ -24,7 +24,7 @@ export const balance = {
     apPerInt: 4,
     intPerTechGrade: 10,
     moveSpeedBase: 150,
-    moveSpeedPerSpd: 0.6,
+    moveSpeedPerSpd: 0, // 2026-09-17: 속도 스탯은 공격속도만 올림 (이동속도는 기본 150 고정)
     runMult: 1.6,
     crouchMult: 0.5,
     overweightMult: 0.6,

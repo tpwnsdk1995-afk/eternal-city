@@ -16,7 +16,7 @@ const STAT_DESC: Record<StatKey, string> = {
   지구력: '달리기/점프 게이지 · 무게',
   기술: '원거리 공격력 · 명중 · 치명타',
   지능: '기술등급 · 행동력',
-  속도: '이동속도 · 공격속도',
+  속도: '공격속도',
 };
 
 export class StatusWindow extends Window {
