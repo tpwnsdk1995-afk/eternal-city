@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { clickAt, newGame } from './helpers';
 
 test.describe('구청 보관함 · 인벤토리 정렬/필터', () => {
-  test('deposit removes weight, withdraw respects the limit, and the 보관함 survives a reload', async ({ page }) => {
+  test('deposit removes weight, withdraw brings it back, and the 보관함 survives a reload', async ({ page }) => {
     const errors = await newGame(page, '창고맨');
     await page.evaluate(() => {
       window.__ec!.give('m60', 1); // 10.5kg

@@ -35,10 +35,8 @@ export class StorageWindow extends Window {
     this.content.add([this.left, this.right]);
 
     const inv = gameState.inventory;
-    const d = gameState.derived();
     const kg = totalWeightKg(inv, registry.item);
-    const over = kg > d.maxWeightKg;
-    this.label(12, 4, `내 인벤토리 — 무게 ${kg.toFixed(1)} / ${d.maxWeightKg.toFixed(1)} kg${over ? '  ⚠ 과적' : ''}`, over ? theme.colors.bad : theme.colors.muted, 12);
+    this.label(12, 4, `내 인벤토리 — 무게 ${kg.toFixed(1)} kg`, theme.colors.muted, 12);
     const used = gameState.storage.items.length;
     const cap = balance.storage.slots;
     this.label(12 + LIST_W + 12, 4, `보관함 ${used} / ${cap}칸 — 보관 중인 물건은 무게에 잡히지 않습니다`, used >= cap ? theme.colors.bad : theme.colors.brass, 12);

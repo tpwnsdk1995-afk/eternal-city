@@ -50,7 +50,7 @@ export class AssaultWindow extends Window {
       return {
         id: d.id,
         text: `[${d.tier}] ${d.name}`,
-        sub: `${assaultStyle(d)} · Lv.${min}+ · ₩${d.rewards.won.toLocaleString('ko-KR')} · ${d.rewards.xp} XP${best ? ` · 최고 ${best.grade} ${best.score.toLocaleString('ko-KR')}점` : ''}`,
+        sub: `${assaultStyle(d)} · ₩${d.rewards.won.toLocaleString('ko-KR')} · ${d.rewards.xp} XP${best ? ` · 최고 ${best.grade} ${best.score.toLocaleString('ko-KR')}점` : ''}`,
         right: !ok ? `Lv.${min} 필요` : best ? `${best.grade}  ×${assaultClears(gameState.stats, d.id)}` : '지원 가능',
         rightColor: !ok ? theme.colors.bad : best ? GRADE_COLOR[best.grade as AssaultGrade] ?? theme.colors.good : theme.colors.good,
         color: d.id === this.selected ? '#ffffff' : d.advanced ? '#e0a0ff' : ok ? theme.colors.text : theme.colors.muted,
@@ -69,8 +69,7 @@ export class AssaultWindow extends Window {
     this.label(X, 32, `[${d.tier}]`, TIER_COLOR[d.tier], 22, { fontStyle: 'bold' });
     this.label(X + 44, 36, d.name, '#ffffff', 16, { fontStyle: 'bold' });
     if (d.advanced) this.label(X + 44, 58, '고급 어설트 — 적 체력 ×1.7 · 피해 ×1.4 · 보상 ×2', '#e0a0ff', 11);
-    const min = this.minLevel(d);
-    this.label(X, 84, `유형 ${assaultStyle(d)} · 권장 Lv.${min}~${d.levelRange[1]} · ${registry.map(d.mapId).name}`, theme.colors.muted, 11);
+    this.label(X, 84, `유형 ${assaultStyle(d)} · 권장 Lv.${d.levelRange[0]}~${d.levelRange[1]} · ${registry.map(d.mapId).name}`, theme.colors.muted, 11);
 
     let y = 110;
     this.label(X, y, '단계', theme.colors.brass, 12, { fontStyle: 'bold' });
@@ -109,8 +108,7 @@ export class AssaultWindow extends Window {
       this.label(X, y, clears ? `클리어 ${clears}회 · 점수 기록 없음 (기록판 도입 전)` : '아직 기록이 없습니다. 첫 클리어가 기록판에 오릅니다.', theme.colors.muted, 11);
     }
 
-    const ok = gameState.character.level >= min;
-    const b = this.button(0, this.h - 84, ok ? `${d.name} 지원` : `Lv.${min} 이상 지원 가능`, () => this.deploy(d), ok ? '#ff9b9b' : '#6b7280', 14);
+    const b = this.button(0, this.h - 84, `${d.name} 지원`, () => this.deploy(d), '#ff9b9b', 14);
     b.setX(this.w - 16 - b.width);
   }
 

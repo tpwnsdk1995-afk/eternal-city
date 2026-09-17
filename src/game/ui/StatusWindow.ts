@@ -68,7 +68,7 @@ export class StatusWindow extends Window {
       ['치명타', `${(d.critChance * 100).toFixed(1)}% · ×${d.critMult.toFixed(2)}`],
       ['의식회복 확률', `${(d.consciousnessChance * 100).toFixed(1)}%`],
       ['방어력', `${gameState.defense().toFixed(0)}`],
-      ['무게', `${totalWeightKg(gameState.inventory, registry.item).toFixed(1)} / ${d.maxWeightKg.toFixed(1)} kg`],
+      ['무게', `${totalWeightKg(gameState.inventory, registry.item).toFixed(1)} kg`],
     ];
     for (const [k, val] of rows) {
       this.label(14, y, k, theme.colors.muted, 13);

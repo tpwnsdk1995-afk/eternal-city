@@ -38,10 +38,8 @@ export class InventoryWindow extends Window {
     if (this.drawConfirm()) return;
 
     const inv = gameState.inventory;
-    const d = gameState.derived();
     const kg = totalWeightKg(inv, registry.item);
-    const over = kg > d.maxWeightKg;
-    this.label(12, 4, `무게 ${kg.toFixed(1)} / ${d.maxWeightKg.toFixed(1)} kg${over ? '  ⚠ 과적' : ''}`, over ? theme.colors.bad : theme.colors.muted, 12);
+    this.label(12, 4, `무게 ${kg.toFixed(1)} kg`, theme.colors.muted, 12);
     this.label(this.w - 12, 4, `₩ ${gameState.character.won.toLocaleString('ko-KR')}`, theme.colors.brass, 12).setOrigin(1, 0);
 
     this.filterSortBar(24, inv.items, this, () => this.refresh());

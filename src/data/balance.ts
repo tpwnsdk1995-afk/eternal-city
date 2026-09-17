@@ -105,7 +105,7 @@ export const balance = {
   },
   assault: {
     /** Testing gate for the reception desk; null = real levelRange (e2e starts missions through the debug hook). */
-    entryLevelOverride: null as number | null,
+    entryLevelOverride: 0 as number | null, // 2026-09-17: every assault open at any level
     /** 고급 어설트 scaling */
     advanced: { levelOffset: 10, rewardMult: 2, hpMult: 1.7, defenseBonus: 8, dmgMult: 1.4, xpMult: 1.6, wonMult: 1.5 },
     /** every assault (2026-09-17): tougher monsters to match the x50 clear rewards in src/data/assaults */

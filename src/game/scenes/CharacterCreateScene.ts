@@ -152,7 +152,7 @@ export class CharacterCreateScene extends Phaser.Scene {
     this.leftText.setText(`남은 포인트 ${this.left}`);
     const d = derivedStats(this.alloc, 1);
     this.previewText.setText(
-      `생명 ${d.maxHp} · 지구력 ${d.maxStamina} · 행동력 ${d.maxAp} · 이동 ${d.moveSpeed.toFixed(0)}px/s · 기술등급 ${d.techGrade} · 무게 ${d.maxWeightKg.toFixed(1)}kg\n남은 포인트는 게임 안에서 상태창(C)으로 배분할 수 있습니다.`,
+      `생명 ${d.maxHp} · 지구력 ${d.maxStamina} · 행동력 ${d.maxAp} · 이동 ${d.moveSpeed.toFixed(0)}px/s · 기술등급 ${d.techGrade}\n남은 포인트는 게임 안에서 상태창(C)으로 배분할 수 있습니다.`,
     );
   }
 

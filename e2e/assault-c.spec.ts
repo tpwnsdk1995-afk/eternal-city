@@ -45,7 +45,7 @@ test.describe('assault C — 하수도 심층 (보스 사냥형) + 고급 변형
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
-  test('the reception board gates by level, shows 고급 variants, and deploys the advanced mission with scaled monsters', async ({ page }) => {
+  test('the reception board shows 고급 variants, and deploys the advanced mission with scaled monsters', async ({ page }) => {
     test.setTimeout(120_000);
     const errors = await newGame(page);
     await page.evaluate(() => window.__ec!.state.events.emit('npcInteract', { npcId: 'npc_assault' }));
@@ -53,7 +53,6 @@ test.describe('assault C — 하수도 심층 (보스 사냥형) + 고급 변형
     await page.evaluate(() => window.__ec!.openWindow('assault'));
     await page.waitForFunction(() => window.__ec!.windows().includes('assault'));
     await page.screenshot({ path: 'e2e/out/assault-board.png' });
-    // Lv.1 cannot deploy anything: the machine never starts
     await page.evaluate(() => window.__ec!.state.setCharacter({ ...window.__ec!.state.character, level: 25 }));
     await page.evaluate(() => window.__ec!.god(true));
     // 고급 A: same phases, tougher enemies

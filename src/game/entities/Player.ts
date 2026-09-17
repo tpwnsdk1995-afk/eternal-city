@@ -8,8 +8,6 @@ import type { ControlScheme } from '@data/schema/enums';
 import type { Vec2 } from '@core/math/vec';
 import { angleTo } from '@core/math/vec';
 import { newStuckTracker, steerToward, trackStuck, type StuckTracker } from '@core/map/pathing';
-import { totalWeightKg } from '@core/inventory/weight';
-import { registry } from '@data/registry';
 import { gameState } from '../state/GameState';
 import type { InputIntent } from '../systems/input/InputMapper';
 
@@ -104,7 +102,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       gameState.setVitals({ stamina: vit.stamina - balance.stamina.jumpCost });
     }
 
-    const overweight = totalWeightKg(gameState.inventory, registry.item) > derived.maxWeightKg;
     const wantsRun = (intent.runHeld || intent.runToggled || this.runLatched) && !this.crouching; // running is free: no stamina gate
 
     let dir: Vec2 = { x: 0, y: 0 };
@@ -135,7 +132,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     let speed = derived.moveSpeed;
     if (this.running) speed *= balance.derived.runMult;
     if (this.crouching) speed *= balance.derived.crouchMult;
-    if (overweight) speed *= balance.derived.overweightMult;
     this.setVelocity(dir.x * speed, dir.y * speed);
 
     // running costs no stamina (only jumps do); stamina regenerates whether moving or not

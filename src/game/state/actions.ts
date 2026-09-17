@@ -10,7 +10,6 @@ import type { PartId } from '@data/schema/tuning';
 import { PARTS, UNIQUES } from '@data/tuning';
 import { gameRng, type Rng } from '@core/rng';
 import { equipStack, pruneEquipment, unequipArmor, unequipWeapon } from '@core/inventory/equipment';
-import { totalWeightKg } from '@core/inventory/weight';
 import { defaultAmmoKind, isAmmoCompatible, selectAmmoKind } from '@core/weapons/fireController';
 import { learnOrRankUp, toggleActive } from '@core/skills/skillState';
 import { buy, sell } from '@core/economy/shop';
@@ -129,16 +128,14 @@ export const actions = {
     const def = registry.item(itemId);
     const r = buy(gameState.inventory, gameState.character.won, def, registry.item);
     if (!r.ok) return fail('₩이 부족합니다.');
-    if (totalWeightKg(r.inv, registry.item) > gameState.derived().maxWeightKg) return fail('무게 한도를 초과합니다.');
     gameState.setInventory(r.inv);
     gameState.setCharacter({ ...gameState.character, won: r.won });
     return done(`${def.name} 구매 (₩${r.cost.toLocaleString('ko-KR')})`, 'good');
   },
 
-  /** Buys `n` of one item in a single step; stops early at the first box the wallet or the weight limit can't take. */
+  /** Buys `n` of one item in a single step; stops early when the wallet runs out. */
   buyMany(itemId: string, n: number): ActionResult {
     const def = registry.item(itemId);
-    const max = gameState.derived().maxWeightKg;
     let inv = gameState.inventory;
     let wallet = gameState.character.won;
     let bought = 0;
@@ -146,11 +143,10 @@ export const actions = {
     for (; bought < n; bought++) {
       const r = buy(inv, wallet, def, registry.item);
       if (!r.ok) { why = '₩ 부족'; break; }
-      if (totalWeightKg(r.inv, registry.item) > max) { why = '무게 한도'; break; }
       inv = r.inv;
       wallet = r.won;
     }
-    if (!bought) return fail(why === '무게 한도' ? '무게 한도를 초과합니다.' : '₩이 부족합니다.');
+    if (!bought) return fail('₩이 부족합니다.');
     const spent = gameState.character.won - wallet;
     gameState.setInventory(inv);
     gameState.setCharacter({ ...gameState.character, won: wallet });
@@ -264,7 +260,6 @@ export const actions = {
     const def = registry.item(stack.itemId);
     const r = moveStack(gameState.storage, gameState.inventory, uid, registry.item);
     if (!r.ok) return fail('보관함에 그 아이템이 없습니다.');
-    if (totalWeightKg(r.to, registry.item) > gameState.derived().maxWeightKg) return fail('무게 한도를 초과합니다. 다른 물건을 먼저 맡기세요.');
     gameState.setStorage(r.from);
     gameState.setInventory(r.to);
     return done(`${def.name} 꺼냄`);
