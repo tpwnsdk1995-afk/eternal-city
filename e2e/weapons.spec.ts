@@ -73,9 +73,9 @@ test.describe('weapon classes', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
-  test('shop shows a level-based grade band and hides far-off weapons', async ({ page }) => {
+  test('shop lists every weapon from level 1; the buyer picks the grade', async ({ page }) => {
     const errors = await newGame(page);
-    // Lv.1: glock grades 1..3 only, no rifles
+    // Lv.1: everything is listed; buying is only limited by ₩ (equip still checks the level)
     await page.evaluate(() => window.__ec!.state.events.emit('npcInteract', { npcId: 'npc_shop' }));
     await page.evaluate(() => window.__ec!.openWindow('shop'));
     await page.waitForFunction(() => window.__ec!.windows().includes('shop'));

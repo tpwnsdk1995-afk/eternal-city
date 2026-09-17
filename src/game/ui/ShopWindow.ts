@@ -1,7 +1,6 @@
 import type Phaser from 'phaser';
 import { registry } from '@data/registry';
 import { NPCS } from '@data/npcs';
-import { WEAPONS } from '@data/weapons';
 import type { NpcDef } from '@data/schema/npc';
 import { buyPrice, buyQty, sellPrice } from '@core/economy/shop';
 import { gradeMult } from '@core/weapons/weaponMath';
@@ -13,22 +12,14 @@ import { Window } from './Window';
 import { ListView, type ListRow } from './ListView';
 import { theme } from './theme';
 
-/** Ammo shows up once any weapon of that caliber is within reach (owned or near the shop's display level). */
-function ammoRelevant(caliber: string, level: number): boolean {
-  if (gameState.inventory.items.some((s) => {
-    const d = registry.item(s.itemId);
-    return d.kind === 'weapon' && d.caliber === caliber;
-  })) return true;
-  return WEAPONS.some((w) => w.caliber === caliber && !w.illegal && w.reqLevel <= level + 6);
-}
-
-/** Highest weapon grade a shop displays at this level: 3 at Lv.1, +1 every 4 levels, capped at 11. */
-export const shopGradeCap = (level: number): number => Math.min(11, 3 + Math.floor(level / 4));
+const npcHasWeapons = (npc: NpcDef | null): boolean => (npc ?? NPCS.find((n) => n.role === 'shop'))?.stock?.some((id) => registry.item(id).kind === 'weapon') ?? false;
 
 export class ShopWindow extends Window {
   private buyList: ListView;
   private sellList: ListView;
   private npc: NpcDef | null = null;
+  /** Weapon grade on display (◀ ▶ stepper); every weapon is listed at this grade from level 1. */
+  private grade = 1;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, 'shop', x, y, 800, 540, '무기상');
@@ -52,22 +43,22 @@ export class ShopWindow extends Window {
     const colW = (this.w - 36) / 2;
     this.label(12, 4, `₩ ${gameState.character.won.toLocaleString('ko-KR')}`, theme.colors.brass, 15, { fontStyle: 'bold' });
     this.label(12, 26, '구매 (클릭)', theme.colors.muted, 12);
+    if (npcHasWeapons(this.npc)) {
+      this.button(colW - 96, 22, '◀', () => { this.grade = Math.max(1, this.grade - 1); this.refresh(); });
+      this.label(colW - 62, 26, `${this.grade}등급`, theme.colors.brass, 12, { fontStyle: 'bold' });
+      this.button(colW - 12, 22, '▶', () => { this.grade = Math.min(11, this.grade + 1); this.refresh(); });
+    }
     this.label(24 + colW, 26, '판매 — 내 인벤토리 (클릭, 정가의 40%)', theme.colors.muted, 12);
 
     const level = gameState.character.level;
     const buyRows: ListRow[] = [];
     const npc = this.npc ?? NPCS.find((n) => n.role === 'shop') ?? null;
-    // shops carry a band of grades that tracks the hunter's level (original: higher-grade stock appears as you progress)
-    const gradeCap = shopGradeCap(level);
     for (const id of npc?.stock ?? []) {
       const def = registry.item(id);
-      if (def.kind === 'armor' && def.reqLevel > level + 6) continue; // far-off gear is not displayed yet
       if (def.kind === 'weapon') {
         if (!weaponUsableBy(def, gameState.character.race)) continue; // 총기는 인간, 변이무기는 감염체
-        if (def.reqLevel > level + 6) continue; // far-off weapons are not displayed yet
-        const hi = Math.min(def.gradeMax, gradeCap);
-        const lo = Math.max(def.gradeMin, hi - 2);
-        for (let g = lo; g <= hi; g++) {
+        const g = Math.min(def.gradeMax, Math.max(def.gradeMin, this.grade));
+        {
           const price = buyPrice(def, g);
           buyRows.push({
             id: `${id}@${g}`,
@@ -83,7 +74,6 @@ export class ShopWindow extends Window {
         continue;
       }
       const price = buyPrice(def);
-      if (def.kind === 'ammo' && !ammoRelevant(def.caliber, level)) continue;
       const sub =
         def.kind === 'ammo'
           ? `${def.caliber} ${def.ammoKind} · ${buyQty(def)}발 박스`
