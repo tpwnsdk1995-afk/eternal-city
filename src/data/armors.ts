@@ -30,7 +30,9 @@ export const ARMORS: ArmorDef[] = [
   A({ id: 'armor_top_wito', name: '위토 강습 장갑복', slot: '상의', defense: 58, weightKg: 5.2, reqLevel: 70, price: 1_800_000 }),
   A({ id: 'armor_top_wito_cl', name: 'CL 위토 강습 장갑복', slot: '상의', defense: 58, weightKg: 4.6, reqLevel: 70, price: 5_400_000, cl: true }),
   A({ id: 'armor_top_seoul', name: '서울 특무 장갑복', slot: '상의', defense: 70, weightKg: 5.4, reqLevel: 85, price: 3_500_000 }),
+  { ...A({ id: 'armor_top_omega', name: 'Ω 종말 장갑복', slot: '상의', defense: 110, weightKg: 5, reqLevel: 95, price: 20_000_000 }), iconTex: icon('armor_top_seoul') },
   A({ id: 'armor_top_seoul_cl', name: 'CL 서울 특무 장갑복', slot: '상의', defense: 70, weightKg: 4.8, reqLevel: 85, price: 10_000_000, cl: true }),
+  { ...A({ id: 'armor_top_omega_cl', name: 'CL Ω 종말 장갑복', slot: '상의', defense: 110, weightKg: 4.6, reqLevel: 95, price: 60_000_000, cl: true }), iconTex: icon('armor_top_seoul_cl') },
   // ---------------------------------------------------------------- 하의
   A({ id: 'armor_bottom_jeans', name: '청바지', slot: '하의', defense: 3, weightKg: 0.7, reqLevel: 1, price: 3_000 }),
   A({ id: 'armor_bottom_basic', name: '카고 팬츠', slot: '하의', defense: 4, weightKg: 0.9, reqLevel: 1, price: 4_500 }),
@@ -43,6 +45,7 @@ export const ARMORS: ArmorDef[] = [
   A({ id: 'armor_bottom_gangnam', name: '강남 특무 팬츠', slot: '하의', defense: 30, weightKg: 2.6, reqLevel: 55, price: 600_000 }),
   A({ id: 'armor_bottom_wito', name: '위토 강습 장갑 하의', slot: '하의', defense: 38, weightKg: 3.0, reqLevel: 70, price: 1_200_000 }),
   A({ id: 'armor_bottom_seoul', name: '서울 특무 장갑 하의', slot: '하의', defense: 46, weightKg: 3.2, reqLevel: 85, price: 2_400_000 }),
+  { ...A({ id: 'armor_bottom_omega', name: 'Ω 종말 장갑 하의', slot: '하의', defense: 72, weightKg: 3, reqLevel: 95, price: 14_000_000 }), iconTex: icon('armor_bottom_seoul') },
   // ---------------------------------------------------------------- 코트
   A({ id: 'armor_coat_trench', name: '트렌치코트', slot: '코트', defense: 5, weightKg: 1.8, reqLevel: 3, price: 12_000 }),
   A({ id: 'armor_coat_military', name: '군용 야전상의', slot: '코트', defense: 9, weightKg: 2.2, reqLevel: 8, price: 34_000 }),
@@ -59,7 +62,9 @@ export const ARMORS: ArmorDef[] = [
   A({ id: 'armor_coat_wito', name: '위토 강습 코트', slot: '코트', defense: 48, weightKg: 5.4, reqLevel: 70, price: 2_200_000 }),
   A({ id: 'armor_coat_wito_cl', name: 'CL 위토 강습 코트', slot: '코트', defense: 48, weightKg: 4.8, reqLevel: 70, price: 6_600_000, cl: true }),
   A({ id: 'armor_coat_seoul', name: '서울 특무 코트', slot: '코트', defense: 58, weightKg: 5.6, reqLevel: 85, price: 4_200_000 }),
+  { ...A({ id: 'armor_coat_omega', name: 'Ω 종말 코트', slot: '코트', defense: 90, weightKg: 5.2, reqLevel: 95, price: 24_000_000 }), iconTex: icon('armor_coat_seoul') },
   A({ id: 'armor_coat_seoul_cl', name: 'CL 서울 특무 코트', slot: '코트', defense: 58, weightKg: 5.0, reqLevel: 85, price: 12_500_000, cl: true }),
+  { ...A({ id: 'armor_coat_omega_cl', name: 'CL Ω 종말 코트', slot: '코트', defense: 90, weightKg: 4.8, reqLevel: 95, price: 72_000_000, cl: true }), iconTex: icon('armor_coat_seoul_cl') },
   // ---------------------------------------------------------------- 신발
   A({ id: 'armor_shoes_sneakers', name: '운동화', slot: '신발', defense: 2, weightKg: 0.6, reqLevel: 1, price: 3_000 }),
   A({ id: 'armor_shoes_running', name: '러닝화', slot: '신발', defense: 4, weightKg: 0.5, reqLevel: 5, price: 8_000 }),
@@ -71,6 +76,7 @@ export const ARMORS: ArmorDef[] = [
   A({ id: 'armor_shoes_gangnam', name: '강남 특무 부츠', slot: '신발', defense: 20, weightKg: 1.8, reqLevel: 55, price: 450_000 }),
   A({ id: 'armor_shoes_wito', name: '위토 강습 부츠', slot: '신발', defense: 25, weightKg: 2.0, reqLevel: 70, price: 900_000 }),
   A({ id: 'armor_shoes_seoul', name: '서울 특무 부츠', slot: '신발', defense: 30, weightKg: 2.1, reqLevel: 85, price: 1_800_000 }),
+  { ...A({ id: 'armor_shoes_omega', name: 'Ω 종말 부츠', slot: '신발', defense: 48, weightKg: 2, reqLevel: 95, price: 10_000_000 }), iconTex: icon('armor_shoes_seoul') },
   // ---------------------------------------------------------------- 모자
   A({ id: 'armor_hat_cap', name: '야구 모자', slot: '모자', defense: 1, weightKg: 0.2, reqLevel: 1, price: 2_000 }),
   A({ id: 'armor_hat_beret', name: '베레모', slot: '모자', defense: 2, weightKg: 0.2, reqLevel: 3, price: 4_000 }),
@@ -83,6 +89,7 @@ export const ARMORS: ArmorDef[] = [
   A({ id: 'armor_hat_gangnam', name: '강남 특무 헬멧', slot: '모자', defense: 24, weightKg: 1.7, reqLevel: 55, price: 520_000 }),
   A({ id: 'armor_hat_wito', name: '위토 강습 헬멧', slot: '모자', defense: 30, weightKg: 1.9, reqLevel: 70, price: 1_000_000 }),
   A({ id: 'armor_hat_seoul', name: '서울 특무 헬멧', slot: '모자', defense: 36, weightKg: 2.0, reqLevel: 85, price: 2_000_000 }),
+  { ...A({ id: 'armor_hat_omega', name: 'Ω 종말 헬멧', slot: '모자', defense: 56, weightKg: 1.9, reqLevel: 95, price: 12_000_000 }), iconTex: icon('armor_hat_seoul') },
   // 치장용 모자 (원작 사이버샵 코스튬)
   A({ id: 'armor_hat_straw', name: '밀짚모자', slot: '모자', defense: 1, weightKg: 0.2, reqLevel: 1, price: 5_000 }),
   A({ id: 'armor_hat_cowboy', name: '카우보이 모자', slot: '모자', defense: 2, weightKg: 0.3, reqLevel: 1, price: 12_000 }),

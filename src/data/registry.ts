@@ -41,6 +41,7 @@ import { assaultD } from './assaults/assault-d';
 import { assaultE } from './assaults/assault-e';
 import { assaultF } from './assaults/assault-f';
 import { assaultX } from './assaults/assault-x';
+import { assaultX2, assaultX3, assaultX4 } from './assaults/assault-x-plus';
 import { coexUnderground, gwanghwamunDefense } from './maps/late-assaults';
 import { alphaTraining } from './maps/alpha-training';
 import { advancedOf } from '@core/assault/advanced';
@@ -57,7 +58,7 @@ export const ITEMS: ItemDef[] = [...WEAPONS, ...AMMO, ...ARMORS, ...CONSUMABLES,
 export const MAPS: MapDef[] = [gwangjinParking, junggokDong, junggokBlockade, yonggokMiddleSchool, junggokStation, achasanStation, sewer, hangangPark, pyeongchangDong, junggokStationDefense, sewerDepths, jongnoShelter, jongnoStreet, technomartShelter, technomartBridge, uijeongbu, parasiteNest, uijeongbuRuinsShelter, uijeongbuRuins, jongnoRuins, ilsanWaterway, ...LATE_YEAR_MAPS, coexUnderground, gwanghwamunDefense, alphaTraining];
 const BASE_ASSAULTS: AssaultDef[] = [assaultA, assaultB, assaultC, assaultD, assaultE, assaultF];
 /** every mission plus its 고급 variant */
-export const ASSAULTS: AssaultDef[] = [...BASE_ASSAULTS, ...BASE_ASSAULTS.map(advancedOf), assaultX];
+export const ASSAULTS: AssaultDef[] = [...BASE_ASSAULTS, ...BASE_ASSAULTS.map(advancedOf), assaultX, assaultX2, assaultX3, assaultX4];
 
 const items = byId(ITEMS);
 const monsters = byId(MONSTERS);

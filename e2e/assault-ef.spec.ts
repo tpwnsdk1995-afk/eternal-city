@@ -128,4 +128,41 @@ test.describe('assault E · F', () => {
     expect((await page.evaluate(() => window.__ec!.hud())).won).toBeGreaterThanOrEqual(before.won + 100_000_000);
     expect(errors, errors.join('\n')).toEqual([]);
   });
+  test('극한 II: 광화문 네 파도 + 보스 둘, Ω 장비 보상', async ({ page }) => {
+    test.setTimeout(240_000);
+    const errors = await newGame(page, '극한2');
+    await startAssault(page, 'assault-x2', 1);
+    await clearUntilPhase(page, 1);
+    await page.evaluate(() => window.__ec!.teleport(40 * 32, 22 * 32));
+    await page.waitForFunction(() => window.__ec!.assault()?.phaseKind === 'defend');
+    await page.waitForFunction(() => window.__ec!.assault()?.phaseKind === 'boss' || (window.__ec!.killAll(), false), null, { timeout: 150000, polling: 250 });
+    await page.waitForFunction(() => window.__ec!.enemies().some((e) => e.id === 'wito_commander'), null, { timeout: 15000 });
+    await page.waitForFunction(() => (window.__ec!.assault()?.phaseIndex ?? 0) >= 4 || (window.__ec!.killAll(), false), null, { timeout: 45000, polling: 250 });
+    await page.waitForFunction(() => window.__ec!.enemies().some((e) => e.id === 'zombie_ceo'), null, { timeout: 15000 });
+    const before = await page.evaluate(() => window.__ec!.hud());
+    await page.waitForFunction(() => { window.__ec!.killAll(); return window.__ec!.assault()?.status === 'success'; }, null, { timeout: 30000, polling: 250 });
+    expect((await page.evaluate(() => window.__ec!.hud())).won).toBeGreaterThanOrEqual(before.won + 250_000_000);
+    expect(await page.evaluate(() => window.__ec!.state.inventory.items.some((s) => s.itemId === 'armor_hat_omega'))).toBe(true);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
+  test('극한 IV: 보스 넷, power 3 몬스터, ₩10억', async ({ page }) => {
+    test.setTimeout(240_000);
+    const errors = await newGame(page, '극한4');
+    await startAssault(page, 'assault-x4', 1);
+    await clearUntilPhase(page, 1);
+    await page.evaluate(() => window.__ec!.destroyObjectives());
+    await page.waitForFunction(() => window.__ec!.assault()?.phaseKind === 'advance', null, { timeout: 45000, polling: 250 });
+    await page.evaluate(() => window.__ec!.teleport(40 * 32, 20 * 32));
+    await page.waitForFunction(() => window.__ec!.assault()?.phaseKind === 'clear');
+    await clearUntilPhase(page, 4);
+    await page.evaluate(() => window.__ec!.teleport(85 * 32, 20 * 32));
+    await page.waitForFunction(() => window.__ec!.enemies().some((e) => e.id === 'zombie_ceo'), null, { timeout: 15000 });
+    await page.screenshot({ path: 'e2e/out/assault-x4-boss.png' });
+    const before = await page.evaluate(() => window.__ec!.hud());
+    await page.waitForFunction(() => { window.__ec!.killAll(); return window.__ec!.assault()?.status === 'success'; }, null, { timeout: 90000, polling: 250 });
+    expect((await page.evaluate(() => window.__ec!.hud())).won).toBeGreaterThanOrEqual(before.won + 1_000_000_000);
+    expect(await page.evaluate(() => window.__ec!.state.inventory.items.some((s) => s.itemId === 'omega_rail'))).toBe(true);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
 });

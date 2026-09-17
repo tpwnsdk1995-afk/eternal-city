@@ -32,6 +32,7 @@ export interface AssaultDef {
   name: string;
   tier: AssaultTier;
   advanced?: boolean; // 고급 어설트
+  power?: number; // 극한 II~: monster hp·dmg multiplier on top of 고급
   levelRange: [number, number];
   mapId: MapId;
   entrySpawn: string;

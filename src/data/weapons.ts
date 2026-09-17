@@ -8,6 +8,11 @@ const W = (w: In): WeaponDef => {
   return { kind: 'weapon', tex: icon, iconTex: icon, ...w };
 };
 const ARC = (speed: number, aoeRadius: number, arc = true) => ({ speed, aoeRadius, arc });
+/** a weapon with no art of its own wears another weapon's icon */
+const WI = (iconOf: string, w: In): WeaponDef => {
+  const icon = TEX[`icon_${iconOf}` as keyof typeof TEX];
+  return { ...W(w), tex: icon, iconTex: icon };
+};
 
 /**
  * Real-firearm roster following the original's classes; one ladder of level tiers per class up to the
@@ -139,6 +144,15 @@ export const WEAPONS: WeaponDef[] = [
   W({ id: 'moonlight_sword', name: '월광검', class: '근접무기', caliber: 'none', baseDamage: 1300, rpm: 130, range: 60, spreadDeg: 0, baseAccuracy: 0.97, weightKg: 1.5, reqLevel: 82, illegal: true, price: 8_500_000 }),
   W({ id: 'sky_spear', name: '천공의 황금창', class: '근접무기', caliber: 'none', baseDamage: 1800, rpm: 60, range: 100, spreadDeg: 0, baseAccuracy: 0.95, weightKg: 5, reqLevel: 86, illegal: true, price: 10_000_000 }),
   W({ id: 'guillotine_axe', name: '단두 대부월', class: '근접무기', caliber: 'none', baseDamage: 2600, rpm: 22, range: 64, spreadDeg: 0, baseAccuracy: 0.93, weightKg: 12, reqLevel: 90, illegal: true, price: 13_000_000 }), // 한 방 2600, 느림
+  // ---------------------------------------------------------------- 종말형 Ω (Lv.95) — 불법 최종 티어보다 한 단계 위, 극한 어설트 보상 겸 암거래상
+  WI('judgement_50', { id: 'omega_judge', name: 'Ω 심판자 .50', class: '권총', caliber: '.45ACP', baseDamage: 900, rpm: 60, range: 560, spreadDeg: 1.4, baseAccuracy: 0.95, weightKg: 2.4, reqLevel: 95, illegal: true, price: 30_000_000 }),
+  WI('viper_pdw', { id: 'omega_pdw', name: 'Ω 폭풍 PDW', class: '기관단총', caliber: '.45ACP', baseDamage: 260, rpm: 1400, range: 500, spreadDeg: 2.6, baseAccuracy: 0.89, weightKg: 2.2, reqLevel: 95, illegal: true, price: 32_000_000 }),
+  WI('nightfall_ar', { id: 'omega_ar', name: 'Ω 종말 소총', class: '돌격소총', caliber: '5.56mm', baseDamage: 400, rpm: 900, range: 680, spreadDeg: 1.6, baseAccuracy: 0.93, weightKg: 3.2, reqLevel: 95, illegal: true, price: 35_000_000 }),
+  WI('sunbreaker', { id: 'omega_sg', name: 'Ω 태양폭발 산탄총', class: '산탄총', caliber: '12ga', baseDamage: 1800, pellets: 12, rpm: 150, range: 320, spreadDeg: 7, baseAccuracy: 0.87, weightKg: 5, reqLevel: 95, illegal: true, price: 34_000_000 }),
+  WI('railgun_x', { id: 'omega_rail', name: 'Ω 레일건 완성형', class: '저격소총', caliber: '.50BMG', baseDamage: 6000, rpm: 18, range: 1200, spreadDeg: 0.15, baseAccuracy: 0.99, weightKg: 20, reqLevel: 95, reqTechGrade: 5, illegal: true, price: 45_000_000 }),
+  WI('tempest_mg', { id: 'omega_minigun', name: 'Ω 멸망의 회전포', class: '기관총', caliber: '7.62mm', baseDamage: 280, rpm: 2000, range: 600, spreadDeg: 5, baseAccuracy: 0.66, weightKg: 30, reqLevel: 95, reqTechGrade: 5, illegal: true, price: 40_000_000 }),
+  WI('hellfire_mlrs', { id: 'omega_mlrs', name: 'Ω 아마겟돈 로켓', class: '투척중화기', caliber: 'rocket', baseDamage: 4800, rpm: 45, range: 700, spreadDeg: 1, baseAccuracy: 0.95, weightKg: 22, reqLevel: 95, reqTechGrade: 5, illegal: true, price: 50_000_000, projectile: ARC(680, 150, false) }),
+  WI('moonlight_sword', { id: 'omega_blade', name: 'Ω 멸세검', class: '근접무기', caliber: 'none', baseDamage: 3200, rpm: 80, range: 84, spreadDeg: 0, baseAccuracy: 0.97, weightKg: 3, reqLevel: 95, illegal: true, price: 42_000_000 }),
   // ---------------------------------------------------------------- 변이무기 (감염체 전용)
   W({ id: 'claws', name: '발톱', class: '변이무기', caliber: 'none', baseDamage: 16, rpm: 150, range: 42, spreadDeg: 0, baseAccuracy: 0.92, weightKg: 0, reqLevel: 1, race: 'infected', price: 2_500 }),
   W({ id: 'fangs', name: '송곳니', class: '변이무기', caliber: 'none', baseDamage: 26, rpm: 130, range: 40, spreadDeg: 0, baseAccuracy: 0.92, weightKg: 0, reqLevel: 4, race: 'infected', price: 7_000 }),
@@ -153,4 +167,5 @@ export const WEAPONS: WeaponDef[] = [
   W({ id: 'horror_maw', name: '괴물 아가리', class: '변이무기', caliber: 'none', baseDamage: 380, rpm: 80, range: 50, spreadDeg: 0, baseAccuracy: 0.92, weightKg: 0, reqLevel: 62, race: 'infected', price: 1_200_000 }),
   W({ id: 'plague_spit', name: '역병 토사', class: '변이무기', caliber: 'none', baseDamage: 500, rpm: 40, range: 360, spreadDeg: 2, baseAccuracy: 0.9, weightKg: 0, reqLevel: 72, race: 'infected', price: 2_200_000, projectile: { speed: 400, aoeRadius: 80, arc: true, selfDamage: false } }),
   W({ id: 'apex_claws', name: '정점 발톱', class: '변이무기', caliber: 'none', baseDamage: 740, rpm: 140, range: 48, spreadDeg: 0, baseAccuracy: 0.94, weightKg: 0, reqLevel: 85, race: 'infected', price: 5_500_000 }),
+  WI('apex_claws', { id: 'omega_maw', name: 'Ω 종말 포식자', class: '변이무기', caliber: 'none', baseDamage: 1300, rpm: 140, range: 56, spreadDeg: 0, baseAccuracy: 0.95, weightKg: 0, reqLevel: 95, race: 'infected', price: 30_000_000 }),
 ];

@@ -38,13 +38,13 @@ export function advancedMonster(def: MonsterDef): MonsterDef {
 }
 
 /** Every assault: monsters last longer and hit harder (clear rewards were raised x50 to match). */
-export function hardMonster(def: MonsterDef): MonsterDef {
+export function hardMonster(def: MonsterDef, power = 1): MonsterDef {
   const H = balance.assault.hard;
   return {
     ...def,
-    hp: Math.round(def.hp * H.hpMult),
-    attack: { ...def.attack, dmg: Math.round(def.attack.dmg * H.dmgMult) },
-    ranged: def.ranged ? { ...def.ranged, dmg: Math.round(def.ranged.dmg * H.dmgMult) } : undefined,
+    hp: Math.round(def.hp * H.hpMult * power),
+    attack: { ...def.attack, dmg: Math.round(def.attack.dmg * H.dmgMult * power) },
+    ranged: def.ranged ? { ...def.ranged, dmg: Math.round(def.ranged.dmg * H.dmgMult * power) } : undefined,
   };
 }
 
