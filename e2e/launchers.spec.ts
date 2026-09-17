@@ -63,6 +63,8 @@ test.describe('launchers (투척/중화기)', () => {
     const hud = await page.evaluate(() => window.__ec!.hud());
     expect(hud.weaponName).toBe('RPG-7');
     expect(hud.ammoKind).toBe('대전차탄');
+    // a reload or a sold box leaves 일반탄 selected — the launcher must still fire its 대전차탄
+    await page.evaluate(() => window.__ec!.state.setFire({ ...window.__ec!.state.fire, ammoKind: '일반탄' }));
 
     const zid = await page.evaluate(() => window.__ec!.spawn('zombie_suit_m', 220, 0));
     await page.waitForTimeout(150);

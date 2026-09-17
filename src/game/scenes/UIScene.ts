@@ -4,6 +4,7 @@ import { activeBuffs, formatRemaining } from '@core/combat/buffs';
 import { GAME_HEIGHT, GAME_WIDTH, fitCamera } from '../../config/gameConfig';
 import { TEX } from '@data/textureKeys';
 import { registry } from '@data/registry';
+import { defaultAmmoKind, isAmmoCompatible, selectAmmoKind } from '@core/weapons/fireController';
 import { totalRounds } from '@core/inventory/inventory';
 import { xpToNext } from '@core/stats/levelCurve';
 import { progressText } from '@core/quest/questState';
@@ -359,6 +360,7 @@ export class UIScene extends Phaser.Scene {
     this.subFireText.setText(gameState.fire.subFire ? '서브연사 ON (Ctrl)' : '');
     if (w.def.class === '근접무기') this.ammoText.setText('근접');
     else {
+      if (!isAmmoCompatible(w.def, gameState.fire.ammoKind)) gameState.setFire(selectAmmoKind(gameState.fire, defaultAmmoKind(w.def, gameState.inventory, registry.item, gameState.fire.ammoKind)));
       const rounds = totalRounds(gameState.inventory, registry.item, w.def.caliber, gameState.fire.ammoKind);
       this.ammoText.setText(`${gameState.fire.ammoKind} ${w.def.caliber} · ${rounds}발`);
       this.ammoText.setColor(rounds === 0 ? theme.colors.bad : theme.colors.muted);

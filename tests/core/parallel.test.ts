@@ -28,6 +28,7 @@ describe('패러렐 시스템', () => {
       expect(hub.year).toBe(y.year);
       expect(hubForYear(y.year)).toBe(y.hubMapId);
       expect((hub.npcs ?? []).some((n) => n.id === 'npc_assault'), `${y.year} 어설트 접수원`).toBe(true);
+      expect((hub.npcs ?? []).some((n) => n.id === 'npc_blackmarket'), `${y.year} 암거래상`).toBe(true);
     }
     expect(hubForYear(2003)).toBe('jongno-shelter');
     expect(hubForYear(2007)).toBe('gwangjin-gucheong-parking'); // unknown years fall back to the start

@@ -12,7 +12,7 @@ import { spreadOffset, stanceSpread } from '@core/combat/accuracy';
 import { applyBurn, isBurning, isInvulnerable, tickBurn } from '@core/combat/statusEffects';
 import { rollConsciousness } from '@core/combat/consciousness';
 import { enemyHitChance, playerDamageTaken } from '@core/combat/enemyAttack';
-import { markFired, toggleSubFire, tryFire } from '@core/weapons/fireController';
+import { defaultAmmoKind, isAmmoCompatible, markFired, selectAmmoKind, toggleSubFire, tryFire } from '@core/weapons/fireController';
 import { fireProfile, subFireParams } from '@core/weapons/weaponMath';
 import { audio } from '../audio/AudioManager';
 import { targetsInArc } from '@core/combat/meleeArc';
@@ -196,6 +196,8 @@ export class CombatBridge {
     if (!w) return this.throttled('noWeapon', '장착된 무기가 없습니다.', 'bad');
     const d = gameState.derived();
     const eff = w.eff.def; // 강화/부품/유니크 folded in
+    // the kind resets to 일반탄 on load/sell; a rocket launcher has no 일반탄, so switch to one it can chamber
+    if (!isAmmoCompatible(eff, gameState.fire.ammoKind)) gameState.setFire(selectAmmoKind(gameState.fire, defaultAmmoKind(eff, gameState.inventory, registry.item, gameState.fire.ammoKind)));
     const attempt = tryFire(gameState.fire, now, eff, d.attackSpeedMult, gameState.inventory, registry.item);
     if (!attempt.ok) {
       if (attempt.reason === 'noAmmo' || attempt.reason === 'incompatibleAmmo') audio.play('no_ammo');

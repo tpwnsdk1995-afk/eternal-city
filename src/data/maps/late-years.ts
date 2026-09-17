@@ -80,6 +80,7 @@ function makeHub(s: HubSpec): MapDef {
       { id: 'npc_cybershop', at: { x: 19, y: 22 } },
       { id: 'npc_taxi', at: { x: 27, y: 22 } },
       { id: 'npc_assault', at: { x: 39, y: 11 } },
+      { id: 'npc_blackmarket', at: { x: 7, y: 11 } },
     ],
     safeZone: true,
   };
