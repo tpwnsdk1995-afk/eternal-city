@@ -3,7 +3,6 @@ import { registry } from '@data/registry';
 import type { ItemStack } from '@data/schema/item';
 import { isMeleeClass } from '@data/schema/enums';
 import { stackWeightKg, totalWeightKg } from '@core/inventory/weight';
-import { gradeMult } from '@core/weapons/weaponMath';
 import { armorDefense, armorLabel, effectiveWeapon, enhanceLevel, weaponLabel } from '@core/tuning/tuning';
 import { sellPrice } from '@core/economy/shop';
 import { PARTS, UNIQUES } from '@data/tuning';
@@ -87,9 +86,8 @@ export class InventoryWindow extends Window {
     let ok = true;
     switch (def.kind) {
       case 'weapon': {
-        const g = s.grade ?? def.gradeMin;
         const eff = effectiveWeapon(def, s);
-        const atk = Math.round(eff.def.baseDamage * gradeMult(g));
+        const atk = Math.round(eff.def.baseDamage);
         const mult = isMeleeClass(def.class) ? d.meleeMult : d.rangedMult;
         const enh = enhanceLevel(s);
         title = weaponLabel(def, s);
@@ -157,13 +155,12 @@ export class InventoryWindow extends Window {
     const onClick = (): void => this.tap(s.uid);
     switch (def.kind) {
       case 'weapon': {
-        const g = s.grade ?? def.gradeMin;
         const eff = effectiveWeapon(def, s).def;
         return {
           id: s.uid,
           icon: def.iconTex,
           text: weaponLabel(def, s),
-          sub: `${def.class} · 공격 ${Math.round(eff.baseDamage * gradeMult(g))} · Lv.${def.reqLevel} · ${kg}kg`,
+          sub: `${def.class} · 공격 ${Math.round(eff.baseDamage)} · Lv.${def.reqLevel} · ${kg}kg`,
           right: equipped ? '장착중' : '',
           rightColor: theme.colors.good,
           color,

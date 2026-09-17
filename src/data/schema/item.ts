@@ -19,13 +19,11 @@ export interface WeaponDef {
   projectile?: { speed: number; aoeRadius: number; arc: boolean; selfDamage?: boolean };
   /** 변이무기 are infected-only; guns (no race) are human-only */
   race?: Race;
-  gradeMin: number;
-  gradeMax: number;
   weightKg: number;
   reqLevel: number;
   reqTechGrade?: number;
   illegal?: boolean; // 불법무기
-  price: number; // ₩ at grade 1; grade multiplies
+  price: number; // ₩
   tex: TexKey;
   iconTex: TexKey;
 }
@@ -84,7 +82,6 @@ export interface ItemStack {
   uid: string;
   itemId: string;
   qty: number;
-  grade?: number;
   /** 강화 +0..+9 (weapons) */
   enhance?: number;
   /** 부품 개조 installed on this weapon */

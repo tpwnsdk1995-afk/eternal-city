@@ -52,7 +52,6 @@ export function pruneEquipment(eq: Equipment, inv: Inventory): Equipment {
 export interface EquippedWeapon {
   /** base definition (names, class, caliber, requirements) */
   def: WeaponDef;
-  grade: number;
   uid: string;
   stack: ItemStack;
   /** numbers with 강화/부품/유니크 applied — combat reads these */
@@ -65,7 +64,7 @@ export function equippedWeapon(eq: Equipment, inv: Inventory, lookup: ItemLookup
   if (!stack) return null;
   const def = lookup(stack.itemId);
   if (def.kind !== 'weapon') return null;
-  return { def, grade: stack.grade ?? def.gradeMin, uid: stack.uid, stack, eff: effectiveWeapon(def, stack) };
+  return { def, uid: stack.uid, stack, eff: effectiveWeapon(def, stack) };
 }
 
 export function totalDefense(eq: Equipment, inv: Inventory, lookup: ItemLookup): number {

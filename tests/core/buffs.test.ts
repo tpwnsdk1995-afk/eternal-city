@@ -48,7 +48,7 @@ describe('buffs', () => {
 
   it('특수 강화권 adds to the success chance for one attempt', () => {
     const m16 = WEAPONS.find((w) => w.id === 'm16a2')!;
-    const stack = { uid: 'w', itemId: m16.id, qty: 1, grade: 3, enhance: 8 };
+    const stack = { uid: 'w', itemId: m16.id, qty: 1, enhance: 8 };
     expect(enhanceChancePct(stack)).toBe(10);
     expect(enhanceChancePct(stack, 20)).toBe(30);
     expect(enhanceChancePct({ ...stack, enhance: 0 }, 60)).toBe(100);

@@ -4,14 +4,6 @@ import type { WeaponClass } from '@data/schema/enums';
 
 const C = balance.combat;
 
-export function gradeMult(grade: number): number {
-  return Math.pow(C.gradeMult, Math.max(1, grade) - 1);
-}
-
-export function weaponPrice(def: WeaponDef, grade: number): number {
-  return Math.round(def.price * gradeMult(grade));
-}
-
 export function subFireParams(def: WeaponDef): { rpm: number; dmgMult: number } {
   return def.subFire ?? C.defaultSubFire;
 }

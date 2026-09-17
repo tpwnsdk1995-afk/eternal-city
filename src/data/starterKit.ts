@@ -2,7 +2,7 @@ import type { Race } from './schema/enums';
 
 interface StarterKit {
   won: number;
-  items: readonly { itemId: string; qty: number; grade?: number }[];
+  items: readonly { itemId: string; qty: number }[];
   equipWeaponItemId: string;
 }
 
@@ -11,7 +11,7 @@ export const STARTER_KITS: Record<Race, StarterKit> = {
   human: {
     won: 5_000,
     items: [
-      { itemId: 'glock17', qty: 1, grade: 1 },
+      { itemId: 'glock17', qty: 1 },
       { itemId: 'ammo_9mm_normal', qty: 100 },
       { itemId: 'bandage', qty: 2 },
     ],
@@ -20,7 +20,7 @@ export const STARTER_KITS: Record<Race, StarterKit> = {
   infected: {
     won: 5_000,
     items: [
-      { itemId: 'claws', qty: 1, grade: 1 },
+      { itemId: 'claws', qty: 1 },
       { itemId: 'bandage', qty: 2 },
     ],
     equipWeaponItemId: 'claws',

@@ -13,7 +13,7 @@ const top = ARMORS.find((a) => a.kind === 'armor' && a.slot === '상의')!;
 
 /** RNG that always succeeds / fails `chance`, and picks the first option in `range`. */
 const rng = (roll: number): Rng => ({ chance: (p: number) => roll < p, range: (lo: number) => lo, int: (lo: number) => lo, pick: <T>(xs: readonly T[]) => xs[0], next: () => roll });
-const stack = (def: WeaponDef, extra: Partial<ItemStack> = {}): ItemStack => ({ uid: 'w1', itemId: def.id, qty: 1, grade: 3, ...extra });
+const stack = (def: WeaponDef, extra: Partial<ItemStack> = {}): ItemStack => ({ uid: 'w1', itemId: def.id, qty: 1, ...extra });
 
 describe('강화', () => {
   it('follows the 50→10% table and caps at +9', () => {
@@ -36,7 +36,7 @@ describe('강화', () => {
     expect(r0.ok && r0.stack.enhance === 0).toBe(true);
   });
 
-  it('cost scales with grade price and level; +N raises damage enhanceDmgPerLevel per level', () => {
+  it('cost scales with price and level; +N raises damage enhanceDmgPerLevel per level', () => {
     const c0 = enhanceCost(m16, stack(m16));
     const c5 = enhanceCost(m16, stack(m16, { enhance: 5 }));
     expect(c5).toBeGreaterThan(c0 * 3);
@@ -78,7 +78,7 @@ describe('유니크 개조', () => {
     if (!win.ok) return;
     expect(effectiveWeapon(m16, win.stack).critPct).toBeCloseTo(0.05);
     expect(tryUnique(m16, win.stack, rng(0.01))).toEqual({ ok: false, reason: 'hasUnique' });
-    expect(weaponLabel(m16, win.stack)).toBe('M16A2  [3등급] +7 [정밀]');
+    expect(weaponLabel(m16, win.stack)).toBe('M16A2 +7 [정밀]');
   });
 });
 

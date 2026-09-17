@@ -69,7 +69,6 @@ export const balance = {
     killMult: 5, // kills give 5x the monster's listed xp (early game felt too slow)
   },
   combat: {
-    gradeMult: 1.25,
     varianceMin: 0.9,
     varianceMax: 1.1,
     burnThresholdPct: 0.1,
@@ -144,7 +143,7 @@ export const balance = {
     enhanceSuccessPct: [50, 45, 40, 35, 30, 25, 20, 15, 10] as readonly number[],
     maxEnhance: 9,
     enhanceDmgPerLevel: 0.15,
-    /** cost = weapon grade price × base × (1 + level × perLevel) */
+    /** cost = weapon price × base × (1 + level × perLevel) */
     enhanceCostBase: 0.12,
     enhanceCostPerLevel: 0.45,
     /** failure drops one level (never breaks); below this level a failure costs nothing but ₩ */

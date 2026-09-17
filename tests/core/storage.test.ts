@@ -6,14 +6,14 @@ import { filterStacks, nextSortMode, sortStacks } from '@core/inventory/sortFilt
 
 describe('구청 보관함 (moveStack)', () => {
   it('moves a weapon across with its tune fields and a fresh uid', () => {
-    let inv = addItem(createInventory(), registry.item('mp5'), 1, { grade: 3 });
+    let inv = addItem(createInventory(), registry.item('mp5'), 1);
     inv = { ...inv, items: inv.items.map((s) => ({ ...s, enhance: 4, parts: ['barrel' as never] })) };
     const r = moveStack(inv, createInventory(), inv.items[0].uid, registry.item, 40);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.from.items).toEqual([]);
     expect(r.to.items).toHaveLength(1);
-    expect(r.to.items[0]).toMatchObject({ itemId: 'mp5', grade: 3, enhance: 4, uid: 'i1' });
+    expect(r.to.items[0]).toMatchObject({ itemId: 'mp5', enhance: 4, uid: 'i1' });
     expect(r.to.nextUid).toBe(2);
   });
 
@@ -55,8 +55,8 @@ describe('inventory sort / filter', () => {
   const inv = (() => {
     let i = createInventory();
     i = addItem(i, registry.item('bandage'), 2);
-    i = addItem(i, registry.item('m60'), 1, { grade: 1 }); // 10.5kg, 120,000
-    i = addItem(i, registry.item('glock17'), 1, { grade: 1 }); // 0.9kg, 8,000
+    i = addItem(i, registry.item('m60'), 1); // 10.5kg, 120,000
+    i = addItem(i, registry.item('glock17'), 1); // 0.9kg, 8,000
     i = addItem(i, registry.item('ammo_9mm_normal'), 100);
     return i;
   })();

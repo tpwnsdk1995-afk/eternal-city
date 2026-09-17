@@ -9,7 +9,7 @@ test.describe('기술상 (tuning)', () => {
   test('강화 succeeds/fails per the roll, parts install once, unique lands at +7, plus-up raises defense', async ({ page }) => {
     const errors = await newGame(page);
     await page.evaluate(() => window.__ec!.state.setCharacter({ ...window.__ec!.state.character, level: 20, won: 5_000_000 }));
-    expect(await page.evaluate(() => window.__ec!.actions.buy('m16a2', 4).ok)).toBe(true);
+    expect(await page.evaluate(() => window.__ec!.actions.buy('m16a2').ok)).toBe(true);
     const uid = await page.evaluate(() => window.__ec!.state.inventory.items.find((s) => s.itemId === 'm16a2')!.uid);
     await page.evaluate((u) => window.__ec!.actions.equipToggle(u), uid);
     const won0 = await page.evaluate(() => window.__ec!.state.character.won);
@@ -22,7 +22,7 @@ test.describe('기술상 (tuning)', () => {
     stack = await page.evaluate((u) => window.__ec!.state.inventory.items.find((s) => s.uid === u)!, uid);
     expect(stack.enhance).toBe(2);
     expect(await page.evaluate(() => window.__ec!.state.character.won)).toBeLessThan(won0);
-    expect((await page.evaluate(() => window.__ec!.hud())).weaponLabel).toBe('M16A2  [4등급] +2');
+    expect((await page.evaluate(() => window.__ec!.hud())).weaponLabel).toBe('M16A2 +2');
 
     // parts: barrel once, second time refused; scope allowed on a rifle
     expect(await page.evaluate((u) => window.__ec!.actions.installPart(u, 'barrel').ok, uid)).toBe(true);
@@ -39,7 +39,7 @@ test.describe('기술상 (tuning)', () => {
     stack = await page.evaluate((u) => window.__ec!.state.inventory.items.find((s) => s.uid === u)!, uid);
     expect(stack.enhance).toBe(7);
     expect(stack.unique).toBe('precision');
-    expect((await page.evaluate(() => window.__ec!.hud())).weaponLabel).toBe('M16A2  [4등급] +7 [정밀]');
+    expect((await page.evaluate(() => window.__ec!.hud())).weaponLabel).toBe('M16A2 +7 [정밀]');
 
     // plus-up on a bought top
     expect(await page.evaluate(() => window.__ec!.actions.buy('armor_top_basic').ok)).toBe(true);
@@ -61,7 +61,7 @@ test.describe('기술상 (tuning)', () => {
     await page.keyboard.press('c'); // 계속하기
     await page.waitForFunction(() => window.__ec?.scene() === 'SafeZone');
     await page.waitForTimeout(300);
-    expect((await page.evaluate(() => window.__ec!.hud())).weaponLabel).toBe('M16A2  [4등급] +7 [정밀]');
+    expect((await page.evaluate(() => window.__ec!.hud())).weaponLabel).toBe('M16A2 +7 [정밀]');
     expect(errors, errors.join('\n')).toEqual([]);
   });
 });

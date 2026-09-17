@@ -125,14 +125,14 @@ export const actions = {
     return { ok: true };
   },
 
-  buy(itemId: string, grade?: number): ActionResult {
+  buy(itemId: string): ActionResult {
     const def = registry.item(itemId);
-    const r = buy(gameState.inventory, gameState.character.won, def, registry.item, grade);
-    if (!r.ok) return fail(r.reason === 'noMoney' ? '₩이 부족합니다.' : '판매하지 않는 등급입니다.');
+    const r = buy(gameState.inventory, gameState.character.won, def, registry.item);
+    if (!r.ok) return fail('₩이 부족합니다.');
     if (totalWeightKg(r.inv, registry.item) > gameState.derived().maxWeightKg) return fail('무게 한도를 초과합니다.');
     gameState.setInventory(r.inv);
     gameState.setCharacter({ ...gameState.character, won: r.won });
-    return done(`${def.name}${def.kind === 'weapon' ? ` [${grade ?? def.gradeMin}등급]` : ''} 구매 (₩${r.cost.toLocaleString('ko-KR')})`, 'good');
+    return done(`${def.name} 구매 (₩${r.cost.toLocaleString('ko-KR')})`, 'good');
   },
 
   sell(uid: string): ActionResult {

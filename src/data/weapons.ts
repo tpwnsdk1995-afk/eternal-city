@@ -1,18 +1,17 @@
 import type { WeaponDef } from './schema/item';
 import { TEX } from './textureKeys';
 
-type In = Omit<WeaponDef, 'kind' | 'gradeMin' | 'gradeMax' | 'tex' | 'iconTex'> & Partial<Pick<WeaponDef, 'gradeMin' | 'gradeMax'>>;
+type In = Omit<WeaponDef, 'kind' | 'tex' | 'iconTex'>;
 /** every weapon's icon is `icon_<id>` (original-client art via tools/ec-icons.py) */
 const W = (w: In): WeaponDef => {
   const icon = TEX[`icon_${w.id}` as keyof typeof TEX];
-  return { kind: 'weapon', gradeMin: 1, gradeMax: 11, tex: icon, iconTex: icon, ...w };
+  return { kind: 'weapon', tex: icon, iconTex: icon, ...w };
 };
 const ARC = (speed: number, aoeRadius: number, arc = true) => ({ speed, aoeRadius, arc });
 
 /**
  * Real-firearm roster following the original's classes; one ladder of level tiers per class up to the
- * Lv.85 서울 특무 gear. `baseDamage` is per shot at grade 1 (shotguns: total across pellets);
- * every grade multiplies by 1.25. `price` is grade 1.
+ * Lv.85 서울 특무 gear, then the illegal endgame tier above it. `baseDamage` is per shot (shotguns: total across pellets).
  */
 export const WEAPONS: WeaponDef[] = [
   // ---------------------------------------------------------------- 권총
@@ -117,12 +116,29 @@ export const WEAPONS: WeaponDef[] = [
   W({ id: 'smaw', name: 'SMAW', class: '투척중화기', caliber: 'rocket', baseDamage: 800, rpm: 15, range: 580, spreadDeg: 1.2, baseAccuracy: 0.92, weightKg: 7.5, reqLevel: 55, reqTechGrade: 4, price: 900_000, projectile: ARC(580, 100, false) }),
   W({ id: 'xm25', name: 'XM25 CDTE', class: '투척중화기', caliber: 'grenade', baseDamage: 560, rpm: 120, range: 480, spreadDeg: 1.6, baseAccuracy: 0.92, weightKg: 6.3, reqLevel: 70, reqTechGrade: 4, price: 2_000_000, projectile: ARC(460, 80) }),
   W({ id: 'javelin', name: 'FGM-148 재블린 특무형', class: '투척중화기', caliber: 'rocket', baseDamage: 1800, rpm: 10, range: 640, spreadDeg: 1, baseAccuracy: 0.95, weightKg: 22, reqLevel: 85, reqTechGrade: 5, price: 6_000_000, projectile: ARC(600, 120, false) }),
-  // ---------------------------------------------------------------- 불법무기 (암거래상)
-  W({ id: 'tec9', name: 'TEC-9 (개조)', class: '기관단총', caliber: '9mm', baseDamage: 11, rpm: 900, range: 300, spreadDeg: 8, baseAccuracy: 0.55, weightKg: 1.6, reqLevel: 6, illegal: true, price: 40_000 }),
-  W({ id: 'sawed_off', name: '단축 산탄총', class: '산탄총', caliber: '12ga', baseDamage: 88, pellets: 8, rpm: 70, range: 150, spreadDeg: 16, baseAccuracy: 0.75, weightKg: 2.4, reqLevel: 9, illegal: true, price: 45_000 }),
-  W({ id: 'ak47_mod', name: 'AK-47 (개조 연사)', class: '돌격소총', caliber: '7.62mm', baseDamage: 26, rpm: 800, range: 420, spreadDeg: 5.5, baseAccuracy: 0.62, weightKg: 4.0, reqLevel: 16, illegal: true, price: 95_000 }),
-  W({ id: 'deagle_gold', name: 'Desert Eagle (금도금 개조)', class: '권총', caliber: '.45ACP', baseDamage: 52, rpm: 140, range: 440, spreadDeg: 3.4, baseAccuracy: 0.8, weightKg: 2.0, reqLevel: 32, illegal: true, price: 220_000 }),
-  W({ id: 'saiga_mod', name: 'Saiga-12 (드럼 개조)', class: '산탄총', caliber: '12ga', baseDamage: 144, pellets: 8, rpm: 260, range: 230, spreadDeg: 11, baseAccuracy: 0.7, weightKg: 4.4, reqLevel: 34, illegal: true, price: 320_000 }),
+  // ---------------------------------------------------------------- 불법무기 (암거래상) — 최종 티어: 특무형보다 강하고, 하나씩 특이한 버릇이 있다
+  W({ id: 'phantom_9', name: 'PHANTOM-9 광자권총', class: '권총', caliber: '9mm', baseDamage: 90, rpm: 900, range: 460, spreadDeg: 3.5, baseAccuracy: 0.85, weightKg: 1.1, reqLevel: 62, illegal: true, price: 3_200_000 }), // 권총인데 기관단총 연사
+  W({ id: 'judgement_50', name: '저지먼트 .50 처형 리볼버', class: '권총', caliber: '.45ACP', baseDamage: 480, rpm: 30, range: 520, spreadDeg: 1.8, baseAccuracy: 0.93, weightKg: 2.6, reqLevel: 80, illegal: true, price: 7_500_000 }), // 한 발 480
+  W({ id: 'hornet_swarm', name: '호넷 SWARM 초연사기', class: '기관단총', caliber: '9mm', baseDamage: 64, rpm: 2400, range: 420, spreadDeg: 5, baseAccuracy: 0.78, weightKg: 2.2, reqLevel: 65, illegal: true, price: 4_800_000 }), // 분당 2400발
+  W({ id: 'viper_pdw', name: '바이퍼 PDW (음속 개조)', class: '기관단총', caliber: '.45ACP', baseDamage: 150, rpm: 1200, range: 460, spreadDeg: 3, baseAccuracy: 0.86, weightKg: 2.4, reqLevel: 82, illegal: true, price: 8_000_000 }),
+  W({ id: 'nightfall_ar', name: '나이트폴 광자소총', class: '돌격소총', caliber: '5.56mm', baseDamage: 230, rpm: 850, range: 620, spreadDeg: 2, baseAccuracy: 0.9, weightKg: 3.4, reqLevel: 78, illegal: true, price: 7_500_000 }),
+  W({ id: 'berserk_ak', name: '버서크 AK (과열 개조)', class: '돌격소총', caliber: '7.62mm', baseDamage: 140, rpm: 1500, range: 500, spreadDeg: 4.5, baseAccuracy: 0.74, weightKg: 4.6, reqLevel: 68, illegal: true, price: 5_200_000 }), // 소총인데 1500rpm
+  W({ id: 'hydra_12', name: '히드라 전자동 산탄총', class: '산탄총', caliber: '12ga', baseDamage: 560, pellets: 8, rpm: 420, range: 250, spreadDeg: 10, baseAccuracy: 0.76, weightKg: 5.8, reqLevel: 66, illegal: true, price: 5_000_000 }), // 산탄총 420rpm
+  W({ id: 'sunbreaker', name: '선브레이커 광자산탄총', class: '산탄총', caliber: '12ga', baseDamage: 1080, pellets: 12, rpm: 90, range: 300, spreadDeg: 8, baseAccuracy: 0.84, weightKg: 5.2, reqLevel: 76, illegal: true, price: 6_800_000 }), // 12펠릿
+  W({ id: 'wraith_dmr', name: '레이스 DMR (연사 개조)', class: '저격소총', caliber: '7.62mm', baseDamage: 640, rpm: 240, range: 880, spreadDeg: 0.6, baseAccuracy: 0.94, weightKg: 6, reqLevel: 72, reqTechGrade: 4, illegal: true, price: 6_000_000 }), // 저격총 240rpm
+  W({ id: 'railgun_x', name: '레일건 X-0 시제품', class: '저격소총', caliber: '.50BMG', baseDamage: 3600, rpm: 12, range: 1100, spreadDeg: 0.2, baseAccuracy: 0.98, weightKg: 24, reqLevel: 85, reqTechGrade: 5, illegal: true, price: 11_000_000 }), // 한 발 3600
+  W({ id: 'arc_cannon', name: '아크 캐논 (전자기 개조)', class: '기관총', caliber: '.50BMG', baseDamage: 420, rpm: 300, range: 580, spreadDeg: 4.5, baseAccuracy: 0.66, weightKg: 22, reqLevel: 74, reqTechGrade: 4, illegal: true, price: 6_500_000 }),
+  W({ id: 'tempest_mg', name: '템페스트 회전기관총', class: '기관총', caliber: '7.62mm', baseDamage: 160, rpm: 1800, range: 540, spreadDeg: 6, baseAccuracy: 0.6, weightKg: 34, reqLevel: 82, reqTechGrade: 5, illegal: true, price: 9_500_000 }), // 기관총 300rpm 규칙을 깨는 1800rpm
+  W({ id: 'plasma_mortar', name: '플라즈마 박격포', class: '투척중화기', caliber: 'grenade', baseDamage: 1500, rpm: 60, range: 500, spreadDeg: 1.5, baseAccuracy: 0.92, weightKg: 9, reqLevel: 75, reqTechGrade: 4, illegal: true, price: 8_000_000, projectile: ARC(460, 140) }), // 폭발 반경 140
+  W({ id: 'hellfire_mlrs', name: '헬파이어 다연장 로켓', class: '투척중화기', caliber: 'rocket', baseDamage: 2800, rpm: 40, range: 660, spreadDeg: 1.2, baseAccuracy: 0.94, weightKg: 26, reqLevel: 84, reqTechGrade: 5, illegal: true, price: 12_000_000, projectile: ARC(640, 130, false) }),
+  W({ id: 'photon_chakram', name: '광자 차크람', class: '근접무기', caliber: 'none', baseDamage: 520, rpm: 300, range: 52, spreadDeg: 0, baseAccuracy: 0.97, weightKg: 0.8, reqLevel: 64, illegal: true, price: 4_600_000 }), // 근접 300rpm
+  W({ id: 'executioner_flail', name: '처형자의 쇠사슬 철퇴', class: '근접무기', caliber: 'none', baseDamage: 1500, rpm: 30, range: 92, spreadDeg: 0, baseAccuracy: 0.92, weightKg: 9, reqLevel: 68, illegal: true, price: 5_200_000 }), // 한 방 1500
+  W({ id: 'frost_axe', name: '빙정 도끼', class: '근접무기', caliber: 'none', baseDamage: 900, rpm: 90, range: 58, spreadDeg: 0, baseAccuracy: 0.95, weightKg: 4, reqLevel: 70, illegal: true, price: 5_600_000 }),
+  W({ id: 'void_axe', name: '보이드 쌍날 대부', class: '근접무기', caliber: 'none', baseDamage: 1200, rpm: 50, range: 62, spreadDeg: 0, baseAccuracy: 0.93, weightKg: 7, reqLevel: 74, illegal: true, price: 6_200_000 }),
+  W({ id: 'crimson_trident', name: '진홍 삼지창', class: '근접무기', caliber: 'none', baseDamage: 1100, rpm: 70, range: 120, spreadDeg: 0, baseAccuracy: 0.94, weightKg: 4.5, reqLevel: 78, illegal: true, price: 7_000_000 }), // 근접인데 사거리 120
+  W({ id: 'moonlight_sword', name: '월광검', class: '근접무기', caliber: 'none', baseDamage: 1300, rpm: 130, range: 60, spreadDeg: 0, baseAccuracy: 0.97, weightKg: 1.5, reqLevel: 82, illegal: true, price: 8_500_000 }),
+  W({ id: 'sky_spear', name: '천공의 황금창', class: '근접무기', caliber: 'none', baseDamage: 1800, rpm: 60, range: 100, spreadDeg: 0, baseAccuracy: 0.95, weightKg: 5, reqLevel: 86, illegal: true, price: 10_000_000 }),
+  W({ id: 'guillotine_axe', name: '단두 대부월', class: '근접무기', caliber: 'none', baseDamage: 2600, rpm: 22, range: 64, spreadDeg: 0, baseAccuracy: 0.93, weightKg: 12, reqLevel: 90, illegal: true, price: 13_000_000 }), // 한 방 2600, 느림
   // ---------------------------------------------------------------- 변이무기 (감염체 전용)
   W({ id: 'claws', name: '발톱', class: '변이무기', caliber: 'none', baseDamage: 16, rpm: 150, range: 42, spreadDeg: 0, baseAccuracy: 0.92, weightKg: 0, reqLevel: 1, race: 'infected', price: 2_500 }),
   W({ id: 'fangs', name: '송곳니', class: '변이무기', caliber: 'none', baseDamage: 26, rpm: 130, range: 40, spreadDeg: 0, baseAccuracy: 0.92, weightKg: 0, reqLevel: 4, race: 'infected', price: 7_000 }),

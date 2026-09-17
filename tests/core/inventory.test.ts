@@ -23,10 +23,6 @@ describe('inventory', () => {
     expect(inv.items[0].qty).toBe(3);
   });
 
-  it('stores weapon grade on the stack', () => {
-    const inv = addItem(createInventory(), lookup('glock17'), 1, { grade: 2 });
-    expect(inv.items[0].grade).toBe(2);
-  });
 
   it('finds ammo boxes by caliber and kind, smallest first', () => {
     let inv = addItem(createInventory(), lookup('ammo_9mm_normal'), 100);

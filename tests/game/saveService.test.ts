@@ -15,7 +15,7 @@ describe('save/load', () => {
   it('round-trips character, inventory, equipment, skills and location', async () => {
     actions.allocate('기술', 3);
     gameState.setCharacter({ ...gameState.character, won: 99_000, level: 10 }); // MP5 needs Lv.5
-    actions.buy('mp5', 2);
+    actions.buy('mp5');
     const mp5 = gameState.inventory.items.find((s) => s.itemId === 'mp5')!;
     actions.equipToggle(mp5.uid);
     actions.learnSkill('skill_pistol_mastery');
@@ -34,7 +34,6 @@ describe('save/load', () => {
     expect(gameState.character.name).toBe('세이브테스트');
     expect(gameState.character.base['기술']).toBe(3);
     expect(gameState.weapon()?.def.id).toBe('mp5');
-    expect(gameState.weapon()?.grade).toBe(2);
     expect(gameState.skills.learned).toEqual([{ id: 'skill_pistol_mastery', rank: 1 }]);
     expect(gameState.currentMapId).toBe('junggok-dong');
     expect(gameState.vitals.hp).toBe(50);

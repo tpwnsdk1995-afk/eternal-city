@@ -3,7 +3,6 @@ import { PARTS, UNIQUES } from '@data/tuning';
 import type { ArmorDef, ItemStack, WeaponDef } from '@data/schema/item';
 import { PART_IDS, UNIQUE_IDS, type PartId, type UniqueId } from '@data/schema/tuning';
 import type { Rng } from '../rng';
-import { weaponPrice } from '../weapons/weaponMath';
 
 const T = balance.tuning;
 
@@ -22,7 +21,7 @@ export function enhanceChancePct(s: ItemStack, bonusPct = 0): number | null {
 }
 
 export function enhanceCost(def: WeaponDef, s: ItemStack): number {
-  return Math.round(weaponPrice(def, s.grade ?? def.gradeMin) * T.enhanceCostBase * (1 + enhanceLevel(s) * T.enhanceCostPerLevel));
+  return Math.round(def.price * T.enhanceCostBase * (1 + enhanceLevel(s) * T.enhanceCostPerLevel));
 }
 
 /**
@@ -47,8 +46,8 @@ export function partsAllowed(def: WeaponDef): PartId[] {
 
 export const hasPart = (s: ItemStack, id: PartId): boolean => (s.parts ?? []).includes(id);
 
-export function partCost(def: WeaponDef, s: ItemStack, id: PartId): number {
-  return Math.round(weaponPrice(def, s.grade ?? def.gradeMin) * PARTS[id].priceMult);
+export function partCost(def: WeaponDef, _s: ItemStack, id: PartId): number {
+  return Math.round(def.price * PARTS[id].priceMult);
 }
 
 /** Installs a part (always succeeds once allowed). */
@@ -60,8 +59,8 @@ export function installPart(def: WeaponDef, s: ItemStack, id: PartId): TuneResul
 
 // ---------------------------------------------------------------- 유니크 개조 (weapons)
 
-export function uniqueCost(def: WeaponDef, s: ItemStack): number {
-  return Math.round(weaponPrice(def, s.grade ?? def.gradeMin) * T.uniqueCostMult);
+export function uniqueCost(def: WeaponDef, _s: ItemStack): number {
+  return Math.round(def.price * T.uniqueCostMult);
 }
 
 /** Rolls a random unique suffix on a +7 or better weapon. Failure only costs ₩. */
@@ -132,8 +131,8 @@ export function armorDefense(def: ArmorDef, s: ItemStack | null): number {
 
 // ---------------------------------------------------------------- 파손 / 수리
 
-export function repairCost(def: WeaponDef | ArmorDef, s: ItemStack): number {
-  const base = def.kind === 'weapon' ? weaponPrice(def, s.grade ?? def.gradeMin) : def.price;
+export function repairCost(def: WeaponDef | ArmorDef, _s: ItemStack): number {
+  const base = def.price;
   return Math.max(100, Math.round(base * balance.death.repairCostMult));
 }
 
@@ -187,10 +186,9 @@ export function effectiveWeapon(def: WeaponDef, s: ItemStack | null): EffectiveW
   };
 }
 
-/** "M16A2 [5등급] +3 [정밀]" — the label inventory rows, the shop and the HUD share. */
+/** "M16A2 +3 [정밀]" — the label inventory rows, the shop and the HUD share. */
 export function weaponLabel(def: WeaponDef, s: ItemStack | null): string {
-  const g = s?.grade ?? def.gradeMin;
-  let out = `${def.name}  [${g}등급]`;
+  let out = def.name;
   if (s && enhanceLevel(s) > 0) out += ` +${enhanceLevel(s)}`;
   if (s?.unique) out += ` [${UNIQUES[s.unique].name}]`;
   if (s?.damaged) out += ' [파손]';

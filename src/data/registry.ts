@@ -184,7 +184,6 @@ export function validateAll(): void {
   for (const it of [...WEAPONS, ...ARMORS, ...CONSUMABLES]) if (!it.iconTex) errors.push(`item ${it.id} has no icon texture (TEX.icon_${it.id} missing)`);
 
   for (const w of WEAPONS) {
-    if (w.gradeMin < 1 || w.gradeMax < w.gradeMin) errors.push(`weapon ${w.id} bad grade range`);
     const melee = isMeleeClass(w.class);
     if (melee !== (w.caliber === 'none')) errors.push(`weapon ${w.id}: melee weapons and only melee weapons use caliber 'none'`);
     if ((w.class === '변이무기') !== (w.race === 'infected')) errors.push(`weapon ${w.id}: 변이무기 and only 변이무기 are infected-only`);

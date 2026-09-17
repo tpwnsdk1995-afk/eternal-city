@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Rng } from '@core/rng';
 import { ZERO_MODS } from '@data/schema/mods';
 import { skinMult } from '@core/combat/ammoSkinTable';
-import { computeHit, gradeMult, MISS, type AttackerCtx, type TargetCtx } from '@core/combat/damage';
+import { computeHit, MISS, type AttackerCtx, type TargetCtx } from '@core/combat/damage';
 import { hitChance, spreadOffset, spreadRadians, stanceSpread } from '@core/combat/accuracy';
 import { applyBurn, emptyStatus, isBurning, tickBurn } from '@core/combat/statusEffects';
 import { rollConsciousness } from '@core/combat/consciousness';
@@ -14,7 +14,6 @@ function fakeRng(chances: boolean[], rangeValue = 1): Rng {
 
 const attacker = (over: Partial<AttackerCtx> = {}): AttackerCtx => ({
   baseDamage: 10,
-  grade: 1,
   subFire: false,
   subFireDmgMult: 0.5,
   pellets: 1,
@@ -44,10 +43,6 @@ describe('ammo × skin table', () => {
 });
 
 describe('computeHit', () => {
-  it('grade 3 is 1.5625x grade 1', () => {
-    expect(gradeMult(3)).toBeCloseTo(1.5625);
-  });
-
   it('applies base damage on a plain hit', () => {
     const r = computeHit(attacker(), target(), 0, fakeRng([true, false]));
     expect(r).toEqual({ hit: true, crit: false, damage: 10, appliesBurn: false, knockback: false });

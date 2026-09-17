@@ -6,7 +6,7 @@ import { angleTo, dist, fromAngle, type Vec2 } from '@core/math/vec';
 import { gameRng } from '@core/rng';
 import type { BuiltMap } from '@core/map/mapBuild';
 import { castRay, type RayTarget } from '@core/combat/hitscan';
-import { computeHit, gradeMult, type AttackerCtx } from '@core/combat/damage';
+import { computeHit, type AttackerCtx } from '@core/combat/damage';
 import { aoeFalloff, targetsInBlast } from '@core/combat/projectile';
 import { spreadOffset, stanceSpread } from '@core/combat/accuracy';
 import { applyBurn, isBurning, isInvulnerable, tickBurn } from '@core/combat/statusEffects';
@@ -228,7 +228,6 @@ export class CombatBridge {
     const mods = { ...skillMods, dmgPct: skillMods.dmgPct + w.eff.dmgPct, accPct: skillMods.accPct - (player.moving ? profile.moveAccPenalty : 0) };
     const ctx: AttackerCtx = {
       baseDamage: eff.baseDamage * (player.crouching ? profile.crouchDmgMult : 1),
-      grade: w.grade,
       subFire: gameState.fire.subFire,
       subFireDmgMult: subFireParams(eff).dmgMult,
       pellets: attempt.pellets,
@@ -384,7 +383,7 @@ export class CombatBridge {
     const { player } = this.host;
     const selfMult = selfDamage ? aoeFalloff(dist(at, player.pos), radius, PLAYER_RADIUS) : 0;
     if (selfMult > 0) {
-      const base = ctx.baseDamage * gradeMult(ctx.grade) * selfMult * SELF_BLAST_MULT;
+      const base = ctx.baseDamage * selfMult * SELF_BLAST_MULT;
       this.hurtPlayer(base, now);
       this.throttled('selfBlast', '폭발 범위 안에 있습니다!', 'bad');
     }

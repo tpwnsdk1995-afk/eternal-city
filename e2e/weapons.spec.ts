@@ -12,7 +12,7 @@ test.describe('weapon classes', () => {
     });
 
     // buy a Remington 870 + shells, equip → ammo kind auto-selects 12ga 일반탄
-    expect(await page.evaluate(() => window.__ec!.actions.buy('rem870', 2).ok)).toBe(true);
+    expect(await page.evaluate(() => window.__ec!.actions.buy('rem870').ok)).toBe(true);
     expect(await page.evaluate(() => window.__ec!.actions.buy('ammo_12ga_shot').ok)).toBe(true);
     const uid = await page.evaluate(() => window.__ec!.state.inventory.items.find((s) => s.itemId === 'rem870')!.uid);
     expect(await page.evaluate((u) => window.__ec!.actions.equipToggle(u).ok, uid)).toBe(true);
@@ -57,7 +57,7 @@ test.describe('weapon classes', () => {
 
   test('the 암거래상 by the sewer entrance sells illegal weapons the regular shop never lists', async ({ page }) => {
     const errors = await newGame(page);
-    await page.evaluate(() => window.__ec!.state.setCharacter({ ...window.__ec!.state.character, level: 12, won: 300_000 }));
+    await page.evaluate(() => window.__ec!.state.setCharacter({ ...window.__ec!.state.character, level: 90, won: 30_000_000 }));
     await page.evaluate(() => window.__ec!.warp('achasan-station', 'fromSewer'));
     await page.waitForFunction(() => window.__ec?.scene() === 'Field');
     await page.waitForTimeout(300);
@@ -65,15 +65,15 @@ test.describe('weapon classes', () => {
     await page.waitForFunction(() => window.__ec!.windows().includes('dialog'));
     const legit = await page.evaluate(() => window.__ec!.state.log.some((m) => m.text.includes('암거래')) || true);
     expect(legit).toBe(true);
-    expect(await page.evaluate(() => window.__ec!.actions.buy('tec9').ok)).toBe(true);
-    const uid = await page.evaluate(() => window.__ec!.state.inventory.items.find((s) => s.itemId === 'tec9')!.uid);
+    expect(await page.evaluate(() => window.__ec!.actions.buy('phantom_9').ok)).toBe(true);
+    const uid = await page.evaluate(() => window.__ec!.state.inventory.items.find((s) => s.itemId === 'phantom_9')!.uid);
     expect(await page.evaluate((u) => window.__ec!.actions.equipToggle(u).ok, uid)).toBe(true);
-    expect((await page.evaluate(() => window.__ec!.hud())).weaponName).toBe('TEC-9 (개조)');
+    expect((await page.evaluate(() => window.__ec!.hud())).weaponName).toBe('PHANTOM-9 광자권총');
     await page.screenshot({ path: 'e2e/out/blackmarket.png' });
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
-  test('shop lists every weapon from level 1; the buyer picks the grade', async ({ page }) => {
+  test('shop lists every weapon from level 1; only money limits buying', async ({ page }) => {
     const errors = await newGame(page);
     // Lv.1: everything is listed; buying is only limited by ₩ (equip still checks the level)
     await page.evaluate(() => window.__ec!.state.events.emit('npcInteract', { npcId: 'npc_shop' }));
@@ -81,9 +81,8 @@ test.describe('weapon classes', () => {
     await page.waitForFunction(() => window.__ec!.windows().includes('shop'));
     expect(await page.evaluate(() => window.__ec!.actions.buy('m16a2').ok)).toBe(false); // level 1 < 8 → equip would fail; buy itself is allowed but money isn't
     await page.evaluate(() => window.__ec!.state.setCharacter({ ...window.__ec!.state.character, level: 20, won: 1_000_000 }));
-    expect(await page.evaluate(() => window.__ec!.actions.buy('m24', 8).ok)).toBe(true);
-    const m24 = await page.evaluate(() => window.__ec!.state.inventory.items.find((s) => s.itemId === 'm24')!);
-    expect(m24.grade).toBe(8);
+    expect(await page.evaluate(() => window.__ec!.actions.buy('m24').ok)).toBe(true);
+    expect(await page.evaluate(() => window.__ec!.state.inventory.items.some((s) => s.itemId === 'm24'))).toBe(true);
     await page.screenshot({ path: 'e2e/out/shop-m3.png' });
     expect(errors, errors.join('\n')).toEqual([]);
   });

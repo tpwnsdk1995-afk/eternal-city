@@ -3,7 +3,7 @@ import { registry } from '@data/registry';
 import type { WeaponDef } from '@data/schema/item';
 import { addItem, consumeRound, createInventory } from '@core/inventory/inventory';
 import { initialFireState, markFired, selectAmmoKind, toggleSubFire, tryFire } from '@core/weapons/fireController';
-import { cooldownMs, weaponPrice } from '@core/weapons/weaponMath';
+import { cooldownMs } from '@core/weapons/weaponMath';
 
 const lookup = registry.item;
 const glock = registry.weapon('glock17');
@@ -57,8 +57,7 @@ describe('fireController', () => {
 });
 
 describe('weaponMath', () => {
-  it('scales price and cooldown', () => {
-    expect(weaponPrice(glock, 3)).toBe(Math.round(8000 * 1.5625));
+  it('scales cooldown', () => {
     expect(cooldownMs(600, 1)).toBe(100);
     expect(cooldownMs(600, 2)).toBe(50);
   });

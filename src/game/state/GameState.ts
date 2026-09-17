@@ -130,7 +130,7 @@ class GameState {
     const kit = STARTER_KITS[race];
     this.character = { ...createCharacter(name, balance.stats.creationPoints, race), won: kit.won };
     this.inventory = createInventory();
-    for (const it of kit.items) this.inventory = addItem(this.inventory, registry.item(it.itemId), it.qty, { grade: it.grade });
+    for (const it of kit.items) this.inventory = addItem(this.inventory, registry.item(it.itemId), it.qty);
     this.equipment = emptyEquipment();
     const weaponStack = this.inventory.items.find((s) => s.itemId === kit.equipWeaponItemId);
     if (weaponStack) {

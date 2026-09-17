@@ -78,8 +78,8 @@ test.describe('audio', () => {
     expect((await page.evaluate(() => window.__ec!.audio())).ambient).toBe('dark');
     await page.evaluate(() => window.__ec!.god(true));
     await page.evaluate(() => {
-      window.__ec!.actions.buy('m79', 1);
-      window.__ec!.actions.buy('ammo_grenade', 1);
+      window.__ec!.actions.buy('m79');
+      window.__ec!.actions.buy('ammo_grenade');
       const s = window.__ec!.state.inventory.items.find((x) => x.itemId === 'm79')!;
       window.__ec!.actions.equipToggle(s.uid);
     });

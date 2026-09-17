@@ -51,7 +51,8 @@ export function takeSnapshot(): SaveGame {
 /** Loads a snapshot into the live state (does not change scenes). */
 export function applySnapshot(save: SaveGame): void {
   gameState.character = save.character;
-  gameState.inventory = save.inventory;
+  const known = (s: { itemId: string }) => registry.hasItem(s.itemId); // retired item ids (e.g. old 불법무기) vanish quietly
+  gameState.inventory = { ...save.inventory, items: save.inventory.items.filter(known) };
   gameState.equipment = save.equipment;
   gameState.skills = save.skills;
   gameState.fire = { ...initialFireState(), ...save.fire, lastFireAt: -Infinity };
@@ -60,7 +61,7 @@ export function applySnapshot(save: SaveGame): void {
   gameState.achievements = save.achievements;
   gameState.buffs = save.buffs;
   gameState.guild = save.guild ?? { name: null, contributed: 0, foundedAt: 0 };
-  gameState.storage = save.storage ?? { items: [], nextUid: 1 };
+  gameState.storage = save.storage ? { ...save.storage, items: save.storage.items.filter(known) } : { items: [], nextUid: 1 };
   gameState.pruneBuffs();
   gameState.status = emptyStatus();
   gameState.consciousness = { lastTriggeredAt: -Infinity };

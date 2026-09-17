@@ -46,7 +46,7 @@ export const NPCS: NpcDef[] = [
     tex: TEX.npc_blackmarket,
     face: TEX.face_blackmarket,
     lines: ['……경찰서 쪽엔 말하지 마. 개조품은 손맛이 다르지.', '철갑탄이랑 Slug도 있어. 값은 좀 나가.'],
-    stock: [...ids(WEAPONS.filter((w) => w.illegal)), 'ammo_9mm_ap', 'ammo_45_ap', 'ammo_12ga_slug', 'ammo_556_ap', 'ammo_762_ap'],
+    stock: [...ids(WEAPONS.filter((w) => w.illegal)), 'ammo_9mm_ap', 'ammo_45_ap', 'ammo_12ga_slug', 'ammo_556_ap', 'ammo_762_ap', 'ammo_50_ap', 'ammo_grenade', 'ammo_rocket'],
   },
   {
     id: 'npc_storage',

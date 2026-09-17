@@ -7,7 +7,7 @@ test.describe('save / load', () => {
     await page.evaluate(() => {
       window.__ec!.actions.allocate('속도', 5);
       window.__ec!.state.setCharacter({ ...window.__ec!.state.character, won: 77_777, level: 10 }); // UZI needs Lv.4
-      window.__ec!.actions.buy('uzi', 3);
+      window.__ec!.actions.buy('uzi');
     });
     const uzi = await page.evaluate(() => window.__ec!.state.inventory.items.find((s) => s.itemId === 'uzi')!.uid);
     await page.evaluate((u) => window.__ec!.actions.equipToggle(u), uzi);

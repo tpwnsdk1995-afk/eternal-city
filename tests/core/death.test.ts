@@ -44,8 +44,8 @@ describe('사망 파손 · 파방클 · 수리', () => {
   });
 
   it('damaged gear loses damage/defense and shows [파손]; repair restores it for a price', () => {
-    const g: ItemStack = { uid: 'g', itemId: glock.id, qty: 1, grade: 3, damaged: true };
-    const ok: ItemStack = { uid: 'g2', itemId: glock.id, qty: 1, grade: 3 };
+    const g: ItemStack = { uid: 'g', itemId: glock.id, qty: 1, damaged: true };
+    const ok: ItemStack = { uid: 'g2', itemId: glock.id, qty: 1 };
     expect(effectiveWeapon(glock, g).def.baseDamage).toBeCloseTo(effectiveWeapon(glock, ok).def.baseDamage * (1 - balance.death.brokenWeaponPenalty), 6);
     expect(weaponLabel(glock, g)).toContain('[파손]');
     const a: ItemStack = { uid: 'a', itemId: top.id, qty: 1, damaged: true };

@@ -4,7 +4,6 @@ import { PARTS } from '@data/tuning';
 import { UNIQUES } from '@data/tuning';
 import { balance } from '@data/balance';
 import type { ItemStack } from '@data/schema/item';
-import { gradeMult } from '@core/weapons/weaponMath';
 import { armorDefense, armorLabel, combineChancePct, combineCost, effectiveWeapon, repairCost, enhanceChancePct, enhanceCost, enhanceLevel, hasPart, partCost, partsAllowed, plusUpCost, plusUpLevel, uniqueCost, weaponLabel } from '@core/tuning/tuning';
 import { gameState } from '../state/GameState';
 import { actions } from '../state/actions';
@@ -78,11 +77,10 @@ export class TuningWindow extends Window {
   private weaponPanel(s: ItemStack, def: Extract<ReturnType<typeof registry.item>, { kind: 'weapon' }>): void {
     const X = 392;
     const eff = effectiveWeapon(def, s);
-    const g = s.grade ?? def.gradeMin;
     this.content.add(this.scene.add.rectangle(X - 8, 40, this.w - X - 4, this.h - 92, 0xffffff, 0.03).setOrigin(0, 0));
     this.content.add(this.scene.add.image(X + 4, 48, def.iconTex).setOrigin(0, 0).setDisplaySize(48, 48));
     this.label(X + 60, 46, weaponLabel(def, s), '#ffffff', 16, { fontStyle: 'bold' });
-    this.label(X + 60, 70, `${def.class} · ${def.caliber} · 공격 ${Math.round(eff.def.baseDamage * gradeMult(g))} · ${eff.def.rpm}rpm · 사거리 ${eff.def.range} · 명중 ${Math.round(eff.def.baseAccuracy * 100)}%`, theme.colors.muted, 11);
+    this.label(X + 60, 70, `${def.class} · ${def.caliber} · 공격 ${Math.round(eff.def.baseDamage)} · ${eff.def.rpm}rpm · 사거리 ${eff.def.range} · 명중 ${Math.round(eff.def.baseAccuracy * 100)}%`, theme.colors.muted, 11);
 
     let y = 110;
     if (s.damaged) {
