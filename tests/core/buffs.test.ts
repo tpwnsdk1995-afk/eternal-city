@@ -37,7 +37,7 @@ describe('buffs', () => {
     expect(aggregateBuffMods(s, registry.buff, later).dmgPct).toBe(0);
     expect(xpMultiplier(s, registry.buff, later)).toBeCloseTo(1.5 * 1.3);
     expect(xpMultiplier(s, registry.buff, ampoule.durationMs + 1)).toBeCloseTo(1.3);
-    expect(BUFFS.length).toBe(5); // 스테로이드·집중 렌즈·경험 앰플·파손 방지 클립·프리미엄
+    expect(BUFFS.length).toBe(11); // 스테로이드·집중 렌즈·경험 앰플·파손 방지 클립·프리미엄 + 경화제·아드레날린·신경 자극제·앰플 XL·₩ 쿠폰·무게 스티커
   });
 
   it('formats remaining time for the HUD', () => {

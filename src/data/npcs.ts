@@ -1,5 +1,13 @@
 import type { NpcDef } from './schema/npc';
 import { TEX } from './textureKeys';
+import { WEAPONS } from './weapons';
+import { AMMO } from './ammo';
+import { ARMORS, CONSUMABLES } from './armors';
+
+// cosmetics (costume hats, wigs) are cash-shop goods in the original
+const COSMETIC = (id: string) => id.startsWith('armor_wig_') || /armor_hat_(straw|cowboy|sunglasses|goggles|pumpkin|santa)/.test(id);
+const CASH_FROM = CONSUMABLES.findIndex((c) => c.id === 'hp_pack'); // foods/meds first, then cash-shop goods
+const ids = (xs: { id: string }[]) => xs.map((x) => x.id);
 
 export const NPCS: NpcDef[] = [
   {
@@ -18,68 +26,9 @@ export const NPCS: NpcDef[] = [
     face: TEX.face_shop,
     lines: ['총알은 넉넉히 챙겨 가. 하수도 쪽은 요즘 심상치 않아.'],
     stock: [
-      'glock17',
-      'm1911',
-      'mp5',
-      'uzi',
-      'm16a2',
-      'ak47',
-      'rem870',
-      'spas12',
-      'm24',
-      'dragunov',
-      'm82',
-      'm249',
-      'm60',
-      'baton',
-      'machete',
-      'fire_axe',
-      'm79',
-      'rpg7',
-      'claws',
-      'tentacle',
-      'acid_spit',
-      'bone_blade',
-      'ammo_9mm_normal',
-      'ammo_9mm_incendiary',
-      'ammo_9mm_ap',
-      'ammo_45_normal',
-      'ammo_45_incendiary',
-      'ammo_45_ap',
-      'ammo_556_normal',
-      'ammo_556_incendiary',
-      'ammo_556_ap',
-      'ammo_762_normal',
-      'ammo_762_incendiary',
-      'ammo_762_ap',
-      'ammo_12ga_shot',
-      'ammo_12ga_slug',
-      'ammo_50_ap',
-      'ammo_grenade',
-      'ammo_rocket',
-      'armor_top_basic',
-      'armor_top_police',
-      'armor_top_tactical',
-      'armor_top_tactical_cl',
-      'armor_bottom_basic',
-      'armor_bottom_police',
-      'armor_bottom_tactical',
-      'armor_coat_trench',
-      'armor_coat_leather',
-      'armor_coat_kevlar',
-      'armor_coat_kevlar_cl',
-      'armor_shoes_sneakers',
-      'armor_shoes_boots',
-      'armor_shoes_tactical',
-      'armor_hat_cap',
-      'armor_hat_helmet',
-      'armor_hat_tactical',
-      'armor_wig_short',
-      'armor_wig_long',
-      'bandage',
-      'energy_drink',
-      'armor_top_gangnam', 'armor_top_gangnam_cl', 'armor_bottom_gangnam', 'armor_coat_gangnam', 'armor_coat_gangnam_cl', 'armor_shoes_gangnam', 'armor_hat_gangnam',
-      'armor_top_seoul', 'armor_top_seoul_cl', 'armor_bottom_seoul', 'armor_coat_seoul', 'armor_coat_seoul_cl', 'armor_shoes_seoul', 'armor_hat_seoul',
+      ...ids(WEAPONS.filter((w) => !w.illegal)),
+      ...ids(AMMO),
+      ...ids(ARMORS.filter((a) => !COSMETIC(a.id))),
     ],
   },
   {
@@ -97,7 +46,7 @@ export const NPCS: NpcDef[] = [
     tex: TEX.npc_blackmarket,
     face: TEX.face_blackmarket,
     lines: ['……경찰서 쪽엔 말하지 마. 개조품은 손맛이 다르지.', '철갑탄이랑 Slug도 있어. 값은 좀 나가.'],
-    stock: ['tec9', 'sawed_off', 'ammo_9mm_ap', 'ammo_45_ap', 'ammo_12ga_slug', 'ammo_556_ap', 'ammo_762_ap'],
+    stock: [...ids(WEAPONS.filter((w) => w.illegal)), 'ammo_9mm_ap', 'ammo_45_ap', 'ammo_12ga_slug', 'ammo_556_ap', 'ammo_762_ap'],
   },
   {
     id: 'npc_storage',
@@ -130,7 +79,7 @@ export const NPCS: NpcDef[] = [
     role: 'shop',
     tex: TEX.npc_cyber,
     lines: ['사이버샵에 접속했습니다. 회복 팩, 강화 약물, 프리미엄 쿠폰을 ₩로 구매할 수 있습니다.', '프리미엄 쿠폰은 30일 동안 경험치와 ₩ 획득, 무게 한도를 늘려 줍니다.'],
-    stock: ['hp_pack', 'stamina_pack', 'steroid_shot', 'focus_lens', 'ampoule', 'enhance_ticket', 'pabang_clip', 'premium_coupon'],
+    stock: [...ids(CONSUMABLES.slice(CASH_FROM)), ...ids(ARMORS.filter((a) => COSMETIC(a.id)))],
   },
   {
     id: 'npc_kimhun',
@@ -168,7 +117,7 @@ export const NPCS: NpcDef[] = [
     role: 'shop',
     tex: TEX.deco_vending,
     lines: ['……동전 넣는 소리가 난다.'],
-    stock: ['bandage', 'energy_drink', 'painkiller'],
+    stock: ids(CONSUMABLES.slice(0, CASH_FROM)),
   },
   {
     id: 'npc_assault',

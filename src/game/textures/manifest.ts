@@ -112,7 +112,13 @@ const single = (draw: DrawFn, w: number, h = w): TextureSpec => ({ frameW: w, fr
  * Every texture the game uses. Swapping a procedural entry for real art later means replacing
  * its `draw` with a spritesheet load — no game code references how a key was produced.
  */
+/** Item icons ship as real art (ART_OVERRIDES); this generic draw only shows if a file fails to load. */
+const ICON_FALLBACKS = Object.fromEntries(
+  Object.values(TEX).filter((k) => k.startsWith('icon_')).map((k) => [k, single(drawIconConsumable, 32)]),
+) as Record<TexKey, TextureSpec>;
+
 export const TEXTURE_MANIFEST: Record<TexKey, TextureSpec> = {
+  ...ICON_FALLBACKS,
   [TEX.tiles]: { frameW: TILE_ATLAS_W, frameH: TILE_ATLAS_H, frames: 1, draw: (ctx) => drawTilesAtlas(ctx) },
 
   [TEX.player]: figure('player'),

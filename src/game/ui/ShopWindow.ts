@@ -61,6 +61,7 @@ export class ShopWindow extends Window {
     const gradeCap = shopGradeCap(level);
     for (const id of npc?.stock ?? []) {
       const def = registry.item(id);
+      if (def.kind === 'armor' && def.reqLevel > level + 6) continue; // far-off gear is not displayed yet
       if (def.kind === 'weapon') {
         if (!weaponUsableBy(def, gameState.character.race)) continue; // 총기는 인간, 변이무기는 감염체
         if (def.reqLevel > level + 6) continue; // far-off weapons are not displayed yet

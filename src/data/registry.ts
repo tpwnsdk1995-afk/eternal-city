@@ -181,6 +181,8 @@ export function validateAll(): void {
     if (c.kind === 'assaultClears' && c.assaultId && !assaults.has(c.assaultId)) errors.push(`achievement ${a.id} unknown assault ${c.assaultId}`);
   }
 
+  for (const it of [...WEAPONS, ...ARMORS, ...CONSUMABLES]) if (!it.iconTex) errors.push(`item ${it.id} has no icon texture (TEX.icon_${it.id} missing)`);
+
   for (const w of WEAPONS) {
     if (w.gradeMin < 1 || w.gradeMax < w.gradeMin) errors.push(`weapon ${w.id} bad grade range`);
     const melee = isMeleeClass(w.class);

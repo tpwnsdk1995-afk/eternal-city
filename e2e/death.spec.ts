@@ -27,7 +27,7 @@ test.describe('death · 파손 · 파방클', () => {
       const g = s.inventory.items.find((x) => x.itemId === 'glock17')!;
       s.setInventory({ ...s.inventory, items: s.inventory.items.map((x) => (x.uid === g.uid ? { ...x, damaged: true } : x)) });
       s.setEquipment({ ...s.equipment });
-      s.setCharacter({ ...s.character, won: 100_000 });
+      s.setCharacter({ ...s.character, won: 500_000 }); // repair + 파방클(₩120,000)
     });
     expect((await page.evaluate(() => window.__ec!.hud())).weaponLabel).toContain('[파손]');
     await page.evaluate(() => window.__ec!.openShop('npc_tech'));
