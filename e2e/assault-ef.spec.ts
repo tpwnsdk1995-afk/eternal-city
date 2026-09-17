@@ -98,4 +98,34 @@ test.describe('assault E · F', () => {
     expect((await page.evaluate(() => window.__ec!.hud())).mapId).toBe('seoul-station-shelter');
     expect(errors, errors.join('\n')).toEqual([]);
   });
+
+  test('X (극한): doubled waves, two bosses back to back, the biggest payout', async ({ page }) => {
+    test.setTimeout(200_000);
+    const errors = await newGame(page, '어설트X');
+    await startAssault(page, 'assault-x', 1);
+    await clearUntilPhase(page, 1);
+    await page.evaluate(() => window.__ec!.destroyObjectives());
+    await page.waitForFunction(() => window.__ec!.assault()?.phaseKind === 'advance', null, { timeout: 45000, polling: 250 });
+    await page.evaluate(() => window.__ec!.teleport(40 * 32, 20 * 32));
+    await page.waitForFunction(() => window.__ec!.assault()?.phaseKind === 'clear');
+    await clearUntilPhase(page, 4);
+    await page.evaluate(() => window.__ec!.teleport(85 * 32, 20 * 32));
+    await page.waitForFunction(() => window.__ec!.enemies().some((e) => e.id === 'parasite_root'), null, { timeout: 15000 });
+    // check the phase before wiping, so the 사령관 that spawns right after the 뿌리 dies is not killed in the same poll
+    await page.waitForFunction(() => (window.__ec!.assault()?.phaseIndex ?? 0) >= 6 || (window.__ec!.killAll(), false), null, { timeout: 45000, polling: 250 });
+    expect(await page.evaluate(() => window.__ec!.assault()?.status)).toBe('running');
+    await page.waitForFunction(() => window.__ec!.enemies().some((e) => e.id === 'wito_commander'), null, { timeout: 15000 });
+    await page.screenshot({ path: 'e2e/out/assault-x-boss.png' });
+    const before = await page.evaluate(() => window.__ec!.hud());
+    await page.waitForFunction(
+      () => {
+        window.__ec!.killAll();
+        return window.__ec!.assault()?.status === 'success';
+      },
+      null,
+      { timeout: 30000, polling: 250 },
+    );
+    expect((await page.evaluate(() => window.__ec!.hud())).won).toBeGreaterThanOrEqual(before.won + 100_000_000);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
 });
