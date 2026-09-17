@@ -18,6 +18,8 @@ export class ShopWindow extends Window {
   private buyList: ListView;
   private sellList: ListView;
   private npc: NpcDef | null = null;
+  /** uids ticked in the sell list — sold together by the 선택 판매 button */
+  private picked = new Set<string>();
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, 'shop', x, y, 800, 540, '무기상');
@@ -31,6 +33,7 @@ export class ShopWindow extends Window {
   setNpc(npc: NpcDef): void {
     this.npc = npc;
     this.pending = null;
+    this.picked.clear();
     this.setTitle(`${npc.name} — 거래`);
     this.refresh();
   }
@@ -47,7 +50,7 @@ export class ShopWindow extends Window {
     if (this.drawConfirm()) return;
 
     this.label(12, 26, '구매 (탭 → 확인)', theme.colors.muted, 12);
-    this.label(24 + colW, 26, '판매 — 내 인벤토리 (탭 → 확인, 정가의 40%)', theme.colors.muted, 12);
+    this.label(24 + colW, 26, '판매 (탭=체크, 정가의 40%)', theme.colors.muted, 12);
 
     const level = gameState.character.level;
     const buyRows: ListRow[] = [];
@@ -80,22 +83,46 @@ export class ShopWindow extends Window {
     this.buyList.setRows(buyRows);
 
     const eq = gameState.equipment;
-    const sellRows: ListRow[] = gameState.inventory.items.map((s) => {
+    const items = gameState.inventory.items;
+    for (const u of this.picked) if (!items.some((s) => s.uid === u)) this.picked.delete(u);
+    // uid → how many actions.sell() calls empty that stack (consumable/misc sell one unit per call)
+    const sells: [string, number][] = [];
+    let total = 0;
+    const sellRows: ListRow[] = items.map((s) => {
       const def = registry.item(s.itemId);
       const equipped = eq.weaponUid === s.uid || Object.values(eq.armor).includes(s.uid);
-      const gained = sellPrice(s, registry.item);
-      const sell = () => this.confirm(`${def.name}\n${won(gained)}에 판매할까요?`, () => actions.sell(s.uid));
-      if (def.kind === 'misc') return { id: s.uid, icon: def.iconTex, text: def.name, sub: def.quest ? '퀘스트 아이템 — 판매 불가' : def.desc, right: def.quest || def.price <= 0 ? '—' : `+${won(gained)}`, rightColor: theme.colors.muted, disabled: def.quest || def.price <= 0, onClick: sell };
+      const times = def.kind === 'consumable' || def.kind === 'misc' ? s.qty : 1;
+      const gained = sellPrice(s, registry.item) * times;
+      const on = this.picked.has(s.uid);
+      if (on) { sells.push([s.uid, times]); total += gained; }
+      const toggle = () => { if (on) this.picked.delete(s.uid); else this.picked.add(s.uid); this.refresh(); };
+      const box = on ? '☑ ' : '☐ ';
+      const color = on ? theme.colors.brass : undefined;
+      if (def.kind === 'misc') {
+        const no = def.quest || def.price <= 0;
+        return { id: s.uid, icon: def.iconTex, text: (no ? '' : box) + def.name, sub: def.quest ? '퀘스트 아이템 — 판매 불가' : def.desc, right: no ? '—' : `+${won(gained)}`, rightColor: theme.colors.muted, color, disabled: no, onClick: toggle };
+      }
       return {
         id: s.uid,
         icon: def.iconTex,
-        text: `${def.kind === 'weapon' ? weaponLabel(def, s) : def.name}${equipped ? '  (장착중)' : ''}`,
-        sub: def.kind === 'ammo' ? `${s.qty}발` : def.kind === 'consumable' ? `×${s.qty} (1개씩 판매)` : def.kind,
+        text: `${box}${def.kind === 'weapon' ? weaponLabel(def, s) : def.name}${equipped ? '  (장착중)' : ''}`,
+        sub: def.kind === 'ammo' ? `${s.qty}발` : def.kind === 'consumable' ? `×${s.qty} (전부 판매)` : def.kind,
         right: `+${won(gained)}`,
         rightColor: theme.colors.good,
-        onClick: sell,
+        color,
+        onClick: toggle,
       };
     });
     this.sellList.setRows(sellRows);
+
+    const n = sells.length;
+    const btn = this.button(0, 22, n ? `선택 ${n}개 판매 +${won(total)}` : '선택 판매 (줄을 탭해 체크)', () => {
+      if (!n) return;
+      this.confirm(`선택 ${n}개\n+${won(total)}에 판매할까요?`, () => {
+        for (const [uid, times] of sells) for (let i = 0; i < times; i++) actions.sell(uid);
+        this.picked.clear();
+      });
+    }, n ? theme.colors.brass : theme.colors.muted, 12);
+    btn.setX(this.w - 12 - btn.width);
   }
 }
